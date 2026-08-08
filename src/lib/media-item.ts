@@ -29,3 +29,9 @@ export const videoItem = (
   credits: readonly CreditTuple[],
   title?: string,
 ): MediaItem => ({ src, kind: "video", credits: toCredits(credits), title });
+
+/** Alt text for a frame: publication first, then everyone credited on it. */
+export const describeMedia = (item: MediaItem) => {
+  const names = item.credits.map((credit) => credit.name.trim()).join(", ");
+  return item.title ? `${item.title} — ${names}` : names;
+};

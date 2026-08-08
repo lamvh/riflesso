@@ -8,17 +8,18 @@
  * here, so a plain <img> is the correct primitive.
  */
 
+import Link from "next/link";
+
 import { useVideoAutoplay } from "@/hooks/use-video-autoplay";
-import type { MediaItem } from "@/lib/media-item";
+import { describeMedia, type MediaItem } from "@/lib/media-item";
 
 import { ArtistCreditLine } from "./artist-credit-line";
 
 const MEDIA_SIZING = "block h-[var(--twg-rail-height)] w-auto max-w-none";
+const CARD = "group flex shrink-0 grow-0 basis-auto flex-col items-start text-left";
 
-function describe(item: MediaItem) {
-  const names = item.credits.map((credit) => credit.name.trim()).join(", ");
-  return item.title ? `${item.title} — ${names}` : names;
-}
+/** Where a card without a gallery points, matching the New Signs rail. */
+const DIRECTORY_HREF = "/artists";
 
 function RailVideo({ src, label }: { src: string; label: string }) {
   const ref = useVideoAutoplay();
@@ -35,14 +36,17 @@ function RailVideo({ src, label }: { src: string; label: string }) {
   );
 }
 
-export function MediaCard({ item }: { item: MediaItem }) {
-  const label = describe(item);
+type MediaCardProps = {
+  item: MediaItem;
+  /** Given by rails that carry a category; without it the card is a link. */
+  onOpen?: () => void;
+};
 
-  return (
-    <a
-      href="#"
-      className="group flex shrink-0 grow-0 basis-auto flex-col items-start"
-    >
+export function MediaCard({ item, onOpen }: MediaCardProps) {
+  const label = describeMedia(item);
+
+  const body = (
+    <>
       <div className="overflow-hidden">
         {item.kind === "image" ? (
           <img
@@ -69,6 +73,20 @@ export function MediaCard({ item }: { item: MediaItem }) {
           </p>
         )}
       </div>
-    </a>
+    </>
+  );
+
+  if (!onOpen) {
+    return (
+      <Link href={DIRECTORY_HREF} className={CARD}>
+        {body}
+      </Link>
+    );
+  }
+
+  return (
+    <button type="button" onClick={onOpen} className={CARD}>
+      {body}
+    </button>
   );
 }

@@ -1,3 +1,5 @@
+"use client";
+
 /* eslint-disable @next/next/no-img-element */
 /*
  * Both features render at `width: 100%; height: auto`, letting each asset's own
@@ -6,30 +8,46 @@
  */
 
 import { FEATURE_ANNIVERSARY, FEATURE_EDITORIAL } from "@/data/home-features";
+import { EDITORIALS_SECTION } from "@/data/home-sections";
+import { describeMedia } from "@/lib/media-item";
 
 import { ArtistCreditLine } from "./artist-credit-line";
 import { SectionHeading } from "./section-heading";
+import { useOpenWork } from "./work-detail-context";
 
 /** Edge-to-edge editorial with its credit block inset by the page gutter. */
 export function FeatureEditorial() {
-  const { heading, src, credit, title } = FEATURE_EDITORIAL;
+  const { heading, item } = FEATURE_EDITORIAL;
+  const openWork = useOpenWork();
 
   return (
     <section className="pt-[70px]">
       <SectionHeading>{heading}</SectionHeading>
-      <a href="#" className="block">
+      {/*
+       * The feature is not itself in the Editorials rail, so the gallery it opens
+       * leads with this frame and continues from the head of that rail.
+       */}
+      <button
+        type="button"
+        onClick={() => openWork(item, EDITORIALS_SECTION)}
+        className="block w-full text-left"
+      >
         <img
-          src={src}
-          alt={`${title} — ${credit.name}`}
+          src={item.src}
+          alt={describeMedia(item)}
           loading="lazy"
           draggable={false}
           className="block h-auto w-full object-cover object-center"
         />
         <div className="flex flex-col gap-[9px] px-5 pt-[10px]">
-          <ArtistCreditLine {...credit} />
-          <p className="font-serif text-[15px] leading-[100%] italic">{title}</p>
+          {item.credits.map((credit, index) => (
+            <ArtistCreditLine key={`${credit.name}-${index}`} {...credit} />
+          ))}
+          <p className="font-serif text-[15px] leading-[100%] italic">
+            {item.title}
+          </p>
         </div>
-      </a>
+      </button>
     </section>
   );
 }

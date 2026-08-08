@@ -1,13 +1,16 @@
 # The Wall Group
 
-Implement hai trang từ Claude Design (`The Wall Group - Home.dc.html` và
-`The Wall Group - Artists.dc.html`) bằng Next.js 16 (App Router) + React 19 +
-Tailwind CSS v4.
+Implement các màn hình từ Claude Design (`The Wall Group.dc.html`) bằng Next.js 16
+(App Router) + React 19 + Tailwind CSS v4.
 
 | Route | Nội dung |
 | --- | --- |
 | `/` | Trang chủ — hero slider 7 slide, 5 rail cuộn ngang, 2 khối feature |
 | `/artists` | Danh bạ nghệ sĩ — lọc theo lãnh thổ / danh mục / tên, ảnh preview sticky |
+| `not-found` | Trang 404 — số "404" khoét ảnh hero, cross-fade 7 slide |
+
+Work detail không có route riêng: trong design nó là overlay `position:fixed`
+phủ lên trang chủ, mở khi click card của rail, và đóng bằng nút X hoặc `Esc`.
 
 ## Chạy dự án
 
@@ -26,11 +29,13 @@ src/
 │   ├── globals.css                    # theme tokens + base layer
 │   ├── layout.tsx
 │   ├── page.tsx                       # trang chủ
+│   ├── not-found.tsx                  # trang 404
 │   └── artists/page.tsx               # trang danh bạ
 ├── components/
-│   ├── site-header.tsx                # masthead cố định, dùng chung 2 trang
+│   ├── site-header.tsx                # masthead cố định, dùng chung mọi trang
 │   ├── site-footer.tsx                # 4 cột link, top-margin theo từng trang
-│   ├── search-icon.tsx
+│   ├── search-icon.tsx, close-icon.tsx
+│   ├── not-found-panel.tsx            # client — số 404 cross-fade
 │   ├── artists-directory.tsx          # client — state lọc của trang Artists
 │   ├── artists-filter-sidebar.tsx
 │   ├── artists-list.tsx
@@ -40,6 +45,8 @@ src/
 │       ├── media-rail.tsx             # rail cuộn ngang
 │       ├── media-card.tsx             # card ảnh/video + credit
 │       ├── feature-blocks.tsx         # 2 khối feature full-bleed / inset
+│       ├── work-detail-context.tsx    # client — sở hữu state overlay đang mở
+│       ├── work-detail-overlay.tsx    # client — gallery toàn màn hình
 │       ├── section-heading.tsx
 │       └── artist-credit-line.tsx
 ├── hooks/
@@ -50,9 +57,11 @@ src/
 │   ├── artists.ts, artist-images.ts   # 64 artist cho trang danh bạ
 │   ├── home-hero-slides.ts            # 7 slide hero
 │   ├── home-rail-*.ts                 # 5 rail: editorials/campaigns/couture/…
+│   ├── home-sections.ts               # 4 rail có work detail + category của chúng
 │   └── home-features.ts
 └── lib/
     ├── filter-artists.ts              # logic lọc thuần, không phụ thuộc React
+    ├── work-detail.ts                 # dựng gallery từ card được click
     └── media-item.ts                  # type + constructor cho item rail
 ```
 
@@ -66,10 +75,33 @@ src/
   thao tác kéo bị chặn ở capture phase để không vô tình điều hướng.
 - **Video** — muted + loop + playsinline; `IntersectionObserver` (margin 200px)
   chỉ phát clip đang trong tầm nhìn, phần còn lại pause.
-- **Ba tham số hiển thị** (khớp props gốc của design) khai báo ở `src/app/page.tsx`:
-  `bannerAutoplay` (false), `sliderHeight` (350px, dải 236–460), `hoverZoom` (true).
-  Hai tham số sau đi xuống card qua custom property `--twg-rail-height` /
-  `--twg-rail-zoom`, nên đổi một chỗ là đổi toàn bộ rail.
+- **Bốn tham số hiển thị** (khớp props gốc của design) khai báo ở `src/app/page.tsx`:
+  `bannerAutoplay` (false), `sliderHeight` (350px, dải 236–460), `hoverZoom` (true),
+  `galleryHeight` (72vh, dải 45–85). Ba tham số sau đi xuống card / overlay qua
+  custom property `--twg-rail-height` / `--twg-rail-zoom` / `--twg-gallery-height`,
+  nên đổi một chỗ là đổi toàn bộ.
+
+**Work detail**
+
+- **Mở** khi click card của 4 rail có `category` (Editorials / Campaigns / Couture /
+  Fashion Weeks) hoặc khối Latest Editorial. Rail **New Signs** không có `category`
+  nên card của nó điều hướng sang `/artists`, đúng như design.
+- **Gallery** được dựng tại chỗ từ chính rail vừa click: frame được click đứng đầu,
+  rồi tới các item kế tiếp (vòng qua cuối danh sách), tối đa 6 frame. Design không
+  có bộ ảnh riêng cho từng work — xem `src/lib/work-detail.ts`.
+- **Điều khiển:** click thumbnail, `←` / `→` để đổi frame, `Esc` hoặc nút X để đóng.
+  Thumbnail đang chọn bị làm mờ (opacity 0.4), cùng quy ước với dải hero.
+- **Khác design một điểm:** design gọi `window.scrollTo(0, 0)` khi mở overlay. Vì
+  overlay là `fixed` nên thao tác đó không nhìn thấy được lúc mở, chỉ lộ ra khi đóng
+  — mất vị trí cuộn ở rail. Bản này giữ nguyên vị trí trang.
+
+**Trang 404**
+
+- Số "404" là một `<span>` ẩn giữ khung, cộng 7 bản absolute chồng lên nhau, mỗi bản
+  lấy một ảnh hero làm `background-image` rồi `background-clip: text`. Đổi frame mỗi
+  2.8s, cross-fade 1.2s.
+- Panel là sheet `fixed` z-20 nằm dưới masthead (z-30) nên header vẫn bấm được; footer
+  bị che hoàn toàn nên `not-found.tsx` không render footer.
 
 **Trang Artists**
 
