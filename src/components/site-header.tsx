@@ -1,11 +1,17 @@
+import Image from "next/image";
 import Link from "next/link";
 
 import { SearchIcon } from "./search-icon";
 
 /**
- * Fixed masthead. The wordmark is horizontally stretched (scaleX) rather than
- * set in a condensed face, matching the original mark.
+ * Layout box for the wordmark at its largest rendered size, matching the
+ * source file's 2233x384 ratio. Declaring the display size rather than the
+ * intrinsic size keeps the generated srcset small (128w/256w instead of 3840w).
  */
+const WORDMARK_WIDTH = 116;
+const WORDMARK_HEIGHT = 20;
+
+/** Fixed masthead carrying the centred Riflesso wordmark. */
 type SiteHeaderProps = {
   /** Underlines the matching nav item. The home page marks nothing active. */
   currentSection?: "artists";
@@ -31,11 +37,17 @@ export function SiteHeader({ currentSection }: SiteHeaderProps = {}) {
 
         <Link
           href="/"
-          aria-label="Homepage"
-          className="absolute top-1/2 left-1/2 flex -translate-x-1/2 -translate-y-1/2 scale-x-[1.3] flex-col items-center font-sans leading-[0.88] font-bold whitespace-nowrap uppercase"
+          aria-label="Riflesso homepage"
+          className="absolute top-1/2 left-1/2 flex -translate-x-1/2 -translate-y-1/2 items-center"
         >
-          <span className="text-[13px] tracking-[0.4px] sm:text-[17px]">The</span>
-          <span className="text-[13px] tracking-[0.4px] sm:text-[17px]">Wall Group</span>
+          <Image
+            src="/riflesso.png"
+            alt=""
+            width={WORDMARK_WIDTH}
+            height={WORDMARK_HEIGHT}
+            priority
+            className="h-[16px] w-auto sm:h-[20px]"
+          />
         </Link>
 
         <button
