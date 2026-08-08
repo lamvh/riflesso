@@ -7,6 +7,8 @@ Implement các màn hình từ Claude Design (`The Wall Group.dc.html`) bằng N
 | --- | --- |
 | `/` | Trang chủ — hero slider 7 slide, 5 rail cuộn ngang, 2 khối feature |
 | `/artists` | Danh bạ nghệ sĩ — lọc theo lãnh thổ / danh mục / tên, ảnh preview sticky |
+| `/about` | Giới thiệu — 2 đoạn copy + lưới liên hệ |
+| `/contact` | Liên hệ — lưới đầy đủ 9 card |
 | `not-found` | Trang 404 — số "404" khoét ảnh hero, cross-fade 7 slide |
 
 Work detail không có route riêng: trong design nó là overlay `position:fixed`
@@ -17,7 +19,7 @@ phủ lên trang chủ, mở khi click card của rail, và đóng bằng nút X
 ```bash
 npm install
 npm run dev     # http://localhost:3000
-npm run build   # build production (cả 2 route đều prerender static)
+npm run build   # build production (mọi route đều prerender static)
 npm run lint
 ```
 
@@ -30,10 +32,13 @@ src/
 │   ├── layout.tsx
 │   ├── page.tsx                       # trang chủ
 │   ├── not-found.tsx                  # trang 404
+│   ├── about/page.tsx                 # trang giới thiệu
+│   ├── contact/page.tsx               # trang liên hệ
 │   └── artists/page.tsx               # trang danh bạ
 ├── components/
 │   ├── site-header.tsx                # masthead cố định, dùng chung mọi trang
-│   ├── site-footer.tsx                # 4 cột link, top-margin theo từng trang
+│   ├── site-footer.tsx                # 4 cột link, margin-top 110px
+│   ├── contact-grid.tsx               # lưới liên hệ, dùng chung About + Contact
 │   ├── search-icon.tsx, close-icon.tsx
 │   ├── not-found-panel.tsx            # client — số 404 cross-fade
 │   ├── artists-directory.tsx          # client — state lọc của trang Artists
@@ -58,6 +63,7 @@ src/
 │   ├── home-hero-slides.ts            # 7 slide hero
 │   ├── home-rail-*.ts                 # 5 rail: editorials/campaigns/couture/…
 │   ├── home-sections.ts               # 4 rail có work detail + category của chúng
+│   ├── contact-offices.ts             # 9 card của lưới liên hệ
 │   └── home-features.ts
 └── lib/
     ├── filter-artists.ts              # logic lọc thuần, không phụ thuộc React
@@ -91,9 +97,20 @@ src/
   có bộ ảnh riêng cho từng work — xem `src/lib/work-detail.ts`.
 - **Điều khiển:** click thumbnail, `←` / `→` để đổi frame, `Esc` hoặc nút X để đóng.
   Thumbnail đang chọn bị làm mờ (opacity 0.4), cùng quy ước với dải hero.
+- **Chiều cao khung ảnh bị chặn trên:** `min(--twg-gallery-height, 100vh - 340px)`.
+  340px là phần chừa cho dải thumbnail, các khoảng cách và khối credit, nên caption
+  không bị đẩy khỏi màn hình trên viewport thấp.
 - **Khác design một điểm:** design gọi `window.scrollTo(0, 0)` khi mở overlay. Vì
   overlay là `fixed` nên thao tác đó không nhìn thấy được lúc mở, chỉ lộ ra khi đóng
   — mất vị trí cuộn ở rail. Bản này giữ nguyên vị trí trang.
+
+**Trang About & Contact**
+
+- **Lưới liên hệ dùng chung.** Cả 2 trang render `ContactGrid`; About bỏ card
+  **Brand Partnerships** (design bọc riêng card này trong `sc-if isContact`).
+- **Cùng một mốc 200px trên đầu.** About lấy từ `padding-top:200px` của cột copy;
+  Contact không có copy nên dùng spacer 110px + `padding-top:90px` của lưới.
+- Lưới là `auto-fit` với cột tối thiểu 260px, nên số cột tự co theo bề rộng.
 
 **Trang 404**
 

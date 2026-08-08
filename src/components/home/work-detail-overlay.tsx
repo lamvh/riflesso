@@ -15,8 +15,12 @@ import { useVideoAutoplay } from "@/hooks/use-video-autoplay";
 import { describeMedia, type MediaItem } from "@/lib/media-item";
 import type { WorkDetail } from "@/lib/work-detail";
 
+/*
+ * The frame takes its configured height but never enough to push the caption off
+ * screen — 340px covers the thumbnail strip, the gaps, and the credits below.
+ */
 const STAGE_SIZING =
-  "block h-[var(--twg-gallery-height)] w-auto max-w-[92vw] object-contain";
+  "block h-[min(var(--twg-gallery-height),calc(100vh-340px))] w-auto max-w-[92vw] object-contain";
 
 function StageVideo({ src, label }: { src: string; label: string }) {
   const ref = useVideoAutoplay();

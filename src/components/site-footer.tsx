@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 type FooterLink = { label: string; href: string };
 
 const BOLD_LINK =
@@ -5,8 +7,8 @@ const BOLD_LINK =
 const SERIF_LINK = "font-serif text-[15px] leading-[100%] hover:underline";
 
 const PAGE_LINKS: FooterLink[] = [
-  { label: "About", href: "#" },
-  { label: "Contact", href: "#" },
+  { label: "About", href: "/about" },
+  { label: "Contact", href: "/contact" },
 ];
 
 const SOCIAL_LINKS: FooterLink[] = [
@@ -44,9 +46,15 @@ function FooterColumn({
     >
       {links.map((link) => (
         <li key={link.label}>
-          <a href={link.href} className={linkClassName}>
-            {link.label}
-          </a>
+          {link.href.startsWith("/") ? (
+            <Link href={link.href} className={linkClassName}>
+              {link.label}
+            </Link>
+          ) : (
+            <a href={link.href} className={linkClassName}>
+              {link.label}
+            </a>
+          )}
         </li>
       ))}
       {children}
@@ -54,16 +62,10 @@ function FooterColumn({
   );
 }
 
-type SiteFooterProps = {
-  /** Top margin differs per page: 140px on Artists, 110px on Home. */
-  className?: string;
-};
-
-export function SiteFooter({ className = "mt-[140px]" }: SiteFooterProps = {}) {
+/** One margin for every screen, as the merged design specifies. */
+export function SiteFooter() {
   return (
-    <footer
-      className={`flex flex-wrap items-start justify-between gap-10 px-5 pb-10 ${className}`}
-    >
+    <footer className="mt-[110px] flex flex-wrap items-start justify-between gap-10 px-5 pb-10">
       <FooterColumn links={PAGE_LINKS} linkClassName={BOLD_LINK} />
       <FooterColumn links={SOCIAL_LINKS} linkClassName={BOLD_LINK} />
       <FooterColumn links={LEGAL_LINKS} linkClassName={SERIF_LINK} />

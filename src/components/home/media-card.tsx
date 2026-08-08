@@ -68,9 +68,7 @@ export function MediaCard({ item, onOpen }: MediaCardProps) {
           ))}
         </div>
         {item.title && (
-          <p className="font-serif text-[15px] leading-[100%] italic">
-            {item.title}
-          </p>
+          <p className="font-serif text-[15px] leading-[100%]">{item.title}</p>
         )}
       </div>
     </>

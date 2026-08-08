@@ -59,7 +59,7 @@ export default function HomePage() {
         </main>
       </WorkDetailProvider>
 
-      <SiteFooter className="mt-[110px]" />
+      <SiteFooter />
     </div>
   );
 }

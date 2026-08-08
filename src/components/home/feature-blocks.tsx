@@ -43,9 +43,7 @@ export function FeatureEditorial() {
           {item.credits.map((credit, index) => (
             <ArtistCreditLine key={`${credit.name}-${index}`} {...credit} />
           ))}
-          <p className="font-serif text-[15px] leading-[100%] italic">
-            {item.title}
-          </p>
+          <p className="font-serif text-[15px] leading-[100%]">{item.title}</p>
         </div>
       </button>
     </section>
