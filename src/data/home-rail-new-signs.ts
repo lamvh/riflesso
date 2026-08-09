@@ -1,12 +1,15 @@
 import { imageItem, videoItem, type MediaItem } from "@/lib/media-item";
 
-import { bynder, wpUpload } from "./media-url";
+import { bynder, siteAsset, wpUpload } from "./media-url";
 
-/** New Signs cards carry no publication title — just the artist credit. */
+/**
+ * New Signs cards carry no publication title — just the artist credit.
+ * Repo-hosted frames lead the rail, as on the other rails.
+ */
 export const NEW_SIGNS: MediaItem[] = [
-  imageItem(wpUpload("2026/07/202403_NUMERO_DPAIGE_RMS_05.jpg"), [
-    ["Rudy Martins", "Hair"],
-  ]),
+  imageItem(siteAsset("artist-2.jpg"), [["Rudy Martins", "Hair"]]),
+  imageItem(siteAsset("artist-3.jpg"), [["Avo Yermagyan", "Styling"]]),
+  imageItem(siteAsset("artist-4.jpg"), [["Shameelah Hicks", "Styling"]]),
   imageItem(
     bynder("93b6ecf1-1836-4403-b1a8-4ad17bdbbada/202504_COSMOPOLITAN_EJOHNSON_BTN_07"),
     [["Brandon Tan", "Styling"]],
@@ -22,10 +25,6 @@ export const NEW_SIGNS: MediaItem[] = [
   imageItem(wpUpload("2026/06/202411_WHATEVR_BMARION_ATS_07-scaled.jpg"), [
     ["Ana Tess", "Styling"],
   ]),
-  imageItem(
-    wpUpload("2026/04/202604_BEHINDTHEBLINDS_SRAMIREZ_AVO_13-scaled.jpg"),
-    [["Avo Yermagyan", "Styling"]],
-  ),
   imageItem(wpUpload("2026/06/202511_DOUBLEVISION_LUIGIIANGO_SNK_06.jpeg"), [
     ["Sasha Nesterchuk", "Hair"],
   ]),
@@ -35,9 +34,6 @@ export const NEW_SIGNS: MediaItem[] = [
   ),
   imageItem(wpUpload("2026/05/202602_MIUMIU_UNKNOWN_KAA_01.jpg"), [
     ["Kendra Alia", "Hair, Color, Digital Creators"],
-  ]),
-  imageItem(wpUpload("2026/06/202605_ANTHEM_RSTERCHI_SHS_16-1.jpg"), [
-    ["Shameelah Hicks", "Styling"],
   ]),
   imageItem(
     wpUpload("2026/04/202507_FLAUNT_MSELIGER_ATN_MAS_08-scaled.jpg"),

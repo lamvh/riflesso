@@ -17,3 +17,9 @@ export const bynderAsset = (path: string) =>
 
 export const wpUpload = (path: string) =>
   `https://thewallgroup.com/wp-content/uploads/${path}`;
+
+/**
+ * Imagery that ships with the repo instead of a DAM — the design references these
+ * as `./assets/<name>`, and they live in `public/assets/`.
+ */
+export const siteAsset = (name: string) => `/assets/${name}`;

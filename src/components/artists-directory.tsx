@@ -17,7 +17,7 @@ type ArtistsDirectoryProps = {
 };
 
 export function ArtistsDirectory({
-  startCategory = "All",
+  startCategory = "Hair",
   showActiveImage = true,
 }: ArtistsDirectoryProps) {
   const [territory, setTerritory] = useState<Territory>("US");

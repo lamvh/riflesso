@@ -1,8 +1,15 @@
 import { imageItem, videoItem, type MediaItem } from "@/lib/media-item";
 
-import { bynder, wpUpload } from "./media-url";
+import { bynder, siteAsset, wpUpload } from "./media-url";
 
+/** Repo-hosted frames lead the rail — see the note on `EDITORIALS`. */
 export const COUTURE: MediaItem[] = [
+  imageItem(
+    siteAsset("artist-1.jpg"),
+    [["Romane Martini", "Manicure"]],
+    "Dior",
+  ),
+  imageItem(siteAsset("artist-4.jpg"), [["Hos", "Hair"]], "Balenciaga"),
   videoItem(
     wpUpload("2026/07/edit-02D0298C-0984-475D-974DD2B1EB66D0CC.mp4"),
     [
@@ -36,11 +43,6 @@ export const COUTURE: MediaItem[] = [
     "Dior",
   ),
   imageItem(
-    wpUpload("2026/07/20260706_INAVARRETTE_DIOR_RMI_01-683x1024.jpg"),
-    [["Romane Martini", "Manicure"]],
-    "Dior",
-  ),
-  imageItem(
     bynder("b64a6cae-fa34-4b50-9058-adad1df8b50e/20260708_HWILLIAMS_BALENCIAGA_AFL_01"),
     [["Aika Flores", "Grooming"]],
     "Balenciaga",
@@ -52,11 +54,6 @@ export const COUTURE: MediaItem[] = [
       ["Ilham Mestour", "Hair"],
     ],
     "Jean Paul Gaultier",
-  ),
-  imageItem(
-    wpUpload("2026/07/20260708_DDEADWYLER_BALENCIAGA_HHN_01-768x1024.jpg"),
-    [["Hos", "Hair"]],
-    "Balenciaga",
   ),
   imageItem(
     wpUpload("2026/07/20260707_LPASCAL_CHANEL_MMC_IGZ_01-683x1024.jpg"),

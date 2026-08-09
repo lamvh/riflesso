@@ -23,12 +23,7 @@ export function filterArtists(
   return artists.filter((artist) => {
     if (artist.territory !== territory) return false;
 
-    if (
-      category !== "All" &&
-      !artist.category.split(", ").includes(category)
-    ) {
-      return false;
-    }
+    if (!artist.category.split(", ").includes(category)) return false;
 
     if (
       normalizedQuery &&

@@ -1,8 +1,38 @@
 import { imageItem, videoItem, type MediaItem } from "@/lib/media-item";
 
-import { bynder, bynderAsset, wpUpload } from "./media-url";
+import { bynder, bynderAsset, siteAsset, wpUpload } from "./media-url";
 
+/**
+ * Frames served from `public/assets/` lead the rail: the design hoists every
+ * repo-hosted item to the front of its list, ahead of the DAM-hosted ones.
+ */
 export const EDITORIALS: MediaItem[] = [
+  imageItem(
+    siteAsset("hero-frame.jpg"),
+    [
+      ["Diego Nguyen", "Makeup"],
+      ["Shishi", "Hair"],
+    ],
+    "Riflesso Studio",
+  ),
+  imageItem(
+    siteAsset("artist-1.jpg"),
+    [
+      ["Takuya Yamaguchi", "Hair"],
+      ["Aya Tariq", "Makeup"],
+    ],
+    "Glamour UK",
+  ),
+  imageItem(
+    siteAsset("artist-2.jpg"),
+    [["Zola Ganzorigt", "Manicure, Digital Creators"]],
+    "Perfect",
+  ),
+  imageItem(
+    siteAsset("artist-3.jpg"),
+    [["Katie Qian", "Styling"]],
+    "Nylon",
+  ),
   imageItem(
     bynder(
       "406c4041-48fa-4d45-bb54-a9a5b92f019a/202607_DLAREPUBBLICA_UKNOBLAUCH_BKR_CPL_01",
@@ -59,14 +89,6 @@ export const EDITORIALS: MediaItem[] = [
     "Vogue Czechoslovakia",
   ),
   imageItem(
-    wpUpload("2026/07/202605_GLAMOURUK_LBENOIT_ATQ_TYI_12.jpg"),
-    [
-      ["Takuya Yamaguchi", "Hair"],
-      ["Aya Tariq", "Makeup"],
-    ],
-    "Glamour UK",
-  ),
-  imageItem(
     wpUpload("2026/06/202604_HOMMEGIRLS_CVALDEZ_CZY_08-scaled.jpg"),
     [["Chelsea Zalopany", "Styling"]],
     "HommeGirls",
@@ -82,16 +104,6 @@ export const EDITORIALS: MediaItem[] = [
     bynder("29bee630-bf4d-4415-9acb-01ea288c3d9a/202606_V_INEZVINOODH_RFR_02"),
     [["Ricky Fraser", "Hair"]],
     "V Magazine",
-  ),
-  imageItem(
-    wpUpload("2026/06/202604_PERFECT_BANDERSON_ZLA_09.jpg"),
-    [["Zola Ganzorigt", "Manicure, Digital Creators"]],
-    "Perfect",
-  ),
-  imageItem(
-    wpUpload("2026/06/202605_NYLON_DKOBAYASHIRITCH_KQN_06-scaled.jpg"),
-    [["Katie Qian", "Styling"]],
-    "Nylon",
   ),
   imageItem(
     bynder("3e7f2b3d-8baa-40fb-afce-c2d02ef0c407/202604_INTERVIEW_TLIU_ZLA_01"),

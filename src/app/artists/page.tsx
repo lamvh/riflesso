@@ -7,7 +7,7 @@ import { SiteHeader } from "@/components/site-header";
 export const metadata: Metadata = {
   title: "The Wall Group — Artists",
   description:
-    "The Wall Group represents hair, makeup, styling, grooming and manicure artists across the US and UK.",
+    "The Wall Group represents hair, makeup, styling, grooming and manicure artists across the US and Europe.",
 };
 
 export default function ArtistsPage() {

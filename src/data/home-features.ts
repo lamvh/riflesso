@@ -1,6 +1,6 @@
 import { imageItem } from "@/lib/media-item";
 
-import { bynder, wpUpload } from "./media-url";
+import { bynder, siteAsset } from "./media-url";
 
 /**
  * Full-bleed editorial feature that sits between the campaign and couture rails.
@@ -21,5 +21,5 @@ export const FEATURE_EDITORIAL = {
 /** Anniversary banner, inset by the standard 20px page gutter. */
 export const FEATURE_ANNIVERSARY = {
   heading: "TWG25",
-  src: wpUpload("2026/02/Header-Image_25-Years-of_01-scaled.jpg"),
+  src: siteAsset("twg25-banner.jpg"),
 };

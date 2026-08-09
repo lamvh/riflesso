@@ -5,11 +5,11 @@ Implement các màn hình từ Claude Design (`The Wall Group.dc.html`) bằng N
 
 | Route | Nội dung |
 | --- | --- |
-| `/` | Trang chủ — hero slider 7 slide, 5 rail cuộn ngang, 2 khối feature |
+| `/` | Trang chủ — hero slider 8 slide, 5 rail cuộn ngang, 2 khối feature |
 | `/artists` | Danh bạ nghệ sĩ — lọc theo lãnh thổ / danh mục / tên, ảnh preview sticky |
 | `/about` | Giới thiệu — 2 đoạn copy + lưới liên hệ |
 | `/contact` | Liên hệ — lưới đầy đủ 9 card |
-| `not-found` | Trang 404 — số "404" khoét ảnh hero, cross-fade 7 slide |
+| `not-found` | Trang 404 — số "404" khoét ảnh hero, cross-fade 8 slide |
 
 Work detail không có route riêng: trong design nó là overlay `position:fixed`
 phủ lên trang chủ, mở khi click card của rail, và đóng bằng nút X hoặc `Esc`.
@@ -58,9 +58,9 @@ src/
 │   ├── use-drag-scroll.ts             # kéo chuột để cuộn rail
 │   └── use-video-autoplay.ts          # play/pause video theo viewport
 ├── data/
-│   ├── media-url.ts                   # helper URL cho Bynder DAM + WordPress
-│   ├── artists.ts, artist-images.ts   # 64 artist cho trang danh bạ
-│   ├── home-hero-slides.ts            # 7 slide hero
+│   ├── media-url.ts                   # helper URL cho Bynder DAM, WordPress, public/assets
+│   ├── artists.ts                     # danh bạ 71 artist, suy ra từ rail
+│   ├── home-hero-slides.ts            # 8 slide hero
 │   ├── home-rail-*.ts                 # 5 rail: editorials/campaigns/couture/…
 │   ├── home-sections.ts               # 4 rail có work detail + category của chúng
 │   ├── contact-offices.ts             # 9 card của lưới liên hệ
@@ -114,7 +114,7 @@ src/
 
 **Trang 404**
 
-- Số "404" là một `<span>` ẩn giữ khung, cộng 7 bản absolute chồng lên nhau, mỗi bản
+- Số "404" là một `<span>` ẩn giữ khung, cộng 8 bản absolute chồng lên nhau, mỗi bản
   lấy một ảnh hero làm `background-image` rồi `background-clip: text`. Đổi frame mỗi
   2.8s, cross-fade 1.2s.
 - Panel là sheet `fixed` z-20 nằm dưới masthead (z-30) nên header vẫn bấm được; footer
@@ -122,14 +122,28 @@ src/
 
 **Trang Artists**
 
-- **Territory** (`US` / `UK`) — lọc cứng, chỉ hiện một vùng tại một thời điểm.
-- **Category** — so khớp với danh sách kỹ năng đã tách theo `", "`.
+- **Territory** (`US` / `EUROPE`) — lọc cứng, chỉ hiện một vùng tại một thời điểm.
+- **Category** — 11 mục, mặc định `Hair`, so khớp với danh sách kỹ năng đã
+  tách theo `", "`. Không có mục `All` — đúng như design.
 - **Query** — khớp chuỗi con tên nghệ sĩ, không phân biệt hoa thường.
 - **Active index** — đổi khi hover/click, bị kẹp lại khi danh sách lọc ngắn đi, và
   reset về 0 mỗi khi đổi bộ lọc. Ảnh preview bên phải bám theo index này.
 
 ## Ghi chú kỹ thuật
 
+- **Ảnh trong `public/assets/`.** Design tham chiếu 7 frame là `./assets/*.jpg`
+  thay vì DAM — hai frame hero (`cover-traces.jpg`, `hero-frame.jpg`), banner
+  TWG25 (`twg25-banner.jpg`) và 4 frame nghệ sĩ (`artist-1..4.jpg`). Helper
+  `siteAsset()` trong `data/media-url.ts` map sang `/assets/<name>`.
+- **Rail hoist frame nội bộ lên đầu.** Design sắp lại từng rail: item nào có
+  `src` bắt đầu bằng `./assets/` hoặc `./uploads/` được đẩy lên trước, giữ nguyên
+  thứ tự tương đối. Ba rail Editorials / Couture / New Signs đã áp thứ tự này.
+- **Danh bạ artist suy ra từ rail, không khai báo tay.** Giống design: một
+  artist tồn tại vì được credit trên một frame, `category` lấy từ credit đầu
+  tiên gọi tên họ, ảnh preview là frame **ảnh** đầu tiên họ xuất hiện khi quét
+  EDITORIALS → CAMPAIGNS → COUTURE → FASHION_WEEKS → NEW_SIGNS. Ảnh được gom ở
+  một lượt riêng nên artist bị credit lần đầu trên video vẫn nhận được ảnh ở
+  rail sau. Sửa rail là danh bạ tự đúng theo, không cần sửa hai chỗ.
 - **Base styles bắt buộc nằm trong `@layer base`.** CSS không thuộc layer nào sẽ
   thắng mọi rule có layer bất kể specificity — nên `a { text-decoration: none }`
   để trần sẽ vô hiệu hóa utility `underline` và `text-muted` của Tailwind.

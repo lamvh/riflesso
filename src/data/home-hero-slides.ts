@@ -1,4 +1,4 @@
-import { bynder } from "./media-url";
+import { bynder, siteAsset } from "./media-url";
 
 export type HeroSlide = {
   src: string;
@@ -12,6 +12,13 @@ export type HeroSlide = {
 
 export const HERO_SLIDES: HeroSlide[] = [
   {
+    src: siteAsset("cover-traces.jpg"),
+    position: "50% 0%",
+    captionColor: "#fff",
+    credits: [{ name: "Diego Nguyen", role: " Makeup, " }],
+    publication: "Traces of Memories",
+  },
+  {
     src: bynder(
       "c8df526e-4f44-4703-8779-196446c8e66d/202605_INTERVIEW_ELYNCH_JCT_RFE_01",
     ),
@@ -24,13 +31,11 @@ export const HERO_SLIDES: HeroSlide[] = [
     publication: "Interview",
   },
   {
-    src: bynder(
-      "8cd1290f-af5b-4641-8175-866905af23aa/202607_BEHINDTHEBLINDS_WALDERSLEY_FBO_05",
-    ),
-    position: "43.41% 32.08%",
+    src: siteAsset("hero-frame.jpg"),
+    position: "50% 22%",
     captionColor: "#fff",
-    credits: [{ name: "Francesca Brazzo", role: " Makeup, " }],
-    publication: "Behind the Blinds",
+    credits: [{ name: "Shishi ", role: "Hair, " }],
+    publication: "Riflesso Studio",
   },
   {
     src: bynder(
