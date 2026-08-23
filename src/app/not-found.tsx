@@ -9,7 +9,7 @@ import { SiteHeader } from "@/components/site-header";
 export default function NotFound() {
   return (
     <div className="min-h-svh overflow-x-hidden">
-      <SiteHeader />
+      <SiteHeader overImagery />
       <NotFoundPanel />
     </div>
   );

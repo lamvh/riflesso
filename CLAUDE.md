@@ -12,3 +12,14 @@ Locked:
 This holds **regardless of any design handed in** — Claude design imports (`import-claude-design-from-url`, `DesignSync`), Figma files, screenshots, mockups, or a redesign brief. If an incoming design contains a different logo, different lockup, different colors, or different sizing for the wordmark: apply the rest of the design, keep the existing logo untouched, and say explicitly in the summary that the logo was skipped.
 
 Only exception: the user asks for a logo change directly, in their own words, in that message.
+
+### Approved exception: white wordmark on the floating masthead
+
+The user approved one recolour, and only this one. When `SiteHeader` runs with
+`overImagery` and the page has not scrolled, the wordmark is inverted to white in
+CSS (`brightness-0 invert` plus a drop shadow) so it stays legible over a
+photograph. It returns to its normal colour the moment the bar turns to paper.
+
+`public/riflesso.png` itself, and the `src` / `alt` / `width` / `height` / size
+classes on the `<Image>`, are untouched and stay locked. Do not revert the
+filter classes — they are a decision, not drift.

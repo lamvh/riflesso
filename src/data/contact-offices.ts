@@ -23,50 +23,44 @@ export type ContactCard = {
 
 export const CONTACT_CARDS: ContactCard[] = [
   {
-    heading: "New York",
-    address: ["304 Park Ave. South, 11th Floor", "New York, NY"],
-    tel: "Tel +1 (212) 352-0777",
-    email: "infoNY@thewallgroup.com",
+    heading: "Ho Chi Minh City",
+    address: ["42 Nguyen Hue Boulevard, District 1", "Ho Chi Minh City"],
+    tel: "Tel +84 (28) 3822 4477",
+    email: "hello@riflesso.studio",
   },
   {
-    heading: "Los Angeles",
-    address: ["8201 Beverly Blvd, Suite 600", "Los Angeles, CA"],
-    tel: "Tel +1 (310) 276-0777",
-    email: "infoLA@thewallgroup.com",
+    heading: "Hanoi",
+    address: ["18 Ly Thuong Kiet, Hoan Kiem District", "Hanoi"],
+    tel: "Tel +84 (24) 3936 5510",
+    email: "hanoi@riflesso.studio",
   },
   {
-    heading: "London",
-    address: [
-      "5th Floor Arundel Street Building",
-      "180 The Strand",
-      "London WC2R 3DA",
-    ],
-    tel: "Tel +44 (0) 207 665 5524",
-    email: "infoLDN@thewallgroup.com",
-  },
-  {
-    heading: "Nashville",
-    address: ["1222 Demonbreun St, Suite 1620", "Nashville, TN"],
-    tel: "Tel +1 (615) 963-3000",
-    email: "infoNashville@thewallgroup.com",
+    heading: "Bookings",
+    lead: "For editorial, campaign and runway bookings please contact",
+    email: "bookings@riflesso.studio",
   },
   {
     heading: "Careers",
-    email: "careers@thewallgroup.com",
+    email: "careers@riflesso.studio",
   },
   {
     heading: "New Business Inquiries",
-    email: "newbusiness@thewallgroup.com",
+    email: "newbusiness@riflesso.studio",
   },
   {
     heading: "Brand Partnerships",
-    email: "mhunter@thewallgroup.com",
+    email: "partnerships@riflesso.studio",
     contactOnly: true,
   },
   {
-    heading: "WALL App",
-    lead: "For any WALL app-related queries please contact",
-    email: "WallApp@thewallgroup.com",
+    heading: "Press",
+    lead: "For press requests and image licensing please contact",
+    email: "press@riflesso.studio",
+  },
+  {
+    heading: "Studio Rental",
+    lead: "For availability at our Ho Chi Minh City studio please contact",
+    email: "studio@riflesso.studio",
   },
   {
     heading: "Representation",

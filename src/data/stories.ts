@@ -33,8 +33,12 @@ export const STORIES = {
     title: "Traces of Memories",
     category: "Editorial",
     credits: [
+      ["Bincio", "Photography"],
       ["Diego Nguyen", "Makeup"],
       ["Shishi", "Hair"],
+      ["Nguyen Tan Thanh", "Styling"],
+      ["Victor Chau", "Lighting"],
+      ["Cathy Tran", "Props"],
     ],
     frameCount: 3,
     coverIndex: 1,

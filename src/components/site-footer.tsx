@@ -1,31 +1,31 @@
-import Link from "next/link";
+import Link from "next/link"
 
-type FooterLink = { label: string; href: string };
+type FooterLink = { label: string; href: string }
 
 const BOLD_LINK =
-  "font-sans text-[14px] leading-[94%] font-bold tracking-[-0.5px] hover:underline";
-const SERIF_LINK = "font-serif text-[15px] leading-[100%] hover:underline";
+  "font-sans text-[14px] leading-[94%] font-bold tracking-[-0.5px] hover:underline"
+const SERIF_LINK = "font-serif text-[15px] leading-[100%] hover:underline"
 
 const PAGE_LINKS: FooterLink[] = [
   { label: "About", href: "/about" },
   { label: "Contact", href: "/contact" },
-];
+]
 
 const SOCIAL_LINKS: FooterLink[] = [
-  { label: "Instagram", href: "https://www.instagram.com/thewallgroup" },
-  { label: "TikTok", href: "https://www.tiktok.com/@thewallgroup" },
-];
+  { label: "Instagram", href: "https://www.instagram.com/riflesso.studio" },
+  { label: "TikTok", href: "https://www.tiktok.com/@riflesso.studio" },
+]
 
 const LEGAL_LINKS: FooterLink[] = [
   { label: "Do Not Sell", href: "#" },
   { label: "Terms of Use", href: "#" },
   { label: "Site Credits", href: "#" },
-];
+]
 
 const POLICY_LINKS: FooterLink[] = [
   { label: "Privacy Policy", href: "#" },
   { label: "Cookie Policy", href: "#" },
-];
+]
 
 function FooterColumn({
   links,
@@ -33,10 +33,10 @@ function FooterColumn({
   align = "left",
   children,
 }: {
-  links: FooterLink[];
-  linkClassName: string;
-  align?: "left" | "right";
-  children?: React.ReactNode;
+  links: FooterLink[]
+  linkClassName: string
+  align?: "left" | "right"
+  children?: React.ReactNode
 }) {
   return (
     <ul
@@ -59,7 +59,7 @@ function FooterColumn({
       ))}
       {children}
     </ul>
-  );
+  )
 }
 
 /** One margin for every screen, as the merged design specifies. */
@@ -69,13 +69,17 @@ export function SiteFooter() {
       <FooterColumn links={PAGE_LINKS} linkClassName={BOLD_LINK} />
       <FooterColumn links={SOCIAL_LINKS} linkClassName={BOLD_LINK} />
       <FooterColumn links={LEGAL_LINKS} linkClassName={SERIF_LINK} />
-      <FooterColumn links={POLICY_LINKS} linkClassName={SERIF_LINK} align="right">
+      <FooterColumn
+        links={POLICY_LINKS}
+        linkClassName={SERIF_LINK}
+        align="right"
+      >
         <li>
           <p className="font-serif text-[15px] leading-[100%]">
-            The Wall Group ©2024
+            Riflesso Studio ©2026
           </p>
         </li>
       </FooterColumn>
     </footer>
-  );
+  )
 }

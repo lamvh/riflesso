@@ -1,6 +1,6 @@
-# The Wall Group
+# Riflesso
 
-Implement các màn hình từ Claude Design (`The Wall Group.dc.html`) bằng Next.js 16
+Implement các màn hình cho Riflesso Studio bằng Next.js 16
 (App Router) + React 19 + Tailwind CSS v4.
 
 | Route | Nội dung |
@@ -85,7 +85,7 @@ src/
 - **Bốn tham số hiển thị** (khớp props gốc của design) khai báo ở `src/app/page.tsx`:
   `bannerAutoplay` (false), `sliderHeight` (350px, dải 236–460), `hoverZoom` (true),
   `galleryHeight` (72vh, dải 45–85). Ba tham số sau đi xuống card / overlay qua
-  custom property `--twg-rail-height` / `--twg-rail-zoom` / `--twg-gallery-height`,
+  custom property `--rfl-rail-height` / `--rfl-rail-zoom` / `--rfl-gallery-height`,
   nên đổi một chỗ là đổi toàn bộ.
 
 **Work detail**
@@ -98,7 +98,7 @@ src/
   có bộ ảnh riêng cho từng work — xem `src/lib/work-detail.ts`.
 - **Điều khiển:** click thumbnail, `←` / `→` để đổi frame, `Esc` hoặc nút X để đóng.
   Thumbnail đang chọn bị làm mờ (opacity 0.4), cùng quy ước với dải hero.
-- **Chiều cao khung ảnh bị chặn trên:** `min(--twg-gallery-height, 100vh - 340px)`.
+- **Chiều cao khung ảnh bị chặn trên:** `min(--rfl-gallery-height, 100vh - 340px)`.
   340px là phần chừa cho dải thumbnail, các khoảng cách và khối credit, nên caption
   không bị đẩy khỏi màn hình trên viewport thấp.
 - **Khác design một điểm:** design gọi `window.scrollTo(0, 0)` khi mở overlay. Vì
@@ -166,7 +166,7 @@ src/
 - **`next/image` vs `<img>`** — dùng `next/image` ở hero và ảnh preview (đều là
   `fill` trong khung có kích thước xác định). Card trong rail và 2 khối feature
   dùng `<img>` thuần vì kích thước do tỉ lệ gốc của từng ảnh quyết định
-  (`height: var(--twg-rail-height); width: auto` và `width: 100%; height: auto`);
+  (`height: var(--rfl-rail-height); width: auto` và `width: 100%; height: auto`);
   truyền số đo phỏng đoán cho `next/image` sẽ khẳng định sai tỉ lệ.
 - **Ảnh remote** đi qua hai host khai báo trong `next.config.ts` →
   `images.remotePatterns`. Video `<video>` không qua next/image nên không cần khai báo.

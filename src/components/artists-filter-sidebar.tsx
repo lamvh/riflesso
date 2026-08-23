@@ -63,7 +63,9 @@ export function ArtistsFilterSidebar({
           onChange={(event) => onQueryChange(event.target.value)}
           className="flex-1 border-none bg-paper py-[9px] pr-2 pl-0 font-sans text-[15px] leading-[94%] tracking-[-0.5px] text-ink outline-none"
         />
-        <SearchIcon size={15} />
+        <span className="flex text-[#161616]">
+          <SearchIcon size={15} />
+        </span>
       </div>
 
       <nav aria-label="Artist categories">

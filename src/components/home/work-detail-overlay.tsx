@@ -2,7 +2,7 @@
 
 /* eslint-disable @next/next/no-img-element */
 /*
- * The stage is sized by `height: var(--twg-gallery-height); width: auto`, so the
+ * The stage is sized by `height: var(--rfl-gallery-height); width: auto`, so the
  * rendered width comes from each asset's own ratio — the same reason the rail
  * cards use a plain <img> rather than next/image.
  */
@@ -20,7 +20,7 @@ import type { WorkDetail } from "@/lib/work-detail";
  * screen — 340px covers the thumbnail strip, the gaps, and the credits below.
  */
 const STAGE_SIZING =
-  "block h-[min(var(--twg-gallery-height),calc(100vh-340px))] w-auto max-w-[92vw] object-contain";
+  "block h-[min(var(--rfl-gallery-height),calc(100vh-340px))] w-auto max-w-[92vw] object-contain";
 
 function StageVideo({ src, label }: { src: string; label: string }) {
   const ref = useVideoAutoplay();

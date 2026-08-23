@@ -11,8 +11,8 @@ export const FEATURE_EDITORIAL = {
   item: STORY_CARDS.splendor,
 };
 
-/** Anniversary banner, inset by the standard 20px page gutter. */
+/** Credits sheet for the Traces of Memories shoot, inset by the 20px gutter. */
 export const FEATURE_ANNIVERSARY = {
-  heading: "TWG25",
-  src: siteAsset("twg25-banner.jpg"),
+  heading: "Traces of Memories",
+  src: siteAsset("traces-of-memories-credits.jpg"),
 };

@@ -29,9 +29,9 @@ const DISPLAY = {
 };
 
 const displayVars = {
-  "--twg-rail-height": `${DISPLAY.sliderHeight}px`,
-  "--twg-rail-zoom": DISPLAY.hoverZoom ? "1.04" : "1",
-  "--twg-gallery-height": `${DISPLAY.galleryHeight}vh`,
+  "--rfl-rail-height": `${DISPLAY.sliderHeight}px`,
+  "--rfl-rail-zoom": DISPLAY.hoverZoom ? "1.04" : "1",
+  "--rfl-gallery-height": `${DISPLAY.galleryHeight}vh`,
 } as CSSProperties;
 
 export default function HomePage() {
@@ -40,7 +40,7 @@ export default function HomePage() {
       className="flex min-h-svh flex-col overflow-x-hidden"
       style={displayVars}
     >
-      <SiteHeader />
+      <SiteHeader overImagery />
 
       <WorkDetailProvider>
         <main>

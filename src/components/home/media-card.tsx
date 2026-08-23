@@ -2,7 +2,7 @@
 
 /* eslint-disable @next/next/no-img-element */
 /*
- * Rail cards are sized by `height: var(--twg-rail-height); width: auto`, so the
+ * Rail cards are sized by `height: var(--rfl-rail-height); width: auto`, so the
  * rendered width comes from each asset's own aspect ratio. next/image needs
  * explicit dimensions (or a `fill` parent of known size) and neither is available
  * here, so a plain <img> is the correct primitive.
@@ -15,7 +15,7 @@ import { describeMedia, type MediaItem } from "@/lib/media-item";
 
 import { ArtistCreditLine } from "./artist-credit-line";
 
-const MEDIA_SIZING = "block h-[var(--twg-rail-height)] w-auto max-w-none";
+const MEDIA_SIZING = "block h-[var(--rfl-rail-height)] w-auto max-w-none";
 const CARD = "group flex shrink-0 grow-0 basis-auto flex-col items-start text-left";
 
 /** Where a card without a gallery points, matching the New Signs rail. */
@@ -54,7 +54,7 @@ export function MediaCard({ item, onOpen }: MediaCardProps) {
             alt={label}
             loading="lazy"
             draggable={false}
-            className={`${MEDIA_SIZING} transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[var(--twg-rail-zoom)]`}
+            className={`${MEDIA_SIZING} transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[var(--rfl-rail-zoom)]`}
           />
         ) : (
           <RailVideo src={item.src} label={label} />
