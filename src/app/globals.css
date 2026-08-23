@@ -10,6 +10,13 @@
   /* Dimmed state for artist rows that are not the active one. */
   --color-muted: #757575;
   --color-subtle: #999999;
+
+  /* Admin palette. The dashboard draws boxes and rules the public site never
+     does, so it needs a hairline and two greys of its own. */
+  --color-dim: #666666;
+  --color-rule: #e6e6e6;
+  --color-well: #f0f0f0;
+  --color-shell: #fafafa;
 }
 
 /*

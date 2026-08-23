@@ -94,9 +94,9 @@ const RAILS: MediaItem[][] = [
  * Images are collected in a pass of their own, so an artist first credited on
  * a video still picks up a later image frame.
  */
-function deriveArtists(): Artist[] {
+export function deriveArtists(rails: MediaItem[][] = RAILS): Artist[] {
   const images = new Map<string, string>();
-  for (const rail of RAILS) {
+  for (const rail of rails) {
     for (const item of rail) {
       if (item.kind !== "image") continue;
       for (const credit of item.credits) {
@@ -106,7 +106,7 @@ function deriveArtists(): Artist[] {
   }
 
   const byName = new Map<string, Artist>();
-  for (const rail of RAILS) {
+  for (const rail of rails) {
     for (const item of rail) {
       for (const credit of item.credits) {
         if (byName.has(credit.name)) continue;

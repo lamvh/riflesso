@@ -10,6 +10,7 @@ Implement các màn hình cho Riflesso Studio bằng Next.js 16
 | `/about` | Giới thiệu — 2 đoạn copy + lưới liên hệ |
 | `/contact` | Liên hệ — lưới đầy đủ 9 card |
 | `not-found` | Trang 404 — số "404" khoét ảnh hero, cross-fade 8 slide |
+| `/dashboard/*` | Content admin — 5 màn quản trị nội dung, xem mục riêng bên dưới |
 
 Work detail không có route riêng: trong design nó là overlay `position:fixed`
 phủ lên trang chủ, mở khi click card của rail, và đóng bằng nút X hoặc `Esc`.
@@ -34,7 +35,8 @@ src/
 │   ├── not-found.tsx                  # trang 404
 │   ├── about/page.tsx                 # trang giới thiệu
 │   ├── contact/page.tsx               # trang liên hệ
-│   └── artists/page.tsx               # trang danh bạ
+│   ├── artists/page.tsx               # trang danh bạ
+│   └── dashboard/                     # layout + 5 route của trang quản trị
 ├── components/
 │   ├── site-header.tsx                # masthead cố định, dùng chung mọi trang
 │   ├── site-footer.tsx                # 4 cột link, margin-top 110px
@@ -45,7 +47,7 @@ src/
 │   ├── artists-filter-sidebar.tsx
 │   ├── artists-list.tsx
 │   ├── artist-preview-image.tsx
-│   └── home/
+│   ├── home/
 │       ├── hero-banner.tsx            # slider + dải thumbnail
 │       ├── media-rail.tsx             # rail cuộn ngang
 │       ├── media-card.tsx             # card ảnh/video + credit
@@ -54,6 +56,18 @@ src/
 │       ├── work-detail-overlay.tsx    # client — gallery toàn màn hình
 │       ├── section-heading.tsx
 │       └── artist-credit-line.tsx
+│   └── dashboard/                     # trang quản trị, xem mục Dashboard bên dưới
+│       ├── admin-store.tsx            # client — provider + sessionStorage draft
+│       ├── admin-chrome.tsx           # drawer + toast, mount trên router outlet
+│       ├── dashboard-sidebar.tsx      # sidebar 236px, đếm số theo từng màn
+│       ├── dashboard-header.tsx       # header dính — tiêu đề + nút primary theo màn
+│       ├── artist-drawer.tsx          # form sửa artist
+│       ├── album-drawer.tsx           # form sửa album (lưới frame + credit)
+│       ├── hero-editor.tsx            # khối hero banner của màn Homepage
+│       ├── section-list.tsx           # danh sách section của trang chủ
+│       ├── cover-image.tsx            # <img> thuần, preview URL bất kỳ
+│       ├── screens/                   # 5 màn: overview/artists/albums/categories/homepage
+│       └── ui/                        # chip, switch, input viền, drawer, image pick
 ├── hooks/
 │   ├── use-drag-scroll.ts             # kéo chuột để cuộn rail
 │   └── use-video-autoplay.ts          # play/pause video theo viewport
@@ -69,7 +83,17 @@ src/
 └── lib/
     ├── filter-artists.ts              # logic lọc thuần, không phụ thuộc React
     ├── work-detail.ts                 # dựng gallery: nguyên bộ shoot, hoặc hàng xóm trong rail
-    └── media-item.ts                  # type + constructor cho item rail
+    ├── media-item.ts                  # type + constructor cho item rail
+    └── dashboard/
+        ├── admin-types.ts             # Album / AdminArtist / Slide / Block
+        ├── admin-seed.ts              # dựng seed từ data thật của site
+        ├── admin-state.ts             # shape state + draft của drawer
+        ├── admin-actions.ts           # union action, tách theo nhóm
+        ├── admin-record-reducer.ts    # artist / album / drawer
+        ├── admin-reducer.ts           # category / hero / section + session
+        ├── admin-helpers.ts           # swap, patch, note, fromDraft
+        ├── admin-views.ts             # 5 màn: route, nhãn, số liệu dùng chung
+        └── rails.ts                   # 5 rail của trang chủ, dùng để seed
 ```
 
 ## Hành vi
@@ -129,6 +153,59 @@ src/
 - **Query** — khớp chuỗi con tên nghệ sĩ, không phân biệt hoa thường.
 - **Active index** — đổi khi hover/click, bị kẹp lại khi danh sách lọc ngắn đi, và
   reset về 0 mỗi khi đổi bộ lọc. Ảnh preview bên phải bám theo index này.
+
+## Dashboard (`/dashboard`)
+
+Trang quản trị nội dung, dựng theo design `Dashboard.dc.html`. Năm màn, mỗi màn
+một route, dùng chung sidebar 236px + header dính (sticky):
+
+| Route | Màn |
+| --- | --- |
+| `/dashboard` | Overview — 4 ô số liệu, "Needs attention", "Recent activity" |
+| `/dashboard/artists` | Bảng nghệ sĩ — lọc, đổi Live/Draft, mở drawer sửa |
+| `/dashboard/albums` | Lưới album 4 cột — lọc theo loại, gắn/bỏ khỏi trang chủ |
+| `/dashboard/categories` | Danh mục — đổi tên tại chỗ, ẩn/hiện, đổi thứ tự |
+| `/dashboard/homepage` | Hero banner + Page sections + khung preview dính |
+
+**Dữ liệu là dữ liệu thật của site, không phải demo.** Seed dựng trong
+`src/lib/dashboard/admin-seed.ts`:
+
+- **Album = một card của rail.** Loại album lấy từ rail chứa nó (Editorials →
+  Editorial, New Signs → New Signing…). Card nào front một shoot thì mang theo
+  nguyên bộ frame của shoot đó, nên drawer hiện đủ ảnh chứ không chỉ cover. Card
+  New Signs không có title nên album lấy tên theo artist: `Tên — Debut`.
+- **Artist** suy ra từ credit của rail qua `deriveArtists()` — cùng một hàm trang
+  `/artists` dùng — rồi thành list sửa được. Cột **Works** đếm số album đang
+  credit tên đó nên nó tự đổi khi sửa credit.
+- **Page sections** là 7 section thật của trang chủ, đúng thứ tự trong
+  `src/app/page.tsx`.
+
+**Trạng thái chỉ nằm trong trình duyệt.** Không có API, không ghi ngược vào
+`src/data/*`. Draft lưu ở `sessionStorage` để refresh giữa chừng không mất; đóng
+tab là hết. Ảnh upload thành `blob:` URL, xem được trong phiên, không lưu ở đâu cả.
+
+**Khác design ở ba điểm, đều có lý do:**
+
+- **Wordmark.** Design đặt brand là chữ "THE WALL GROUP"; ở đây giữ nguyên ảnh
+  `public/riflesso.png` theo quy tắc khóa logo trong `CLAUDE.md`.
+- **Recent activity.** Design có sẵn 5 dòng lịch sử bịa. Site không có nguồn
+  lịch sử nào để đọc, nên panel ghi đúng những gì phiên làm việc này vừa sửa —
+  dòng mới nhất là "Just now", còn lại "Earlier". Chưa sửa gì thì panel nói vậy.
+- **Ô "Images".** Design ghi chú "Compressed to 1400px" — một khẳng định về
+  pipeline mà dự án không có. Đổi thành "Across every album".
+
+**Ghi chú kỹ thuật:**
+
+- **`hydrated` trong state.** Lần paint đầu phải render seed để server và client
+  khớp nhau, nên effect ghi `sessionStorage` sẽ đè seed lên draft nó sắp đọc.
+  Cờ `hydrated` chặn mọi lần ghi cho tới khi đọc xong — không có cờ này thì
+  StrictMode remount ở dev xóa sạch draft.
+- **Reducer tách ba.** `admin-record-reducer.ts` lo artist/album/drawer,
+  `admin-reducer.ts` lo cách site được sắp xếp, `admin-helpers.ts` giữ các hàm
+  thuần. Action union nằm riêng ở `admin-actions.ts`.
+- **`<img>` thuần trong dashboard.** src là URL người dùng gõ vào, mà
+  `next/image` chỉ nhận host khai báo trong `next.config.ts`. Dashboard từ chối
+  preview vì chưa allow-list còn tệ hơn là ảnh không tối ưu.
 
 ## Ghi chú kỹ thuật
 

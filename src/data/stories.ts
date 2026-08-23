@@ -131,5 +131,5 @@ export const STORY_CARDS = Object.fromEntries(
 ) as Record<keyof typeof STORIES, MediaItem>;
 
 /** A single frame of a shoot, for places that want one picture and no gallery. */
-export const storyFrame = (story: Story, index: number) =>
+export const storyFrame = (story: Pick<Story, "slug">, index: number) =>
   frameSrc(story.slug, index);
