@@ -5,9 +5,9 @@ import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 
 export const metadata: Metadata = {
-  title: "The Wall Group — About",
+  title: "Riflesso — About",
   description:
-    "The Wall Group is a fully integrated management company championing creative talent through effective, career elevating representation.",
+    "Riflesso is a fully integrated management company championing creative talent through effective, career elevating representation.",
 };
 
 const INLINE_LINK = "border-b border-ink";

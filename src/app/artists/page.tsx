@@ -5,9 +5,9 @@ import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 
 export const metadata: Metadata = {
-  title: "The Wall Group — Artists",
+  title: "Riflesso — Artists",
   description:
-    "The Wall Group represents hair, makeup, styling, grooming and manicure artists across the US and Europe.",
+    "Riflesso represents hair, makeup, styling, grooming and manicure artists across the US and Europe.",
 };
 
 export default function ArtistsPage() {

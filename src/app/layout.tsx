@@ -3,9 +3,9 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "The Wall Group",
+  title: "Riflesso",
   description:
-    "The Wall Group represents hair, makeup, styling, grooming and manicure artists across the US and UK.",
+    "Riflesso represents hair, makeup, styling, grooming and manicure artists across the US and UK.",
 };
 
 export default function RootLayout({

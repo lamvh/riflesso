@@ -5,7 +5,7 @@ import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 
 export const metadata: Metadata = {
-  title: "The Wall Group — Contact",
+  title: "Riflesso — Contact",
   description:
     "Offices in New York, Los Angeles, London and Nashville, plus careers, new business and representation enquiries.",
 };
