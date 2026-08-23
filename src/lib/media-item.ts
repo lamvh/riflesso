@@ -10,6 +10,15 @@ export type MediaItem = {
   credits: ArtistCredit[];
   /** Publication or brand, set in italics. Omitted on the New Signs rail. */
   title?: string;
+  /**
+   * Every frame of the shoot this card fronts, in reading order and led by the
+   * card itself. Cards that carry one open a gallery of exactly these frames
+   * instead of borrowing their neighbours from the rail.
+   */
+  gallery?: MediaItem[];
+  /** Overrides the rail's label in the work detail — a Beauty story on the
+   * Editorials rail still reads as Beauty. */
+  category?: string;
 };
 
 /** Credits are authored as `[name, roles]` tuples to keep the data files scannable. */

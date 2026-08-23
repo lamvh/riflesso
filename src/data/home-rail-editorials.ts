@@ -1,12 +1,18 @@
 import { imageItem, videoItem, type MediaItem } from "@/lib/media-item";
 
 import { bynder, bynderAsset, siteAsset, wpUpload } from "./media-url";
+import { STORY_CARDS } from "./stories";
 
 /**
  * Frames served from `public/assets/` lead the rail: the design hoists every
- * repo-hosted item to the front of its list, ahead of the DAM-hosted ones.
+ * repo-hosted item to the front of its list, ahead of the DAM-hosted ones. The
+ * shoots come first among those — each is one card that opens its whole set.
  */
 export const EDITORIALS: MediaItem[] = [
+  STORY_CARDS.gildedFrame,
+  STORY_CARDS.settingCurls,
+  STORY_CARDS.redChair,
+  STORY_CARDS.traces,
   imageItem(
     siteAsset("hero-frame.jpg"),
     [

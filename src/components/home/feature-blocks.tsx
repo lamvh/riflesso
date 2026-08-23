@@ -24,8 +24,8 @@ export function FeatureEditorial() {
     <section className="pt-[70px]">
       <SectionHeading>{heading}</SectionHeading>
       {/*
-       * The feature is not itself in the Editorials rail, so the gallery it opens
-       * leads with this frame and continues from the head of that rail.
+       * The feature fronts a shoot, so the gallery it opens is that shoot's own
+       * frames; the section it is handed only supplies fallbacks it never needs.
        */}
       <button
         type="button"

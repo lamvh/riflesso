@@ -59,7 +59,8 @@ src/
 │   └── use-video-autoplay.ts          # play/pause video theo viewport
 ├── data/
 │   ├── media-url.ts                   # helper URL cho Bynder DAM, WordPress, public/assets
-│   ├── artists.ts                     # danh bạ 71 artist, suy ra từ rail
+│   ├── stories.ts                     # 7 bộ ảnh (shoot), mỗi bộ mở nguyên set ở work detail
+│   ├── artists.ts                     # danh bạ artist, suy ra từ rail
 │   ├── home-hero-slides.ts            # 8 slide hero
 │   ├── home-rail-*.ts                 # 5 rail: editorials/campaigns/couture/…
 │   ├── home-sections.ts               # 4 rail có work detail + category của chúng
@@ -67,7 +68,7 @@ src/
 │   └── home-features.ts
 └── lib/
     ├── filter-artists.ts              # logic lọc thuần, không phụ thuộc React
-    ├── work-detail.ts                 # dựng gallery từ card được click
+    ├── work-detail.ts                 # dựng gallery: nguyên bộ shoot, hoặc hàng xóm trong rail
     └── media-item.ts                  # type + constructor cho item rail
 ```
 
@@ -135,6 +136,17 @@ src/
   thay vì DAM — hai frame hero (`cover-traces.jpg`, `hero-frame.jpg`), banner
   TWG25 (`twg25-banner.jpg`) và 4 frame nghệ sĩ (`artist-1..4.jpg`). Helper
   `siteAsset()` trong `data/media-url.ts` map sang `/assets/<name>`.
+- **Card của một shoot mở nguyên bộ ảnh.** Một `Story` trong `data/stories.ts`
+  gom các frame chụp cùng buổi, cùng ê-kíp, vào một card duy nhất trên rail.
+  `storyCard()` gắn toàn bộ frame vào `MediaItem.gallery`, nên khi click,
+  `buildWorkDetail` trả thẳng set đó thay vì cắt 6 frame hàng xóm trong rail —
+  chỗ khác biệt duy nhất so với các card lẻ. `coverIndex` chọn frame đứng đại
+  diện trên rail, và gallery được xoay để mở đúng frame vừa click. `category`
+  của story ghi đè nhãn của rail, nên bộ Beauty nằm trên rail Editorials vẫn
+  hiện "Beauty" ở work detail.
+- **Ảnh của shoot nằm ở `public/assets/stories/<slug>-NN.jpg`,** đánh số từ 01
+  theo thứ tự đọc. `frameCount` trong `stories.ts` phải khớp số file — không có
+  bước quét thư mục lúc build.
 - **Rail hoist frame nội bộ lên đầu.** Design sắp lại từng rail: item nào có
   `src` bắt đầu bằng `./assets/` hoặc `./uploads/` được đẩy lên trước, giữ nguyên
   thứ tự tương đối. Ba rail Editorials / Couture / New Signs đã áp thứ tự này.

@@ -1,4 +1,4 @@
-import { bynder, siteAsset } from "./media-url";
+import { STORIES, storyFrame } from "./stories";
 
 export type HeroSlide = {
   src: string;
@@ -10,79 +10,91 @@ export type HeroSlide = {
   publication: string;
 };
 
+/**
+ * A frame from each shoot, so the banner reads as a table of contents for the
+ * rails below it.
+ *
+ * Two constraints pick the frames. Tearsheets that carry their own printed
+ * copy are skipped — the banner sets a caption in the same corner and the two
+ * collide. And the frame that fronts the full-bleed feature is left out, so the
+ * same picture is not the first and the largest thing on the page.
+ */
 export const HERO_SLIDES: HeroSlide[] = [
   {
-    src: siteAsset("cover-traces.jpg"),
-    position: "50% 0%",
+    src: storyFrame(STORIES.gildedFrame, 4),
+    position: "50% 28%",
     captionColor: "#fff",
-    credits: [{ name: "Diego Nguyen", role: " Makeup, " }],
+    credits: [
+      { name: "Bincio", role: " Photography, " },
+      { name: "Nguyen Tan Thanh", role: " Styling, " },
+    ],
+    publication: "The Gilded Frame",
+  },
+  {
+    src: storyFrame(STORIES.redChair, 2),
+    position: "50% 45%",
+    captionColor: "#fff",
+    credits: [
+      { name: "Dinh Tran", role: " Makeup, " },
+      { name: "Nguyen Tan Thanh", role: " Styling, " },
+    ],
+    publication: "Cadmium",
+  },
+  {
+    src: storyFrame(STORIES.goldenSpiral, 0),
+    position: "50% 50%",
+    captionColor: "#fff",
+    credits: [
+      { name: "Nguyen Tan Thanh", role: " Styling, " },
+      { name: "May Truong", role: " Hair, " },
+    ],
+    publication: "Golden Spiral",
+  },
+  {
+    src: storyFrame(STORIES.porcelain, 0),
+    position: "50% 30%",
+    captionColor: "#fff",
+    credits: [
+      { name: "Bincio", role: " Photography, " },
+      { name: "Shishi", role: " Hair, " },
+    ],
+    publication: "Porcelain Garden",
+  },
+  {
+    src: storyFrame(STORIES.traces, 1),
+    position: "50% 38%",
+    captionColor: "#fff",
+    credits: [
+      { name: "Diego Nguyen", role: " Makeup, " },
+      { name: "Shishi", role: " Hair, " },
+    ],
     publication: "Traces of Memories",
   },
   {
-    src: bynder(
-      "c8df526e-4f44-4703-8779-196446c8e66d/202605_INTERVIEW_ELYNCH_JCT_RFE_01",
-    ),
-    position: "45.69% 67.08%",
+    src: storyFrame(STORIES.settingCurls, 4),
+    position: "50% 30%",
     captionColor: "#000",
     credits: [
-      { name: "James Catalano ", role: "Hair, " },
-      { name: "Rose Forde", role: " Styling, " },
+      { name: "May Truong", role: " Hair, " },
+      { name: "Dinh Tran", role: " Makeup, " },
     ],
-    publication: "Interview",
+    publication: "Setting Curls",
   },
   {
-    src: siteAsset("hero-frame.jpg"),
-    position: "50% 22%",
-    captionColor: "#fff",
-    credits: [{ name: "Shishi ", role: "Hair, " }],
-    publication: "Riflesso Studio",
-  },
-  {
-    src: bynder(
-      "c1a9daf4-b38c-4deb-b76e-88fe373cd394/202606_ISSEYMIYAKE_CADDY_IPN_03",
-    ),
-    position: "44.67% 17.31%",
-    captionColor: "#fff",
-    credits: [{ name: "Issac Poleon ", role: "Hair, " }],
-    publication: "Issey Miyake",
-  },
-  {
-    src: bynder(
-      "a0afdf47-7f57-4a01-ba5e-f9b8cc57f535/202607_SMODA_TWHITESIDE_FAB_JRS_05",
-    ),
-    position: "45.87% 50.42%",
-    captionColor: "#fff",
+    src: storyFrame(STORIES.splendor, 5),
+    position: "50% 30%",
+    captionColor: "#000",
     credits: [
-      { name: "Fabio Immediato", role: " Styling, " },
-      { name: "Jerrod Roberts ", role: "Hair, " },
+      { name: "Dinh Tran", role: " Makeup, " },
+      { name: "May Truong", role: " Hair, " },
     ],
-    publication: "S Moda",
+    publication: "The Soulful Splendor",
   },
   {
-    src: bynder(
-      "573cc874-596a-41d5-b4ed-25a643a90bd7/202607_VERONICABEARD_HNEUMANN_STJ_13",
-    ),
-    position: "44.96% 87.53%",
+    src: storyFrame(STORIES.gildedFrame, 1),
+    position: "50% 25%",
     captionColor: "#fff",
-    credits: [{ name: "Stoj", role: " Makeup, " }],
-    publication: "Veronica Beard",
-  },
-  {
-    src: bynder(
-      "a3d2b9cc-084c-498b-a6d2-87634c1f400f/202607_STYLE_ZDAEMEN_FAB_05",
-    ),
-    position: "42.90% 27.57%",
-    captionColor: "#fff",
-    credits: [{ name: "Fabio Immediato", role: " Styling, " }],
-    publication: "Style",
-  },
-  {
-    src: bynder(
-      "162bbeb1-aff4-48a4-b871-3f37c2c8ca8f/202606_HARPERSBAZAAR_MFARAGO_RMD_14",
-    ),
-    position: "59.87% 50.69%",
-    captionColor: "#fff",
-    credits: [{ name: "Rafael Medeiros ", role: "Set Design, " }],
-    publication: "Harper’s Bazaar",
+    credits: [{ name: "May Truong", role: " Hair, " }],
+    publication: "The Gilded Frame",
   },
 ];
