@@ -4,8 +4,7 @@ import { bynder, bynderAsset, siteAsset, wpUpload } from "./media-url";
 import { STORY_CARDS } from "./stories";
 
 export const CAMPAIGNS: MediaItem[] = [
-  STORY_CARDS.porcelain,
-  STORY_CARDS.goldenSpiral,
+  STORY_CARDS.artTwo,
   imageItem(
     siteAsset("elle-porsche.jpg"),
     [["Nguyen Tan Thanh", "Styling"]],

@@ -8,7 +8,7 @@ import { STORY_CARDS } from "./stories";
  */
 export const FEATURE_EDITORIAL = {
   heading: "Latest Editorial",
-  item: STORY_CARDS.splendor,
+  item: STORY_CARDS.thuyAnh,
 };
 
 /** Credits sheet for the Traces of Memories shoot, inset by the 20px gutter. */

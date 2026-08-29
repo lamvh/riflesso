@@ -11,8 +11,9 @@ import { STORY_CARDS } from "./stories";
 export const EDITORIALS: MediaItem[] = [
   STORY_CARDS.gildedFrame,
   STORY_CARDS.settingCurls,
-  STORY_CARDS.redChair,
   STORY_CARDS.traces,
+  STORY_CARDS.elle,
+  STORY_CARDS.thuyAnh,
   STORY_CARDS.dep,
   imageItem(
     siteAsset("hero-frame.jpg"),

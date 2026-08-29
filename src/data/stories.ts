@@ -28,21 +28,6 @@ const frameSrc = (slug: string, index: number) =>
   `/assets/stories/${slug}-${String(index + 1).padStart(2, "0")}.jpg`;
 
 export const STORIES = {
-  traces: {
-    slug: "traces",
-    title: "Traces of Memories",
-    category: "Editorial",
-    credits: [
-      ["Bincio", "Photography"],
-      ["Diego Nguyen", "Makeup"],
-      ["Shishi", "Hair"],
-      ["Nguyen Tan Thanh", "Styling"],
-      ["Victor Chau", "Lighting"],
-      ["Cathy Tran", "Props"],
-    ],
-    frameCount: 3,
-    coverIndex: 1,
-  },
   gildedFrame: {
     slug: "gilded-frame",
     title: "The Gilded Frame",
@@ -63,9 +48,42 @@ export const STORIES = {
     ],
     frameCount: 7,
   },
-  splendor: {
-    slug: "splendor",
-    title: "The Soulful Splendor",
+  traces: {
+    slug: "traces",
+    title: "Traces of Memories",
+    category: "Editorial",
+    credits: [
+      ["Bincio", "Photography"],
+      ["Diego Nguyen", "Makeup"],
+      ["Shishi", "Hair"],
+      ["Nguyen Tan Thanh", "Styling"],
+      ["Victor Chau", "Lighting"],
+      ["Cathy Tran", "Props"],
+    ],
+    frameCount: 3,
+    coverIndex: 1,
+  },
+  /**
+   * One production, run as five chapters: moss and rock, the yellow spiral,
+   * the orchid boot, the cloud, then the red room. The site used to carry it
+   * as three separate shoots.
+   */
+  artTwo: {
+    slug: "art-02",
+    title: "Art 02",
+    category: "Campaign",
+    credits: [
+      ["Bincio", "Photography"],
+      ["Nguyen Tan Thanh", "Styling"],
+      ["Dinh Tran", "Makeup"],
+      ["Shishi", "Hair"],
+      ["May Truong", "Hair"],
+    ],
+    frameCount: 23,
+  },
+  elle: {
+    slug: "elle",
+    title: "Elle Vietnam",
     category: "Beauty",
     credits: [
       ["Bincio", "Creative Direction, Photography"],
@@ -73,37 +91,7 @@ export const STORIES = {
       ["Dinh Tran", "Makeup"],
       ["May Truong", "Hair"],
     ],
-    frameCount: 11,
-  },
-  redChair: {
-    slug: "red-chair",
-    title: "Cadmium",
-    category: "Editorial",
-    credits: [
-      ["Dinh Tran", "Makeup"],
-      ["Nguyen Tan Thanh", "Styling"],
-    ],
-    frameCount: 6,
-  },
-  porcelain: {
-    slug: "porcelain",
-    title: "Porcelain Garden",
-    category: "Campaign",
-    credits: [
-      ["Bincio", "Photography"],
-      ["Shishi", "Hair"],
-    ],
-    frameCount: 13,
-  },
-  goldenSpiral: {
-    slug: "golden-spiral",
-    title: "Golden Spiral",
-    category: "Campaign",
-    credits: [
-      ["Nguyen Tan Thanh", "Styling"],
-      ["May Truong", "Hair"],
-    ],
-    frameCount: 4,
+    frameCount: 10,
   },
   dep: {
     slug: "dep",
@@ -115,6 +103,20 @@ export const STORIES = {
       ["May Truong", "Hair"],
     ],
     frameCount: 2,
+  },
+  /** Thuy Anh's book: the printed editorial, then the tests behind it. */
+  thuyAnh: {
+    slug: "thuy-anh",
+    title: "The Soulful Splendor",
+    category: "Portfolio",
+    credits: [
+      ["Thuy Anh", "Muse"],
+      ["Bincio", "Photography"],
+      ["Nguyen Tan Thanh", "Styling"],
+      ["Dinh Tran", "Makeup"],
+      ["May Truong", "Hair"],
+    ],
+    frameCount: 5,
   },
 } as const satisfies Record<string, Story>;
 

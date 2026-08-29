@@ -7,10 +7,7 @@ import { bynder, siteAsset, wpUpload } from "./media-url";
  * Repo-hosted frames lead the rail, as on the other rails.
  */
 export const NEW_SIGNS: MediaItem[] = [
-  imageItem("/assets/stories/studio-01.jpg", [["Thuy Anh", "Muse"]]),
-  imageItem("/assets/stories/thuy-anh-01.jpg", [["Thuy Anh", "Muse"]]),
-  imageItem("/assets/stories/thuy-anh-02.jpg", [["Thuy Anh", "Muse"]]),
-  imageItem("/assets/stories/thuy-anh-03.jpg", [["Thuy Anh", "Muse"]]),
+  imageItem("/assets/stories/thuy-anh-05.jpg", [["Thuy Anh", "Muse"]]),
   imageItem(siteAsset("artist-2.jpg"), [["Rudy Martins", "Hair"]]),
   imageItem(siteAsset("artist-3.jpg"), [["Avo Yermagyan", "Styling"]]),
   imageItem(siteAsset("artist-4.jpg"), [["Shameelah Hicks", "Styling"]]),

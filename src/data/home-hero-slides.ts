@@ -31,7 +31,7 @@ export const HERO_SLIDES: HeroSlide[] = [
     publication: "The Gilded Frame",
   },
   {
-    src: storyFrame(STORIES.redChair, 2),
+    src: storyFrame(STORIES.artTwo, 19),
     position: "50% 45%",
     captionColor: "#fff",
     credits: [
@@ -41,7 +41,7 @@ export const HERO_SLIDES: HeroSlide[] = [
     publication: "Cadmium",
   },
   {
-    src: storyFrame(STORIES.goldenSpiral, 0),
+    src: storyFrame(STORIES.artTwo, 8),
     position: "50% 50%",
     captionColor: "#fff",
     credits: [
@@ -51,7 +51,7 @@ export const HERO_SLIDES: HeroSlide[] = [
     publication: "Golden Spiral",
   },
   {
-    src: storyFrame(STORIES.porcelain, 0),
+    src: storyFrame(STORIES.artTwo, 1),
     position: "50% 30%",
     captionColor: "#fff",
     credits: [
@@ -81,7 +81,7 @@ export const HERO_SLIDES: HeroSlide[] = [
     publication: "Setting Curls",
   },
   {
-    src: storyFrame(STORIES.splendor, 5),
+    src: storyFrame(STORIES.elle, 4),
     position: "50% 30%",
     captionColor: "#000",
     credits: [
