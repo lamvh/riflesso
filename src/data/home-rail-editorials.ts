@@ -13,6 +13,7 @@ export const EDITORIALS: MediaItem[] = [
   STORY_CARDS.settingCurls,
   STORY_CARDS.redChair,
   STORY_CARDS.traces,
+  STORY_CARDS.dep,
   imageItem(
     siteAsset("hero-frame.jpg"),
     [

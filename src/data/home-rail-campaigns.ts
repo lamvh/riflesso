@@ -1,11 +1,16 @@
 import { imageItem, videoItem, type MediaItem } from "@/lib/media-item";
 
-import { bynder, bynderAsset, wpUpload } from "./media-url";
+import { bynder, bynderAsset, siteAsset, wpUpload } from "./media-url";
 import { STORY_CARDS } from "./stories";
 
 export const CAMPAIGNS: MediaItem[] = [
   STORY_CARDS.porcelain,
   STORY_CARDS.goldenSpiral,
+  imageItem(
+    siteAsset("elle-porsche.jpg"),
+    [["Nguyen Tan Thanh", "Styling"]],
+    "Elle × Porsche",
+  ),
   videoItem(
     wpUpload("2026/06/edit-2C1986D7-34CE-4B09-A00FA9ECDE71899A.mp4"),
     [["Peter Lux", "Hair"]],

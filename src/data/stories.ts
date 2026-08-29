@@ -73,7 +73,7 @@ export const STORIES = {
       ["Dinh Tran", "Makeup"],
       ["May Truong", "Hair"],
     ],
-    frameCount: 10,
+    frameCount: 11,
   },
   redChair: {
     slug: "red-chair",
@@ -83,7 +83,7 @@ export const STORIES = {
       ["Dinh Tran", "Makeup"],
       ["Nguyen Tan Thanh", "Styling"],
     ],
-    frameCount: 5,
+    frameCount: 6,
   },
   porcelain: {
     slug: "porcelain",
@@ -93,7 +93,7 @@ export const STORIES = {
       ["Bincio", "Photography"],
       ["Shishi", "Hair"],
     ],
-    frameCount: 10,
+    frameCount: 13,
   },
   goldenSpiral: {
     slug: "golden-spiral",
@@ -103,7 +103,18 @@ export const STORIES = {
       ["Nguyen Tan Thanh", "Styling"],
       ["May Truong", "Hair"],
     ],
-    frameCount: 3,
+    frameCount: 4,
+  },
+  dep: {
+    slug: "dep",
+    title: "Đẹp Magazine",
+    category: "Beauty",
+    credits: [
+      ["Bincio", "Photography"],
+      ["Dinh Tran", "Makeup"],
+      ["May Truong", "Hair"],
+    ],
+    frameCount: 2,
   },
 } as const satisfies Record<string, Story>;
 
