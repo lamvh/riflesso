@@ -18,6 +18,7 @@ export function AdminChrome() {
         <ArtistDrawer
           draft={drawer.draft}
           index={drawer.index}
+          categories={state.cats}
           dispatch={dispatch}
         />
       )}

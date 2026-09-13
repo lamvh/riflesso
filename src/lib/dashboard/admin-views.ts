@@ -1,7 +1,7 @@
 import type { AdminState } from "./admin-state";
 
-/** The five screens the dashboard is made of, in sidebar order. */
-export const VIEWS = ["overview", "artists", "albums", "cats", "home"] as const;
+/** The screens the dashboard is made of, in sidebar order. */
+export const VIEWS = ["overview", "artists", "albums", "cats", "home", "settings"] as const;
 export type View = (typeof VIEWS)[number];
 
 export const VIEW_HREF: Record<View, string> = {
@@ -10,6 +10,7 @@ export const VIEW_HREF: Record<View, string> = {
   albums: "/dashboard/albums",
   cats: "/dashboard/categories",
   home: "/dashboard/homepage",
+  settings: "/dashboard/settings",
 };
 
 export const VIEW_LABEL: Record<View, string> = {
@@ -18,6 +19,7 @@ export const VIEW_LABEL: Record<View, string> = {
   albums: "Albums",
   cats: "Categories",
   home: "Homepage",
+  settings: "Site settings",
 };
 
 export const viewFromPath = (pathname: string): View =>
@@ -50,6 +52,7 @@ export function adminTotals(state: AdminState) {
     blocks: state.blocks.length,
     liveBlocks,
     cats: state.cats.length,
+    contacts: state.contacts.length,
   };
 }
 
@@ -65,6 +68,8 @@ export function navCount(view: View, totals: ReturnType<typeof adminTotals>) {
       return totals.cats;
     case "home":
       return totals.slides + totals.liveBlocks;
+    case "settings":
+      return totals.contacts;
   }
 }
 
@@ -90,6 +95,11 @@ export function pageTitle(
       return [
         "Homepage",
         `${totals.slides} hero slides · ${totals.liveBlocks} of ${totals.blocks} sections live`,
+      ];
+    case "settings":
+      return [
+        "Site settings",
+        `Logo, search listing, About copy, footer · ${totals.contacts} contact cards`,
       ];
     case "overview":
       return ["Overview", "What is live on the Riflesso site right now"];

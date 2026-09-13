@@ -1,5 +1,12 @@
-import type { AdminState, AlbumDraft, ArtistDraft } from "./admin-state";
-import type { Credit, Slide } from "./admin-types";
+import type {
+  ContactCardRecord,
+  SiteContent,
+  SiteSettings,
+  SocialLink,
+} from "@/lib/content/site-content-types";
+
+import type { AlbumDraft, ArtistDraft } from "./admin-state";
+import type { Activity, Credit, Slide } from "./admin-types";
 
 /** Edits to an artist or an album, including everything the drawer touches. */
 export type RecordAction =
@@ -12,7 +19,7 @@ export type RecordAction =
   | { type: "album/save" }
   | { type: "album/delete" }
   | { type: "draft/set"; patch: Partial<ArtistDraft & AlbumDraft> }
-  | { type: "draft/toggleCat"; cat: string }
+  | { type: "draft/toggleCat"; id: string }
   | { type: "draft/addCredit" }
   | { type: "draft/setCredit"; index: number; patch: Partial<Credit> }
   | { type: "draft/removeCredit"; index: number }
@@ -36,16 +43,33 @@ export type SiteAction =
   | { type: "block/toggle"; index: number }
   | { type: "block/move"; index: number; delta: number };
 
-/** Session furniture: the toast, and getting the stored draft back. */
+/** Site-wide settings: brand, SEO, About copy, contact cards, footer links. */
+export type SettingsAction =
+  | { type: "settings/set"; patch: Partial<SiteSettings> }
+  | { type: "contact/add" }
+  | { type: "contact/set"; index: number; patch: Partial<ContactCardRecord> }
+  | { type: "contact/move"; index: number; delta: number }
+  | { type: "contact/remove"; index: number }
+  | { type: "social/add" }
+  | { type: "social/set"; index: number; patch: Partial<SocialLink> }
+  | { type: "social/remove"; index: number };
+
+/** Session furniture: the toast, the stored draft, publishing. */
 export type SessionAction =
   | { type: "toast"; message: string }
-  | { type: "restore"; state: Omit<AdminState, "drawer" | "toast" | "hydrated"> }
+  | { type: "restore"; content: SiteContent; activity: Activity }
   | { type: "hydrated" }
-  | { type: "reset" };
+  /** Throw away unpublished edits and go back to the last published content. */
+  | { type: "discard" }
+  | { type: "published"; revision: number; baseline: string };
 
-export type AdminAction = RecordAction | SiteAction | SessionAction;
+export type AdminAction = RecordAction | SiteAction | SettingsAction | SessionAction;
 
 const RECORD_PREFIXES = ["artist/", "album/", "draft/", "drawer/"];
+const SETTINGS_PREFIXES = ["settings/", "contact/", "social/"];
 
 export const isRecordAction = (action: AdminAction): action is RecordAction =>
   RECORD_PREFIXES.some((prefix) => action.type.startsWith(prefix));
+
+export const isSettingsAction = (action: AdminAction): action is SettingsAction =>
+  SETTINGS_PREFIXES.some((prefix) => action.type.startsWith(prefix));

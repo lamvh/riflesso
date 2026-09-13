@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+import { DEFAULT_LOGO_URL } from "@/lib/content/site-content-types";
 import {
   VIEWS,
   VIEW_HREF,
@@ -12,12 +13,13 @@ import {
   navCount,
   viewFromPath,
 } from "@/lib/dashboard/admin-views";
+import { canOptimizeImage, isPublishableSrc } from "@/lib/media-src";
 
 import { useAdmin } from "./admin-store";
 
 /**
- * The wordmark is the locked asset at its locked dimensions. The design sets
- * the brand as type; here it stays the picture the rest of the site uses.
+ * The wordmark renders at the site's locked dimensions. Its file comes from
+ * Site settings, so an edit to the logo previews here before it is published.
  */
 const WORDMARK_WIDTH = 116;
 const WORDMARK_HEIGHT = 20;
@@ -27,17 +29,20 @@ export function DashboardSidebar() {
   const pathname = usePathname();
   const current = viewFromPath(pathname);
   const totals = adminTotals(state);
+  const typed = state.settings.logoUrl.trim();
+  const logo = isPublishableSrc(typed) ? typed : DEFAULT_LOGO_URL;
 
   return (
     <aside className="fixed top-0 left-0 z-[5] flex h-svh w-[236px] flex-col border-r border-ink bg-paper">
       <div className="border-b border-ink px-[20px] pt-[22px] pb-[18px]">
         <Link href="/" className="flex">
           <Image
-            src="/riflesso.png"
-            alt="Riflesso"
+            src={logo}
+            alt={state.settings.logoAlt || "Riflesso"}
             width={WORDMARK_WIDTH}
             height={WORDMARK_HEIGHT}
             priority
+            unoptimized={!canOptimizeImage(logo)}
             className="h-[20px] w-auto"
           />
         </Link>

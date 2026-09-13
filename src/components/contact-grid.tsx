@@ -1,13 +1,15 @@
 import { Fragment } from "react";
 
-import { CONTACT_CARDS, type ContactCard } from "@/data/contact-offices";
+import type { ContactCardRecord } from "@/lib/content/site-content-types";
 
 const UNDERLINED = "border-b border-ink";
 const BODY = "font-serif text-[15px] leading-[135%]";
 
-function ContactCardBlock({ card }: { card: ContactCard }) {
-  const { address, tel, lead, email, link } = card;
-  const hasDetails = Boolean(tel || lead || email || link);
+function ContactCardBlock({ card }: { card: ContactCardRecord }) {
+  const { tel, lead, email, linkLabel, linkHref } = card;
+  const address = card.address.filter(Boolean);
+  const hasLink = Boolean(linkLabel && linkHref);
+  const hasDetails = Boolean(tel || lead || email || hasLink);
 
   return (
     <div className="flex flex-col gap-[14px]">
@@ -15,10 +17,10 @@ function ContactCardBlock({ card }: { card: ContactCard }) {
         {card.heading}
       </h3>
 
-      {address && (
+      {address.length > 0 && (
         <p className={BODY}>
           {address.map((line, index) => (
-            <Fragment key={line}>
+            <Fragment key={`${line}-${index}`}>
               {index > 0 && <br />}
               {line}
             </Fragment>
@@ -40,9 +42,9 @@ function ContactCardBlock({ card }: { card: ContactCard }) {
               {email}
             </a>
           )}
-          {link && (
-            <a href={link.href} className={UNDERLINED}>
-              {link.label}
+          {hasLink && (
+            <a href={linkHref} className={UNDERLINED}>
+              {linkLabel}
             </a>
           )}
         </p>
@@ -52,19 +54,19 @@ function ContactCardBlock({ card }: { card: ContactCard }) {
 }
 
 type ContactGridProps = {
-  /** About reuses this grid but drops the Brand Partnerships card. */
+  cards: ContactCardRecord[];
+  /** About reuses this grid but drops the cards marked Contact only. */
   variant: "about" | "contact";
 };
 
-export function ContactGrid({ variant }: ContactGridProps) {
-  const cards = CONTACT_CARDS.filter(
-    (card) => variant === "contact" || !card.contactOnly,
-  );
+export function ContactGrid({ cards, variant }: ContactGridProps) {
+  const shown = cards.filter((card) => variant === "contact" || !card.contactOnly);
+  if (!shown.length) return null;
 
   return (
     <div className="grid grid-cols-[repeat(auto-fit,minmax(260px,1fr))] gap-x-10 gap-y-[70px] px-5 pt-[90px]">
-      {cards.map((card) => (
-        <ContactCardBlock key={card.heading} card={card} />
+      {shown.map((card) => (
+        <ContactCardBlock key={card.id} card={card} />
       ))}
     </div>
   );

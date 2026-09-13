@@ -1,24 +1,16 @@
-import type {
-  Activity,
-  AdminArtist,
-  Album,
-  Block,
-  CategoryRow,
-  Credit,
-  Slide,
-} from "./admin-types";
 import {
-  seedAlbums,
-  seedArtists,
-  seedBlocks,
-  seedCategories,
-  seedSlides,
-} from "./admin-seed";
+  pickSiteContent,
+  type LoadedSiteContent,
+  type SiteContent,
+  type SiteContentSource,
+} from "@/lib/content/site-content-types";
+
+import type { Activity, AdminArtist, Album, Credit } from "./admin-types";
 
 /** A frame inside the album drawer's image grid. The first one is the cover. */
 export type Shot = { src: string; pos: string };
 
-export type ArtistDraft = AdminArtist & { catList: string[] };
+export type ArtistDraft = AdminArtist;
 export type AlbumDraft = Album & { shots: Shot[] };
 
 export type Drawer =
@@ -26,12 +18,7 @@ export type Drawer =
   | { kind: "album"; index: number; draft: AlbumDraft }
   | null;
 
-export type AdminState = {
-  artists: AdminArtist[];
-  albums: Album[];
-  cats: CategoryRow[];
-  slides: Slide[];
-  blocks: Block[];
+export type AdminState = SiteContent & {
   activity: Activity;
   /** Which hero slide the homepage screen is editing. */
   slide: number;
@@ -42,40 +29,63 @@ export type AdminState = {
   toast: string;
   /**
    * False until the stored draft has been read. The first paint has to render
-   * the seed so server and client agree, which means the persist effect would
-   * otherwise write that seed over the draft it is about to load.
+   * the server's content so server and client agree, which means the persist
+   * effect would otherwise write that content over the draft it is about to load.
    */
   hydrated: boolean;
+  /** Database revision the content was loaded at, or last published as. */
+  revision: number;
+  /** The content as loaded or last published, serialised. Anything that
+      serialises differently is unpublished. */
+  baseline: string;
+  source: SiteContentSource;
 };
 
-export const initialAdminState = (): AdminState => ({
-  artists: seedArtists(),
-  albums: seedAlbums(),
-  cats: seedCategories(),
-  slides: seedSlides(),
-  blocks: seedBlocks(),
+export const serializeContent = (content: SiteContent) =>
+  JSON.stringify(pickSiteContent(content));
+
+export const initialAdminState = ({
+  content,
+  revision,
+  source,
+}: LoadedSiteContent): AdminState => ({
+  ...pickSiteContent(content),
   activity: [],
   slide: 0,
   newCat: "",
   drawer: null,
   toast: "",
   hydrated: false,
+  revision,
+  baseline: serializeContent(content),
+  source,
 });
+
+/** Records created in the browser get their permanent uuid straight away. */
+export function newId(): string {
+  if (typeof crypto.randomUUID === "function") return crypto.randomUUID();
+  /* randomUUID needs a secure context; plain-http LAN previews fall back here. */
+  const bytes = crypto.getRandomValues(new Uint8Array(16));
+  bytes[6] = (bytes[6] & 0x0f) | 0x40;
+  bytes[8] = (bytes[8] & 0x3f) | 0x80;
+  const hex = [...bytes].map((byte) => byte.toString(16).padStart(2, "0")).join("");
+  return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
+}
 
 /** A blank record for the "new" case of each drawer. */
 export const blankArtist = (): ArtistDraft => ({
+  id: newId(),
   name: "",
-  cats: "",
+  categoryIds: [],
   territory: "US",
   image: "",
   pos: "50% 18%",
   live: false,
   bio: "",
-  catList: [],
 });
 
-export const blankAlbum = (id: string): AlbumDraft => ({
-  id,
+export const blankAlbum = (): AlbumDraft => ({
+  id: newId(),
   title: "",
   kind: "Editorial",
   frames: [],
@@ -89,10 +99,7 @@ export const blankAlbum = (id: string): AlbumDraft => ({
 
 export const toArtistDraft = (artist: AdminArtist): ArtistDraft => ({
   ...artist,
-  catList: artist.cats
-    .split(",")
-    .map((entry) => entry.trim())
-    .filter(Boolean),
+  categoryIds: [...artist.categoryIds],
 });
 
 /**

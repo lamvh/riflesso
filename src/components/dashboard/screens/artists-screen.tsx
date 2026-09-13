@@ -2,24 +2,29 @@
 
 import { useMemo, useState } from "react";
 
-import { CATEGORIES } from "@/data/artists";
-
 import { useAdmin } from "../admin-store";
 import { CoverImage } from "../cover-image";
 import { Chip } from "../ui/controls";
 import { ColumnHead } from "../ui/fields";
 
+const ALL = "All";
+const TERRITORIES = [ALL, "US", "EUROPE"];
+
 /** The design shows the first six disciplines as chips; the rest live in the drawer. */
-const CHIP_CATEGORIES = ["All", ...CATEGORIES.slice(0, 6)];
-const TERRITORIES = ["All", "US", "EUROPE"];
+const CHIP_COUNT = 6;
 
 const GRID = "grid grid-cols-[64px_1.4fr_1.5fr_100px_90px_110px_80px] gap-[16px]";
 
 export function ArtistsScreen() {
   const { state, dispatch } = useAdmin();
   const [query, setQuery] = useState("");
-  const [cat, setCat] = useState("All");
-  const [terr, setTerr] = useState("All");
+  const [cat, setCat] = useState(ALL);
+  const [terr, setTerr] = useState(ALL);
+
+  const nameById = useMemo(
+    () => new Map(state.cats.map((category) => [category.id, category.name])),
+    [state.cats],
+  );
 
   /* Works is the count of albums an artist is credited on, so it moves when a
      credit is edited rather than being a number kept by hand. */
@@ -40,10 +45,12 @@ export function ArtistsScreen() {
       .filter(
         ({ artist }) =>
           (!needle || artist.name.toLowerCase().includes(needle)) &&
-          (cat === "All" || artist.cats.includes(cat)) &&
-          (terr === "All" || artist.territory === terr),
+          (cat === ALL || artist.categoryIds.includes(cat)) &&
+          (terr === ALL || artist.territory === terr),
       );
   }, [state.artists, query, cat, terr]);
+
+  const chips = [{ id: ALL, name: ALL }, ...state.cats.slice(0, CHIP_COUNT)];
 
   return (
     <section className="px-[28px] pt-[24px] pb-[60px]">
@@ -63,12 +70,12 @@ export function ArtistsScreen() {
         </div>
 
         <div className="flex flex-wrap gap-[6px]">
-          {CHIP_CATEGORIES.map((option) => (
+          {chips.map((option) => (
             <Chip
-              key={option}
-              label={option}
-              active={cat === option}
-              onClick={() => setCat(option)}
+              key={option.id}
+              label={option.name}
+              active={cat === option.id}
+              onClick={() => setCat(option.id)}
             />
           ))}
         </div>
@@ -97,7 +104,7 @@ export function ArtistsScreen() {
 
       {rows.map(({ artist, index }) => (
         <div
-          key={artist.name}
+          key={artist.id}
           className={`${GRID} items-center border-b border-rule px-[2px] py-[10px] hover:bg-[#f7f7f7]`}
         >
           <div className="h-[60px] w-[48px] overflow-hidden bg-well">
@@ -109,7 +116,10 @@ export function ArtistsScreen() {
           </span>
 
           <span className="font-serif text-[15px] leading-[115%] text-[#333]">
-            {artist.cats || "—"}
+            {artist.categoryIds
+              .map((id) => nameById.get(id))
+              .filter(Boolean)
+              .join(", ") || "—"}
           </span>
 
           <span className="font-sans text-[12px] leading-none font-bold">

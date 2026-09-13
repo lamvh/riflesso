@@ -1,8 +1,9 @@
-import type { Artist, Category, Territory } from "@/data/artists";
+import type { Artist, Territory } from "@/data/artists";
 
 export type ArtistFilters = {
   territory: Territory;
-  category: Category;
+  /** A category name, as the directory's filter lists it. */
+  category: string;
   query: string;
 };
 

@@ -10,6 +10,7 @@ import {
   type Shot,
 } from "./admin-state";
 import { dropAt, fromDraft, note, patchAt, withDraft } from "./admin-helpers";
+import type { AdminArtist } from "./admin-types";
 
 /** Everything that edits an artist or an album, drawer included. */
 export function recordReducer(state: AdminState, action: RecordAction): AdminState {
@@ -39,11 +40,12 @@ export function recordReducer(state: AdminState, action: RecordAction): AdminSta
       if (state.drawer?.kind !== "artist") return state;
       const { draft, index } = state.drawer;
       if (!draft.name.trim()) return { ...state, toast: "Artist name is required" };
-      const record = {
+      const record: AdminArtist = {
+        id: draft.id,
         name: draft.name.trim(),
-        cats: draft.catList.join(", "),
+        categoryIds: draft.categoryIds,
         territory: draft.territory,
-        image: draft.image,
+        image: draft.image.trim(),
         pos: draft.pos,
         live: draft.live,
         bio: draft.bio,
@@ -69,9 +71,7 @@ export function recordReducer(state: AdminState, action: RecordAction): AdminSta
         drawer: {
           kind: "album",
           index: action.index,
-          draft: album
-            ? toAlbumDraft(album)
-            : blankAlbum(`album-${state.albums.length + 1}`),
+          draft: album ? toAlbumDraft(album) : blankAlbum(),
         },
       };
     }
@@ -111,9 +111,9 @@ export function recordReducer(state: AdminState, action: RecordAction): AdminSta
 
     case "draft/toggleCat":
       return withDraft(state, (draft: ArtistDraft) => ({
-        catList: draft.catList.includes(action.cat)
-          ? draft.catList.filter((cat) => cat !== action.cat)
-          : [...draft.catList, action.cat],
+        categoryIds: draft.categoryIds.includes(action.id)
+          ? draft.categoryIds.filter((id) => id !== action.id)
+          : [...draft.categoryIds, action.id],
       }));
 
     case "draft/addCredit":

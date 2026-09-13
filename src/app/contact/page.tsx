@@ -3,17 +3,22 @@ import type { Metadata } from "next";
 import { ContactGrid } from "@/components/contact-grid";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
+import { getContactCards, getSiteSettings } from "@/lib/content/public-site-content";
 
-export const metadata: Metadata = {
-  title: "Riflesso — Contact",
-  description:
-    "Offices in New York, Los Angeles, London and Nashville, plus careers, new business and representation enquiries.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const [{ metaTitle }, cards] = await Promise.all([getSiteSettings(), getContactCards()]);
+  return {
+    title: `${metaTitle} — Contact`,
+    description: `Offices and enquiries: ${cards.map((card) => card.heading).join(", ")}.`,
+  };
+}
 
-export default function ContactPage() {
+export default async function ContactPage() {
+  const [settings, cards] = await Promise.all([getSiteSettings(), getContactCards()]);
+
   return (
     <div className="flex min-h-svh flex-col overflow-x-hidden">
-      <SiteHeader />
+      <SiteHeader logoUrl={settings.logoUrl} logoAlt={settings.logoAlt} />
 
       <main>
         {/*
@@ -21,7 +26,7 @@ export default function ContactPage() {
          * the grid's 90px padding together match About's 200px top offset.
          */}
         <div className="h-[110px]" />
-        <ContactGrid variant="contact" />
+        <ContactGrid variant="contact" cards={cards} />
       </main>
 
       <SiteFooter />

@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 
-import { ARTISTS, type Category, type Territory } from "@/data/artists";
+import type { Artist, Territory } from "@/data/artists";
 import { filterArtists } from "@/lib/filter-artists";
 
 import { ArtistPreviewImage } from "./artist-preview-image";
@@ -10,24 +10,32 @@ import { ArtistsFilterSidebar } from "./artists-filter-sidebar";
 import { ArtistsList } from "./artists-list";
 
 type ArtistsDirectoryProps = {
-  /** Category preselected on first paint. */
-  startCategory?: Category;
+  /** Published artists, already sorted. */
+  artists: Artist[];
+  /** Visible categories, in dashboard order. */
+  categories: string[];
+  /** Category preselected on first paint, when it is still listed. */
+  startCategory?: string;
   /** Toggles the sticky preview column. */
   showActiveImage?: boolean;
 };
 
 export function ArtistsDirectory({
+  artists: roster,
+  categories,
   startCategory = "Hair",
   showActiveImage = true,
 }: ArtistsDirectoryProps) {
   const [territory, setTerritory] = useState<Territory>("US");
-  const [category, setCategory] = useState<Category>(startCategory);
+  const [category, setCategory] = useState(() =>
+    categories.includes(startCategory) ? startCategory : (categories[0] ?? ""),
+  );
   const [query, setQuery] = useState("");
   const [activeIndex, setActiveIndex] = useState(0);
 
   const artists = useMemo(
-    () => filterArtists(ARTISTS, { territory, category, query }),
-    [territory, category, query],
+    () => filterArtists(roster, { territory, category, query }),
+    [roster, territory, category, query],
   );
 
   // Filters shrink the list, so the stored index can outrun it between renders.
@@ -43,6 +51,7 @@ export function ArtistsDirectory({
       <ArtistsFilterSidebar
         territory={territory}
         onTerritoryChange={(next) => resetTo(() => setTerritory(next))}
+        categories={categories}
         category={category}
         onCategoryChange={(next) => resetTo(() => setCategory(next))}
         query={query}
@@ -57,7 +66,7 @@ export function ArtistsDirectory({
 
       {showActiveImage && (
         <ArtistPreviewImage
-          src={activeArtist?.image ?? null}
+          src={activeArtist?.image || null}
           alt={activeArtist ? `Work by ${activeArtist.name}` : ""}
         />
       )}

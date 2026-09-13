@@ -1,5 +1,7 @@
 import Link from "next/link"
 
+import { getSiteSettings } from "@/lib/content/public-site-content"
+
 type FooterLink = { label: string; href: string }
 
 const BOLD_LINK =
@@ -9,11 +11,6 @@ const SERIF_LINK = "font-serif text-[15px] leading-[100%] hover:underline"
 const PAGE_LINKS: FooterLink[] = [
   { label: "About", href: "/about" },
   { label: "Contact", href: "/contact" },
-]
-
-const SOCIAL_LINKS: FooterLink[] = [
-  { label: "Instagram", href: "https://www.instagram.com/riflesso.studio" },
-  { label: "TikTok", href: "https://www.tiktok.com/@riflesso.studio" },
 ]
 
 const LEGAL_LINKS: FooterLink[] = [
@@ -62,23 +59,28 @@ function FooterColumn({
   )
 }
 
-/** One margin for every screen, as the merged design specifies. */
-export function SiteFooter() {
+/**
+ * One margin for every screen, as the merged design specifies. Social links
+ * and the copyright line come from Site settings.
+ */
+export async function SiteFooter() {
+  const { socialLinks, copyright } = await getSiteSettings()
+
   return (
     <footer className="mt-[110px] flex flex-wrap items-start justify-between gap-10 px-5 pb-10">
       <FooterColumn links={PAGE_LINKS} linkClassName={BOLD_LINK} />
-      <FooterColumn links={SOCIAL_LINKS} linkClassName={BOLD_LINK} />
+      <FooterColumn links={socialLinks} linkClassName={BOLD_LINK} />
       <FooterColumn links={LEGAL_LINKS} linkClassName={SERIF_LINK} />
       <FooterColumn
         links={POLICY_LINKS}
         linkClassName={SERIF_LINK}
         align="right"
       >
-        <li>
-          <p className="font-serif text-[15px] leading-[100%]">
-            Riflesso Studio ©2026
-          </p>
-        </li>
+        {copyright && (
+          <li>
+            <p className="font-serif text-[15px] leading-[100%]">{copyright}</p>
+          </li>
+        )}
       </FooterColumn>
     </footer>
   )

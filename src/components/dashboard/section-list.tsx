@@ -51,7 +51,7 @@ export function SectionList({
       <div className="mt-[16px] flex flex-col gap-[12px]">
         {blocks.map((block, index) => (
           <div
-            key={block.label}
+            key={block.id}
             className={`grid grid-cols-[44px_minmax(0,1fr)_auto] items-center gap-[18px] border px-[16px] py-[14px] ${
               block.on ? "border-ink bg-paper" : "border-[#d9d9d9] bg-shell"
             }`}

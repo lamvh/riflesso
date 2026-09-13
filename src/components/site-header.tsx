@@ -4,6 +4,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
+import { DEFAULT_LOGO_URL } from "@/lib/content/site-content-types";
+import { canOptimizeImage, isPublishableSrc } from "@/lib/media-src";
+
 import { SearchIcon } from "./search-icon";
 
 /**
@@ -37,13 +40,19 @@ type SiteHeaderProps = {
    * on paper leave this off — white on white reads as nothing at all.
    */
   overImagery?: boolean;
+  /** Wordmark from Site settings; anything unusable falls back to the built-in file. */
+  logoUrl: string;
+  logoAlt: string;
 };
 
 export function SiteHeader({
   currentSection,
   overImagery = false,
-}: SiteHeaderProps = {}) {
+  logoUrl,
+  logoAlt,
+}: SiteHeaderProps) {
   const artistsActive = currentSection === "artists";
+  const logo = isPublishableSrc(logoUrl) ? logoUrl : DEFAULT_LOGO_URL;
   const [scrolled, setScrolled] = useState(false);
 
   /* The masthead floats over the hero at rest and only earns its paper backdrop
@@ -116,7 +125,7 @@ export function SiteHeader({
 
         <Link
           href="/"
-          aria-label="Riflesso homepage"
+          aria-label={`${logoAlt || "Riflesso"} homepage`}
           className="absolute top-1/2 left-1/2 flex -translate-x-1/2 -translate-y-1/2 items-center"
         >
           {/*
@@ -127,11 +136,12 @@ export function SiteHeader({
            * spelling out the identity values is what buys the fade.
            */}
           <Image
-            src="/riflesso.png"
+            src={logo}
             alt=""
             width={WORDMARK_WIDTH}
             height={WORDMARK_HEIGHT}
             priority
+            unoptimized={!canOptimizeImage(logo)}
             className={`h-[16px] w-auto sm:h-[20px] transition-[filter] ${EASING} ${
               floating
                 ? "brightness-0 invert drop-shadow-[0_1px_4px_rgba(0,0,0,0.5)]"

@@ -7,29 +7,32 @@
  * ratio the source design never specifies.
  */
 
-import { FEATURE_ANNIVERSARY, FEATURE_EDITORIAL } from "@/data/home-features";
-import { EDITORIALS_SECTION } from "@/data/home-sections";
-import { describeMedia } from "@/lib/media-item";
+import { describeMedia, type MediaItem } from "@/lib/media-item";
+import type { MediaSection } from "@/lib/work-detail";
 
 import { ArtistCreditLine } from "./artist-credit-line";
 import { SectionHeading } from "./section-heading";
 import { useOpenWork } from "./work-detail-context";
 
 /** Edge-to-edge editorial with its credit block inset by the page gutter. */
-export function FeatureEditorial() {
-  const { heading, item } = FEATURE_EDITORIAL;
+export function FeatureEditorial({
+  heading,
+  item,
+  section,
+}: {
+  heading: string;
+  item: MediaItem;
+  /** The rail of the same kind; a single-frame album borrows its gallery from it. */
+  section: MediaSection;
+}) {
   const openWork = useOpenWork();
 
   return (
     <section className="pt-[70px]">
       <SectionHeading>{heading}</SectionHeading>
-      {/*
-       * The feature fronts a shoot, so the gallery it opens is that shoot's own
-       * frames; the section it is handed only supplies fallbacks it never needs.
-       */}
       <button
         type="button"
-        onClick={() => openWork(item, EDITORIALS_SECTION)}
+        onClick={() => openWork(item, section)}
         className="block w-full text-left"
       >
         <img
@@ -50,10 +53,8 @@ export function FeatureEditorial() {
   );
 }
 
-/** Anniversary banner, inset rather than full-bleed and with no caption. */
-export function FeatureAnniversary() {
-  const { heading, src } = FEATURE_ANNIVERSARY;
-
+/** Banner image, inset rather than full-bleed and with no caption. */
+export function FeatureAnniversary({ heading, src }: { heading: string; src: string }) {
   return (
     <section className="pt-[70px]">
       <SectionHeading>{heading}</SectionHeading>

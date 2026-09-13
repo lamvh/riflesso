@@ -1,19 +1,15 @@
 "use client";
 
-import {
-  CATEGORIES,
-  TERRITORIES,
-  type Category,
-  type Territory,
-} from "@/data/artists";
+import { TERRITORIES, type Territory } from "@/data/artists";
 
 import { SearchIcon } from "./search-icon";
 
 type ArtistsFilterSidebarProps = {
   territory: Territory;
   onTerritoryChange: (territory: Territory) => void;
-  category: Category;
-  onCategoryChange: (category: Category) => void;
+  categories: string[];
+  category: string;
+  onCategoryChange: (category: string) => void;
   query: string;
   onQueryChange: (query: string) => void;
 };
@@ -21,6 +17,7 @@ type ArtistsFilterSidebarProps = {
 export function ArtistsFilterSidebar({
   territory,
   onTerritoryChange,
+  categories,
   category,
   onCategoryChange,
   query,
@@ -69,7 +66,7 @@ export function ArtistsFilterSidebar({
       </div>
 
       <nav aria-label="Artist categories">
-        {CATEGORIES.map((option) => (
+        {categories.map((option) => (
           <button
             key={option}
             type="button"

@@ -3,39 +3,42 @@
 import Image from "next/image";
 import { useEffect, useState } from "react";
 
-import { HERO_SLIDES } from "@/data/home-hero-slides";
+import type { HeroSlide } from "@/data/home-hero-slides";
 import { useDragScroll } from "@/hooks/use-drag-scroll";
+import { canOptimizeImage } from "@/lib/media-src";
 
 const AUTOPLAY_INTERVAL_MS = 5000;
 const HIDE_SCROLLBAR = "[scrollbar-width:none] [&::-webkit-scrollbar]:hidden";
 
 type HeroBannerProps = {
+  slides: HeroSlide[];
   /** Off by default, matching the design's `bannerAutoplay` prop. */
   autoplay?: boolean;
 };
 
-export function HeroBanner({ autoplay = false }: HeroBannerProps) {
+export function HeroBanner({ slides, autoplay = false }: HeroBannerProps) {
   const [active, setActive] = useState(0);
   const thumbnailsRef = useDragScroll<HTMLDivElement>();
+  const count = slides.length;
 
   useEffect(() => {
-    if (!autoplay) return;
+    if (!autoplay || count < 2) return;
     const timer = setInterval(
-      () => setActive((current) => (current + 1) % HERO_SLIDES.length),
+      () => setActive((current) => (current + 1) % count),
       AUTOPLAY_INTERVAL_MS,
     );
     return () => clearInterval(timer);
-  }, [autoplay]);
+  }, [autoplay, count]);
 
   return (
     <div className="flex h-svh flex-col">
       {/* Slides are stacked and cross-faded; only the active one is focusable. */}
       <div className="relative w-full flex-grow overflow-hidden">
-        {HERO_SLIDES.map((slide, index) => {
+        {slides.map((slide, index) => {
           const isActive = index === active;
           return (
             <a
-              key={slide.src}
+              key={`${slide.src}-${index}`}
               href="#"
               aria-hidden={!isActive}
               tabIndex={isActive ? 0 : -1}
@@ -55,6 +58,7 @@ export function HeroBanner({ autoplay = false }: HeroBannerProps) {
                 priority={index === 0}
                 sizes="100vw"
                 draggable={false}
+                unoptimized={!canOptimizeImage(slide.src)}
                 className="object-cover"
                 style={{ objectPosition: slide.position }}
               />
@@ -81,9 +85,9 @@ export function HeroBanner({ autoplay = false }: HeroBannerProps) {
         ref={thumbnailsRef}
         className={`mx-auto flex w-fit max-w-full cursor-grab gap-[17px] overflow-x-auto bg-paper px-[18px] pt-3 pb-[31px] ${HIDE_SCROLLBAR}`}
       >
-        {HERO_SLIDES.map((slide, index) => (
+        {slides.map((slide, index) => (
           <button
-            key={slide.src}
+            key={`${slide.src}-${index}`}
             type="button"
             aria-label={`Show slide ${index + 1}: ${slide.publication}`}
             aria-pressed={index === active}
@@ -104,6 +108,7 @@ export function HeroBanner({ autoplay = false }: HeroBannerProps) {
                 fill
                 sizes="177px"
                 draggable={false}
+                unoptimized={!canOptimizeImage(slide.src)}
                 className="pointer-events-none object-cover object-center"
               />
             </div>

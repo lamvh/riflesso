@@ -61,7 +61,7 @@ export function HomepageScreen() {
           </div>
 
           {liveBlocks.map((block) => (
-            <div key={block.label} className="flex flex-col gap-[4px]">
+            <div key={block.id} className="flex flex-col gap-[4px]">
               <p className="font-sans text-[10px] leading-none font-bold tracking-[-0.3px]">
                 {block.label}
               </p>

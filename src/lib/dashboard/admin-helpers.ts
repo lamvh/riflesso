@@ -1,3 +1,5 @@
+import { isVideoSrc } from "@/lib/media-src";
+
 import type { AdminState, AlbumDraft } from "./admin-state";
 import type { Album } from "./admin-types";
 
@@ -27,18 +29,22 @@ export const dropAt = <T,>(list: T[], index: number): T[] =>
 
 /**
  * Collapse the drawer's frame grid back into the album. The first frame leads,
- * and it is what the rail card shows.
+ * and it is what the rail card shows. A cover that changed is re-judged as
+ * video or image by its extension.
  */
 export function fromDraft(draft: AlbumDraft): Album {
-  const shots = draft.shots.filter((shot) => shot.src.trim());
+  const shots = draft.shots
+    .map((shot) => ({ ...shot, src: shot.src.trim() }))
+    .filter((shot) => shot.src);
+  const cover = shots[0]?.src ?? draft.cover;
   return {
     id: draft.id,
     title: draft.title.trim(),
     kind: draft.kind,
     frames: shots.map((shot) => shot.src),
-    cover: shots[0]?.src ?? draft.cover,
+    cover,
     pos: shots[0]?.pos ?? draft.pos,
-    video: draft.video,
+    video: cover === draft.cover ? draft.video : isVideoSrc(cover),
     live: draft.live,
     home: draft.home,
     credits: draft.credits.filter((credit) => credit.name.trim()),

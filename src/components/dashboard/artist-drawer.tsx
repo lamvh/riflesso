@@ -1,25 +1,25 @@
 "use client";
 
-import { CATEGORIES } from "@/data/artists";
 import type { AdminAction } from "@/lib/dashboard/admin-reducer";
 import type { ArtistDraft } from "@/lib/dashboard/admin-state";
+import { TERRITORIES, type CategoryRow } from "@/lib/dashboard/admin-types";
 
 import { CoverImage } from "./cover-image";
 import { Chip, SolidButton, Switch, UnderlineButton } from "./ui/controls";
 import { Drawer } from "./ui/drawer";
-import { LabelledField, NameInput, ProseTextarea } from "./ui/fields";
+import { LabelledField, NameInput, ProseInput, ProseTextarea } from "./ui/fields";
 import { ImagePickButton } from "./ui/image-pick";
-
-const TERRITORIES = ["US", "EUROPE"] as const;
 
 export function ArtistDrawer({
   draft,
   index,
+  categories,
   dispatch,
 }: {
   draft: ArtistDraft;
   /** -1 when the drawer is creating rather than editing. */
   index: number;
+  categories: CategoryRow[];
   dispatch: (action: AdminAction) => void;
 }) {
   const set = (patch: Partial<ArtistDraft>) => dispatch({ type: "draft/set", patch });
@@ -41,12 +41,12 @@ export function ArtistDrawer({
 
       <LabelledField label="Categories (multi-select)" gap={9}>
         <div className="flex flex-wrap gap-[6px]">
-          {CATEGORIES.map((cat) => (
+          {categories.map((cat) => (
             <Chip
-              key={cat}
-              label={cat}
-              active={draft.catList.includes(cat)}
-              onClick={() => dispatch({ type: "draft/toggleCat", cat })}
+              key={cat.id}
+              label={cat.name}
+              active={draft.categoryIds.includes(cat.id)}
+              onClick={() => dispatch({ type: "draft/toggleCat", id: cat.id })}
             />
           ))}
         </div>
@@ -70,16 +70,21 @@ export function ArtistDrawer({
           <div className="h-[120px] w-[96px] shrink-0 overflow-hidden bg-well">
             <CoverImage src={draft.image} pos="50% 22%" />
           </div>
-          <div className="flex flex-1 flex-col gap-[8px]">
+          <div className="flex min-w-0 flex-1 flex-col gap-[8px]">
+            <ProseInput
+              value={draft.image}
+              onChange={(image) => set({ image })}
+              placeholder="/assets/… or https://…"
+            />
             <ImagePickButton
               onPick={(image) => set({ image })}
-              className="flex h-[44px] items-center justify-center border border-dashed border-ink bg-shell font-sans text-[12px] leading-none font-bold tracking-[-0.3px]"
+              className="flex h-[40px] items-center justify-center border border-dashed border-ink bg-shell font-sans text-[12px] leading-none font-bold tracking-[-0.3px]"
             >
-              Upload image
+              Preview a file
             </ImagePickButton>
             <p className="font-serif text-[13px] leading-[120%] text-dim">
-              Portrait JPG, at least 1400px wide. Previews here for this session
-              only — there is no storage behind the dashboard yet.
+              Portrait JPG, at least 1400px wide. A picked file only previews —
+              storage isn&apos;t connected yet, so publish with an image address.
             </p>
           </div>
         </div>

@@ -5,10 +5,10 @@ import type { ReactNode } from "react";
 /**
  * The design's dashed upload tile.
  *
- * There is no storage behind the dashboard, so the picked file becomes an
- * object URL and previews for as long as the tab lives. That is the honest
- * shape of an upload here: the editor sees the real picture immediately, and
- * nothing pretends it was stored anywhere.
+ * Storage is not connected yet, so the picked file becomes an object URL and
+ * previews for as long as the tab lives. Publishing refuses `blob:` addresses,
+ * so nothing pretends the file was stored anywhere — the editor pastes a real
+ * image address next to this button to publish.
  */
 export function ImagePickButton({
   onPick,

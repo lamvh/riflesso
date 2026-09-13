@@ -33,15 +33,18 @@ export function Chip({
 export function SolidButton({
   children,
   onClick,
+  disabled = false,
 }: {
   children: ReactNode;
   onClick: () => void;
+  disabled?: boolean;
 }) {
   return (
     <button
       type="button"
       onClick={onClick}
-      className={`${BASE} bg-ink px-[15px] py-[10px] text-[13px] tracking-[-0.4px] text-paper`}
+      disabled={disabled}
+      className={`${BASE} bg-ink px-[15px] py-[10px] text-[13px] tracking-[-0.4px] text-paper disabled:cursor-default disabled:opacity-35`}
     >
       {children}
     </button>

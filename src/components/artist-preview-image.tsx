@@ -2,6 +2,8 @@
 
 import Image from "next/image";
 
+import { canOptimizeImage } from "@/lib/media-src";
+
 type ArtistPreviewImageProps = {
   src: string | null;
   alt: string;
@@ -21,6 +23,7 @@ export function ArtistPreviewImage({ src, alt }: ArtistPreviewImageProps) {
           <Image
             key={src}
             src={src}
+            unoptimized={!canOptimizeImage(src)}
             alt={alt}
             fill
             sizes="min(30vw, 521px)"

@@ -7,7 +7,7 @@ import type { AlbumDraft } from "@/lib/dashboard/admin-state";
 import { CoverImage } from "./cover-image";
 import { Chip, SolidButton, UnderlineButton } from "./ui/controls";
 import { Drawer } from "./ui/drawer";
-import { LabelledField, NameInput, ProseInput } from "./ui/fields";
+import { LabelledField, NameInput, ProseInput, ProseTextarea } from "./ui/fields";
 import { ImagePickButton } from "./ui/image-pick";
 import { SwitchRow } from "./ui/switch-row";
 
@@ -92,6 +92,22 @@ export function AlbumDrawer({
             +
           </button>
         </div>
+      </LabelledField>
+
+      <LabelledField label="Image addresses · one per line, cover first">
+        <ProseTextarea
+          rows={4}
+          value={draft.shots.map((shot) => shot.src).join("\n")}
+          placeholder="/assets/stories/… or https://…"
+          onChange={(text) =>
+            set({
+              shots: text.split("\n").map((src, position) => ({
+                src,
+                pos: draft.shots[position]?.pos ?? "50% 18%",
+              })),
+            })
+          }
+        />
       </LabelledField>
 
       <LabelledField label="Artist credits" gap={9}>

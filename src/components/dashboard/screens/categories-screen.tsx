@@ -9,12 +9,9 @@ const GRID = "grid grid-cols-[32px_1.6fr_90px_150px_120px] gap-[16px]";
 export function CategoriesScreen() {
   const { state, dispatch } = useAdmin();
 
-  /** How many artists carry a discipline, matched on the split list rather than
-      a substring so "Color" does not also count "Colorist". */
-  const countFor = (name: string) =>
-    state.artists.filter((artist) =>
-      artist.cats.split(",").map((entry) => entry.trim()).includes(name),
-    ).length;
+  /** How many artists carry a discipline. Linked by id, so a rename keeps the count. */
+  const countFor = (id: string) =>
+    state.artists.filter((artist) => artist.categoryIds.includes(id)).length;
 
   return (
     <section className="max-w-[900px] px-[28px] pt-[24px] pb-[60px]">
@@ -45,7 +42,7 @@ export function CategoriesScreen() {
 
       {state.cats.map((cat, index) => (
         <div
-          key={`${cat.name}-${index}`}
+          key={cat.id}
           className={`${GRID} items-center border-b border-rule px-[2px] py-[9px]`}
         >
           <span className="font-sans text-[12px] leading-none font-bold text-dim">
@@ -63,7 +60,7 @@ export function CategoriesScreen() {
           />
 
           <span className="font-serif text-[15px] leading-none">
-            {countFor(cat.name)}
+            {countFor(cat.id)}
           </span>
 
           <span className="justify-self-start">

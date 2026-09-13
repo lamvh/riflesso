@@ -9,6 +9,10 @@ export const ALBUM_KINDS = [
 
 export type AlbumKind = (typeof ALBUM_KINDS)[number];
 
+import type { Territory } from "@/lib/territories";
+
+export { TERRITORIES, type Territory } from "@/lib/territories";
+
 export type Credit = { name: string; role: string };
 
 /**
@@ -33,19 +37,21 @@ export type Album = {
 };
 
 export type AdminArtist = {
+  id: string;
   name: string;
-  /** Comma-separated disciplines. */
-  cats: string;
-  territory: "US" | "EUROPE";
+  /** Category ids, in the order the editor picked them. */
+  categoryIds: string[];
+  territory: Territory;
   image: string;
   pos: string;
   live: boolean;
   bio: string;
 };
 
-export type CategoryRow = { name: string; visible: boolean };
+export type CategoryRow = { id: string; name: string; visible: boolean };
 
 export type Slide = {
+  id: string;
   pub: string;
   /** Rendered as one running line under the banner. */
   credit: string;
@@ -60,10 +66,15 @@ export type BlockKind = (typeof BLOCK_KINDS)[number];
 
 /** A homepage section, in the order it appears down the page. */
 export type Block = {
+  id: string;
   label: string;
   kind: BlockKind;
   source: AlbumKind;
   on: boolean;
+  /** The album a Full-bleed section fronts; null picks the first of its kind. */
+  albumId: string | null;
+  /** The image a Banner section shows. */
+  image: string;
 };
 
 /**

@@ -1,18 +1,25 @@
-import { isRecordAction, type AdminAction } from "./admin-actions";
+import {
+  pickSiteContent,
+  type SiteContent,
+} from "@/lib/content/site-content-types";
+
+import { isRecordAction, isSettingsAction, type AdminAction } from "./admin-actions";
 import { dropAt, note, patchAt, swap } from "./admin-helpers";
 import { recordReducer } from "./admin-record-reducer";
-import { initialAdminState, type AdminState } from "./admin-state";
+import { settingsReducer } from "./admin-settings-reducer";
+import { newId, type AdminState } from "./admin-state";
 import type { Block, CategoryRow } from "./admin-types";
 
 export type { AdminAction } from "./admin-actions";
 
 /**
- * Records are edited in their own reducer; everything left here is how the
- * site is arranged — the directory's disciplines, the banner, the sections —
- * plus the session's own furniture.
+ * Records and site settings are edited in their own reducers; everything left
+ * here is how the site is arranged — the directory's disciplines, the banner,
+ * the sections — plus the session's own furniture.
  */
 export function adminReducer(state: AdminState, action: AdminAction): AdminState {
   if (isRecordAction(action)) return recordReducer(state, action);
+  if (isSettingsAction(action)) return settingsReducer(state, action);
 
   switch (action.type) {
     case "cat/setNew":
@@ -21,7 +28,7 @@ export function adminReducer(state: AdminState, action: AdminAction): AdminState
     case "cat/add": {
       const name = state.newCat.trim();
       if (!name) return { ...state, toast: "Type a category name first" };
-      const cats: CategoryRow[] = [...state.cats, { name, visible: true }];
+      const cats: CategoryRow[] = [...state.cats, { id: newId(), name, visible: true }];
       return note({ ...state, cats, newCat: "" }, `Added ${name}`);
     }
 
@@ -45,11 +52,19 @@ export function adminReducer(state: AdminState, action: AdminAction): AdminState
     case "cat/move":
       return { ...state, cats: swap(state.cats, action.index, action.delta) };
 
-    case "cat/remove":
-      return note(
-        { ...state, cats: dropAt(state.cats, action.index) },
-        `Removed ${state.cats[action.index].name}`,
+    case "cat/remove": {
+      const removed = state.cats[action.index];
+      /* The link table cascades in the database; mirror that here. */
+      const artists = state.artists.map((artist) =>
+        artist.categoryIds.includes(removed.id)
+          ? { ...artist, categoryIds: artist.categoryIds.filter((id) => id !== removed.id) }
+          : artist,
       );
+      return note(
+        { ...state, artists, cats: dropAt(state.cats, action.index) },
+        `Removed ${removed.name}`,
+      );
+    }
 
     case "slide/add":
       return note(
@@ -58,6 +73,7 @@ export function adminReducer(state: AdminState, action: AdminAction): AdminState
           slides: [
             ...state.slides,
             {
+              id: newId(),
               pub: "Untitled",
               credit: "Artist — Role",
               src: "",
@@ -108,12 +124,36 @@ export function adminReducer(state: AdminState, action: AdminAction): AdminState
       return { ...state, toast: action.message };
 
     case "restore":
-      return { ...initialAdminState(), ...action.state, hydrated: true };
+      return {
+        ...state,
+        ...pickSiteContent(action.content),
+        activity: action.activity,
+        hydrated: true,
+      };
 
     case "hydrated":
       return { ...state, hydrated: true };
 
-    case "reset":
-      return initialAdminState();
+    case "discard":
+      return note(
+        {
+          ...state,
+          ...(JSON.parse(state.baseline) as SiteContent),
+          drawer: null,
+          slide: 0,
+        },
+        "Unpublished changes discarded",
+      );
+
+    case "published":
+      return note(
+        {
+          ...state,
+          revision: action.revision,
+          baseline: action.baseline,
+          source: "database",
+        },
+        "Published to the live site",
+      );
   }
 }

@@ -6,8 +6,9 @@ import { EDITORIALS } from "./home-rail-editorials";
 import { FASHION_WEEKS } from "./home-rail-fashion-weeks";
 import { NEW_SIGNS } from "./home-rail-new-signs";
 
-export const TERRITORIES = ["US", "EUROPE"] as const;
-export type Territory = (typeof TERRITORIES)[number];
+import type { Territory } from "@/lib/territories";
+
+export { TERRITORIES, type Territory } from "@/lib/territories";
 
 export const CATEGORIES = [
   "Styling",
@@ -124,5 +125,3 @@ export function deriveArtists(rails: MediaItem[][] = RAILS): Artist[] {
     .sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
     .map(([, artist]) => artist);
 }
-
-export const ARTISTS: Artist[] = deriveArtists();

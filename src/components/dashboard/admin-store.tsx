@@ -10,51 +10,91 @@ import {
   type ReactNode,
 } from "react";
 
+import {
+  pickSiteContent,
+  type LoadedSiteContent,
+  type SiteContent,
+  type SiteContentSource,
+} from "@/lib/content/site-content-types";
 import { adminReducer, type AdminAction } from "@/lib/dashboard/admin-reducer";
-import { initialAdminState, type AdminState } from "@/lib/dashboard/admin-state";
+import {
+  initialAdminState,
+  serializeContent,
+  type AdminState,
+} from "@/lib/dashboard/admin-state";
+import type { Activity } from "@/lib/dashboard/admin-types";
 
 /**
- * Edits live in this browser only. The draft survives a reload through
- * sessionStorage so a refresh mid-edit is not punished, but nothing is written
- * back to `src/data/*` — persistence is a later, separate decision.
+ * Edits happen in the browser and reach the site only when published. The
+ * working draft survives a reload through sessionStorage, pinned to the
+ * database revision it was made against.
  */
 const DRAFT_KEY = "riflesso.admin.draft";
 
 /** How long a toast stays up, matching the design's own timing. */
 const TOAST_MS = 2200;
 
-type AdminContextValue = { state: AdminState; dispatch: Dispatch<AdminAction> };
+type StoredDraft = {
+  revision: number;
+  source: SiteContentSource;
+  content: SiteContent;
+  activity: Activity;
+};
+
+function readDraft(): StoredDraft | null {
+  try {
+    const stored = sessionStorage.getItem(DRAFT_KEY);
+    return stored ? (JSON.parse(stored) as StoredDraft) : null;
+  } catch {
+    return null;
+  }
+}
+
+type AdminContextValue = {
+  state: AdminState;
+  dispatch: Dispatch<AdminAction>;
+  /** Content differs from what was loaded or last published. */
+  dirty: boolean;
+};
 
 const AdminContext = createContext<AdminContextValue | null>(null);
 
-export function AdminProvider({ children }: { children: ReactNode }) {
-  const [state, dispatch] = useReducer(adminReducer, undefined, initialAdminState);
+export function AdminProvider({
+  initial,
+  children,
+}: {
+  initial: LoadedSiteContent;
+  children: ReactNode;
+}) {
+  const [state, dispatch] = useReducer(adminReducer, initial, initialAdminState);
 
-  /* First paint renders the seeded content so server and client agree; a stored
-     draft is layered on immediately after. */
+  /* First paint renders the server's content so server and client agree. A
+     stored draft is layered on only if it was made against the same revision:
+     restoring an older one would quietly undo someone else's publish. */
   useEffect(() => {
-    const stored = sessionStorage.getItem(DRAFT_KEY);
-    if (!stored) {
-      dispatch({ type: "hydrated" });
+    const draft = readDraft();
+    if (draft && draft.revision === initial.revision && draft.source === initial.source) {
+      dispatch({ type: "restore", content: draft.content, activity: draft.activity });
       return;
     }
-    try {
-      dispatch({ type: "restore", state: JSON.parse(stored) as AdminState });
-    } catch {
-      sessionStorage.removeItem(DRAFT_KEY);
-      dispatch({ type: "hydrated" });
-    }
-  }, []);
+    sessionStorage.removeItem(DRAFT_KEY);
+    dispatch({ type: "hydrated" });
+  }, [initial.revision, initial.source]);
 
   useEffect(() => {
-    /* Writing before the read lands would overwrite the draft with the seed. */
+    /* Writing before the read lands would overwrite the draft. */
     if (!state.hydrated) return;
-    /* The toast and the open drawer are session furniture, not content. */
-    const { toast, drawer, hydrated, ...content } = state;
-    void toast;
-    void drawer;
-    void hydrated;
-    sessionStorage.setItem(DRAFT_KEY, JSON.stringify(content));
+    const draft: StoredDraft = {
+      revision: state.revision,
+      source: state.source,
+      content: pickSiteContent(state),
+      activity: state.activity,
+    };
+    try {
+      sessionStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+    } catch {
+      /* Over quota: the draft simply does not survive a reload. */
+    }
   }, [state]);
 
   useEffect(() => {
@@ -63,7 +103,23 @@ export function AdminProvider({ children }: { children: ReactNode }) {
     return () => clearTimeout(timer);
   }, [state.toast]);
 
-  const value = useMemo(() => ({ state, dispatch }), [state]);
+  const { settings, contacts, artists, albums, cats, slides, blocks, baseline } = state;
+  const dirty = useMemo(
+    () =>
+      serializeContent({ settings, contacts, artists, albums, cats, slides, blocks }) !==
+      baseline,
+    [settings, contacts, artists, albums, cats, slides, blocks, baseline],
+  );
+
+  /* The draft survives a reload, but not a closed tab. */
+  useEffect(() => {
+    if (!dirty) return;
+    const warn = (event: BeforeUnloadEvent) => event.preventDefault();
+    window.addEventListener("beforeunload", warn);
+    return () => window.removeEventListener("beforeunload", warn);
+  }, [dirty]);
+
+  const value = useMemo(() => ({ state, dispatch, dirty }), [state, dirty]);
 
   return <AdminContext value={value}>{children}</AdminContext>;
 }

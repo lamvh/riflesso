@@ -6,13 +6,8 @@ import { MediaRail } from "@/components/home/media-rail";
 import { WorkDetailProvider } from "@/components/home/work-detail-context";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
-import { NEW_SIGNS } from "@/data/home-rail-new-signs";
-import {
-  CAMPAIGNS_SECTION,
-  COUTURE_SECTION,
-  EDITORIALS_SECTION,
-  FASHION_WEEKS_SECTION,
-} from "@/data/home-sections";
+import { buildHomeSections, toHeroSlides } from "@/lib/content/home-page-view";
+import { getHomeContent, getSiteSettings } from "@/lib/content/public-site-content";
 
 /**
  * Display knobs the source design exposes as editable props. They reach the rail
@@ -34,27 +29,57 @@ const displayVars = {
   "--rfl-gallery-height": `${DISPLAY.galleryHeight}vh`,
 } as CSSProperties;
 
-export default function HomePage() {
+/** Hero slides and sections, in the order and state set on the dashboard. */
+export default async function HomePage() {
+  const [settings, home] = await Promise.all([getSiteSettings(), getHomeContent()]);
+  const slides = toHeroSlides(home.slides);
+  const sections = buildHomeSections(home.blocks, home.albums);
+
   return (
     <div
       className="flex min-h-svh flex-col overflow-x-hidden"
       style={displayVars}
     >
-      <SiteHeader overImagery />
+      <SiteHeader overImagery logoUrl={settings.logoUrl} logoAlt={settings.logoAlt} />
 
       <WorkDetailProvider>
         <main>
-          <HeroBanner autoplay={DISPLAY.bannerAutoplay} />
+          {slides.length > 0 && (
+            <HeroBanner slides={slides} autoplay={DISPLAY.bannerAutoplay} />
+          )}
 
           <section>
-            <MediaRail {...EDITORIALS_SECTION} />
-            <MediaRail {...CAMPAIGNS_SECTION} />
-            <FeatureEditorial />
-            <MediaRail {...COUTURE_SECTION} />
-            <MediaRail {...FASHION_WEEKS_SECTION} />
-            <FeatureAnniversary />
-            {/* No category: New Signs cards go to the directory, not a gallery. */}
-            <MediaRail heading="New Signs" items={NEW_SIGNS} />
+            {sections.map((section) => {
+              switch (section.layout) {
+                case "rail":
+                  /* No category: New Signs cards go to the directory, not a gallery. */
+                  return (
+                    <MediaRail
+                      key={section.key}
+                      heading={section.heading}
+                      items={section.items}
+                      category={section.category}
+                    />
+                  );
+                case "feature":
+                  return (
+                    <FeatureEditorial
+                      key={section.key}
+                      heading={section.heading}
+                      item={section.item}
+                      section={section.section}
+                    />
+                  );
+                case "banner":
+                  return (
+                    <FeatureAnniversary
+                      key={section.key}
+                      heading={section.heading}
+                      src={section.src}
+                    />
+                  );
+              }
+            })}
           </section>
         </main>
       </WorkDetailProvider>

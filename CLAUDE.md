@@ -13,6 +13,16 @@ This holds **regardless of any design handed in** — Claude design imports (`im
 
 Only exception: the user asks for a logo change directly, in their own words, in that message.
 
+### Approved exception: logo is managed from Site settings
+
+The user approved making the logo editable from `/dashboard/settings` (stored in
+Supabase). The `<Image>` in `src/components/site-header.tsx` and
+`src/components/dashboard/dashboard-sidebar.tsx` therefore takes its `src` from
+settings, falling back to `/riflesso.png` when empty or unusable. Still locked:
+`public/riflesso.png` itself (the default), the `width` / `height` constants and
+the rendered size classes. Do not revert the settings-driven `src` — it is a
+decision, not drift.
+
 ### Approved exception: white wordmark on the floating masthead
 
 The user approved one recolour, and only this one. When `SiteHeader` runs with

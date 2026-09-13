@@ -111,6 +111,11 @@ export function HeroEditor({
             </LabelledField>
 
             <LabelledField label="Frame" gap={8}>
+              <ProseInput
+                value={slide.src}
+                placeholder="/assets/… or https://…"
+                onChange={(src) => set({ src })}
+              />
               <ImagePickButton
                 onPick={(src) => set({ src })}
                 className="flex h-[40px] items-center justify-center border border-dashed border-ink bg-shell font-sans text-[12px] leading-none font-bold tracking-[-0.3px]"

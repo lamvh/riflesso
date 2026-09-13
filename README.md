@@ -10,7 +10,7 @@ Implement các màn hình cho Riflesso Studio bằng Next.js 16
 | `/about` | Giới thiệu — 2 đoạn copy + lưới liên hệ |
 | `/contact` | Liên hệ — lưới đầy đủ 9 card |
 | `not-found` | Trang 404 — số "404" khoét ảnh hero, cross-fade 8 slide |
-| `/dashboard/*` | Content admin — 5 màn quản trị nội dung, xem mục riêng bên dưới |
+| `/dashboard/*` | Content admin — 6 màn quản trị nội dung, publish lên Supabase, xem mục riêng bên dưới |
 
 Work detail không có route riêng: trong design nó là overlay `position:fixed`
 phủ lên trang chủ, mở khi click card của rail, và đóng bằng nút X hoặc `Esc`.
@@ -20,9 +20,54 @@ phủ lên trang chủ, mở khi click card của rail, và đóng bằng nút X
 ```bash
 npm install
 npm run dev     # http://localhost:3000
-npm run build   # build production (mọi route đều prerender static)
+npm run build   # build production (route public prerender, dashboard render theo request)
 npm run lint
 ```
+
+### Supabase
+
+Nội dung site — logo, SEO, copy About, contact card, footer, artist, category,
+album, hero, section trang chủ — nằm trong Supabase Postgres. Chưa cấu hình
+(hoặc chưa chạy migration, hoặc chưa publish lần nào) thì site vẫn chạy bằng
+nội dung gốc trong `src/data/*`.
+
+1. **Backup DB**, rồi chạy `supabase/migrations/20260913142200_create_site_content.sql`
+   (SQL Editor của Supabase, hoặc `supabase db push`).
+2. `cp .env.example .env.local` rồi điền:
+   - `SUPABASE_URL`
+   - `SUPABASE_ANON_KEY` — publishable key, dùng cho đọc public
+   - `SUPABASE_SERVICE_ROLE_KEY` — secret key, chỉ server dùng để đọc draft + publish.
+     Không bao giờ để prefix `NEXT_PUBLIC_`.
+3. `npm run dev` → `/dashboard` → **Publish**. Lần publish đầu ghi toàn bộ nội
+   dung gốc vào DB (revision 1). Từ đó site đọc từ DB.
+
+> **Chưa có auth.** Server action publish mở cho bất kỳ ai gọi được tới nó. Phải
+> thêm đăng nhập vào `src/lib/dashboard/publish-site-content.ts` + `/dashboard`
+> trước khi deploy public.
+
+**Schema** (`supabase/migrations/`) là quan hệ, không phải JSON blob:
+
+| Nhóm | Bảng |
+| --- | --- |
+| Lookup | `territories`, `album_kinds` — thêm territory/kind là thêm dòng |
+| Media | `media_assets` — mọi URL ảnh/video (logo, portrait, frame, hero, banner) trỏ về đây; có sẵn `storage_bucket` / `storage_path` cho Supabase Storage |
+| Site | `site_settings` (1 dòng, giữ `revision`), `social_links`, `page_paragraphs` (theo `page_slug`), `contact_cards` |
+| Artist | `artists`, `categories`, `artist_categories` (N-N) |
+| Album | `albums`, `album_media` (frame có thứ tự + crop), `album_credits` (link `artist_id` khi tên khớp roster) |
+| Trang chủ | `hero_slides`, `home_sections` (FK tới `albums` / `media_assets`) |
+
+- **UUID ổn định.** `publish_site_content(p_content, p_expected_revision)` upsert
+  theo id và chỉ xoá dòng editor đã bỏ, trong một transaction, có advisory lock.
+  Id, `created_at` và mọi bảng sau này FK tới artist/album đều sống qua publish;
+  dòng không đổi không bị update (`updated_at` giữ nguyên).
+- **Chống ghi đè.** Dashboard gửi revision nó đã load; lệch là bị từ chối
+  (`stale_revision`) thay vì đè lên publish của người khác.
+- **RLS.** Anon chỉ `select`; artist/album draft và frame/credit của chúng bị ẩn.
+  Hàm publish và helper trong schema `private` chỉ `service_role` gọi được.
+- **Đọc có phân trang** (Supabase cắt 1000 dòng/response) và **tách theo trang**:
+  `/artists` không tải album, `/contact` không tải artist
+  (`src/lib/content/public-site-content.ts`). Cache bằng `unstable_cache` tag
+  `site-content`; publish gọi `updateTag` + `revalidatePath("/", "layout")`.
 
 ## Cấu trúc
 
@@ -36,7 +81,7 @@ src/
 │   ├── about/page.tsx                 # trang giới thiệu
 │   ├── contact/page.tsx               # trang liên hệ
 │   ├── artists/page.tsx               # trang danh bạ
-│   └── dashboard/                     # layout + 5 route của trang quản trị
+│   └── dashboard/                     # layout + 6 route của trang quản trị
 ├── components/
 │   ├── site-header.tsx                # masthead cố định, dùng chung mọi trang
 │   ├── site-footer.tsx                # 4 cột link, margin-top 110px
@@ -77,14 +122,27 @@ src/
 │   ├── artists.ts                     # danh bạ artist, suy ra từ rail
 │   ├── home-hero-slides.ts            # 8 slide hero
 │   ├── home-rail-*.ts                 # 5 rail: editorials/campaigns/couture/…
-│   ├── home-sections.ts               # 4 rail có work detail + category của chúng
 │   ├── contact-offices.ts             # 9 card của lưới liên hệ
 │   └── home-features.ts
 └── lib/
     ├── filter-artists.ts              # logic lọc thuần, không phụ thuộc React
     ├── work-detail.ts                 # dựng gallery: nguyên bộ shoot, hoặc hàng xóm trong rail
     ├── media-item.ts                  # type + constructor cho item rail
+    ├── media-src.ts                   # URL publish được? next/image tối ưu được? video?
+    ├── supabase/supabase-clients.ts   # client anon (đọc public) + service role (dashboard)
+    ├── content/
+    │   ├── site-content-types.ts      # SiteContent: settings, contacts, artists, albums…
+    │   ├── site-content-queries.ts    # query schema quan hệ → record, có phân trang
+    │   ├── public-site-content.ts     # getter có cache cho từng trang public
+    │   ├── load-dashboard-content.ts  # đọc cả draft, không cache
+    │   ├── site-content-seed.ts       # nội dung gốc của repo, id uuid ổn định
+    │   ├── site-content-validation.ts # kiểm payload publish
+    │   ├── site-content-publish-payload.ts # record → payload snake_case cho RPC
+    │   ├── home-page-view.ts          # album/section/slide → props trang chủ
+    │   └── directory-view.ts          # artist/category → danh bạ public
     └── dashboard/
+        ├── publish-site-content.ts    # server action publish
+        ├── admin-settings-reducer.ts  # settings / contact card / social link
         ├── admin-types.ts             # Album / AdminArtist / Slide / Block
         ├── admin-seed.ts              # dựng seed từ data thật của site
         ├── admin-state.ts             # shape state + draft của drawer
@@ -156,7 +214,7 @@ src/
 
 ## Dashboard (`/dashboard`)
 
-Trang quản trị nội dung, dựng theo design `Dashboard.dc.html`. Năm màn, mỗi màn
+Trang quản trị nội dung, dựng theo design `Dashboard.dc.html`. Sáu màn, mỗi màn
 một route, dùng chung sidebar 236px + header dính (sticky):
 
 | Route | Màn |
@@ -166,9 +224,12 @@ một route, dùng chung sidebar 236px + header dính (sticky):
 | `/dashboard/albums` | Lưới album 4 cột — lọc theo loại, gắn/bỏ khỏi trang chủ |
 | `/dashboard/categories` | Danh mục — đổi tên tại chỗ, ẩn/hiện, đổi thứ tự |
 | `/dashboard/homepage` | Hero banner + Page sections + khung preview dính |
+| `/dashboard/settings` | Site settings — logo, SEO, copy About, footer, contact card (địa chỉ, phone, email) |
 
-**Dữ liệu là dữ liệu thật của site, không phải demo.** Seed dựng trong
-`src/lib/dashboard/admin-seed.ts`:
+**Dữ liệu là dữ liệu thật của site, không phải demo.** Dashboard đọc từ Supabase;
+trước lần publish đầu nó dùng nội dung gốc dựng trong
+`src/lib/dashboard/admin-seed.ts` (id là uuid băm từ khóa tự nhiên, nên ổn định
+giữa các request):
 
 - **Album = một card của rail.** Loại album lấy từ rail chứa nó (Editorials →
   Editorial, New Signs → New Signing…). Card nào front một shoot thì mang theo
@@ -180,14 +241,21 @@ một route, dùng chung sidebar 236px + header dính (sticky):
 - **Page sections** là 7 section thật của trang chủ, đúng thứ tự trong
   `src/app/page.tsx`.
 
-**Trạng thái chỉ nằm trong trình duyệt.** Không có API, không ghi ngược vào
-`src/data/*`. Draft lưu ở `sessionStorage` để refresh giữa chừng không mất; đóng
-tab là hết. Ảnh upload thành `blob:` URL, xem được trong phiên, không lưu ở đâu cả.
+**Sửa trong trình duyệt, lên site khi Publish.** Mọi thao tác đổi state cục bộ;
+header hiện "Unpublished changes", nút **Discard** trả về bản đã publish, nút
+**Publish** gọi server action ghi toàn bộ vào Supabase trong một transaction.
+Draft lưu ở `sessionStorage` kèm revision — chỉ khôi phục khi DB vẫn ở đúng
+revision đó, để draft cũ không âm thầm đè publish mới hơn. Đóng tab khi còn thay
+đổi chưa publish sẽ bị hỏi lại.
+
+**Ảnh là địa chỉ, chưa có storage.** Mọi ô ảnh có input URL (`/assets/…` hoặc
+`https://…`). Nút chọn file vẫn cho xem trước bằng `blob:` URL, nhưng publish từ
+chối `blob:`. Ảnh ngoài hai host của `next.config.ts` render `unoptimized`.
 
 **Khác design ở ba điểm, đều có lý do:**
 
-- **Wordmark.** Design đặt brand là chữ "THE WALL GROUP"; ở đây giữ nguyên ảnh
-  `public/riflesso.png` theo quy tắc khóa logo trong `CLAUDE.md`.
+- **Wordmark.** Design đặt brand là chữ "THE WALL GROUP"; ở đây là ảnh logo lấy
+  từ Site settings, mặc định `public/riflesso.png`, kích thước khóa theo `CLAUDE.md`.
 - **Recent activity.** Design có sẵn 5 dòng lịch sử bịa. Site không có nguồn
   lịch sử nào để đọc, nên panel ghi đúng những gì phiên làm việc này vừa sửa —
   dòng mới nhất là "Just now", còn lại "Earlier". Chưa sửa gì thì panel nói vậy.
@@ -196,8 +264,8 @@ tab là hết. Ảnh upload thành `blob:` URL, xem được trong phiên, khôn
 
 **Ghi chú kỹ thuật:**
 
-- **`hydrated` trong state.** Lần paint đầu phải render seed để server và client
-  khớp nhau, nên effect ghi `sessionStorage` sẽ đè seed lên draft nó sắp đọc.
+- **`hydrated` trong state.** Lần paint đầu phải render nội dung server trả về để
+  server và client khớp nhau, nên effect ghi `sessionStorage` sẽ đè nó lên draft sắp đọc.
   Cờ `hydrated` chặn mọi lần ghi cho tới khi đọc xong — không có cờ này thì
   StrictMode remount ở dev xóa sạch draft.
 - **Reducer tách ba.** `admin-record-reducer.ts` lo artist/album/drawer,
@@ -227,12 +295,13 @@ tab là hết. Ảnh upload thành `blob:` URL, xem được trong phiên, khôn
 - **Rail hoist frame nội bộ lên đầu.** Design sắp lại từng rail: item nào có
   `src` bắt đầu bằng `./assets/` hoặc `./uploads/` được đẩy lên trước, giữ nguyên
   thứ tự tương đối. Ba rail Editorials / Couture / New Signs đã áp thứ tự này.
-- **Danh bạ artist suy ra từ rail, không khai báo tay.** Giống design: một
+- **Seed danh bạ artist suy ra từ rail.** Giống design: một
   artist tồn tại vì được credit trên một frame, `category` lấy từ credit đầu
   tiên gọi tên họ, ảnh preview là frame **ảnh** đầu tiên họ xuất hiện khi quét
   EDITORIALS → CAMPAIGNS → COUTURE → FASHION_WEEKS → NEW_SIGNS. Ảnh được gom ở
   một lượt riêng nên artist bị credit lần đầu trên video vẫn nhận được ảnh ở
-  rail sau. Sửa rail là danh bạ tự đúng theo, không cần sửa hai chỗ.
+  rail sau. Discipline ngoài 11 category gốc (Photography, Lighting…) thành
+  category ẩn. Sau lần publish đầu, danh bạ là bảng `artists` — sửa ở dashboard.
 - **Base styles bắt buộc nằm trong `@layer base`.** CSS không thuộc layer nào sẽ
   thắng mọi rule có layer bất kể specificity — nên `a { text-decoration: none }`
   để trần sẽ vô hiệu hóa utility `underline` và `text-muted` của Tailwind.
