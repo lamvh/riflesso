@@ -8,9 +8,9 @@ export function SettingsScreen() {
   const { state, dispatch } = useAdmin();
 
   return (
-    <section className="grid max-w-[1240px] grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] items-start gap-[40px] px-[28px] pt-[24px] pb-[60px]">
+    <div className="grid items-start gap-[16px] xl:grid-cols-2">
       <SettingsBrandPanel settings={state.settings} dispatch={dispatch} />
       <SettingsContactCards contacts={state.contacts} dispatch={dispatch} />
-    </section>
+    </div>
   );
 }

@@ -18,6 +18,9 @@ export type Drawer =
   | { kind: "album"; index: number; draft: AlbumDraft }
   | null;
 
+/** Errors stay up longer and read as alerts. */
+export type ToastTone = "info" | "error";
+
 export type AdminState = SiteContent & {
   activity: Activity;
   /** Which hero slide the homepage screen is editing. */
@@ -27,6 +30,7 @@ export type AdminState = SiteContent & {
   newCat: string;
   drawer: Drawer;
   toast: string;
+  toastTone: ToastTone;
   /**
    * False until the stored draft has been read. The first paint has to render
    * the server's content so server and client agree, which means the persist
@@ -55,6 +59,7 @@ export const initialAdminState = ({
   newCat: "",
   drawer: null,
   toast: "",
+  toastTone: "info",
   hydrated: false,
   revision,
   baseline: serializeContent(content),

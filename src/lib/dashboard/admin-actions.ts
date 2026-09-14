@@ -5,7 +5,7 @@ import type {
   SocialLink,
 } from "@/lib/content/site-content-types";
 
-import type { AlbumDraft, ArtistDraft } from "./admin-state";
+import type { AlbumDraft, ArtistDraft, ToastTone } from "./admin-state";
 import type { Activity, Credit, Slide } from "./admin-types";
 
 /** Edits to an artist or an album, including everything the drawer touches. */
@@ -56,7 +56,7 @@ export type SettingsAction =
 
 /** Session furniture: the toast, the stored draft, publishing. */
 export type SessionAction =
-  | { type: "toast"; message: string }
+  | { type: "toast"; message: string; tone?: ToastTone }
   | { type: "restore"; content: SiteContent; activity: Activity }
   | { type: "hydrated" }
   /** Throw away unpublished edits and go back to the last published content. */

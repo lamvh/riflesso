@@ -2,13 +2,19 @@
 
 import type { AdminAction } from "@/lib/dashboard/admin-reducer";
 import type { ArtistDraft } from "@/lib/dashboard/admin-state";
-import { TERRITORIES, type CategoryRow } from "@/lib/dashboard/admin-types";
+import type { CategoryRow, Territory } from "@/lib/dashboard/admin-types";
 
 import { CoverImage } from "./cover-image";
-import { Chip, SolidButton, Switch, UnderlineButton } from "./ui/controls";
+import { Button, Chip, Segmented, buttonClass } from "./ui/controls";
 import { Drawer } from "./ui/drawer";
 import { LabelledField, NameInput, ProseInput, ProseTextarea } from "./ui/fields";
 import { ImagePickButton } from "./ui/image-pick";
+import { SwitchRow } from "./ui/switch-row";
+
+const TERRITORY_OPTIONS: { value: Territory; label: string }[] = [
+  { value: "US", label: "US" },
+  { value: "EUROPE", label: "Europe" },
+];
 
 export function ArtistDrawer({
   draft,
@@ -24,14 +30,35 @@ export function ArtistDrawer({
 }) {
   const set = (patch: Partial<ArtistDraft>) => dispatch({ type: "draft/set", patch });
   const close = () => dispatch({ type: "drawer/close" });
+  const editing = index >= 0;
+
+  const remove = () => {
+    if (window.confirm(`Delete ${draft.name || "this artist"}? They leave the site when you publish.`)) {
+      dispatch({ type: "artist/delete" });
+    }
+  };
 
   return (
     <Drawer
-      title={index >= 0 ? "Edit details" : "New artist"}
-      width={460}
+      title={editing ? draft.name || "Untitled artist" : "New artist"}
+      description={editing ? "Saved changes go live when you publish" : "Name, disciplines and a portrait"}
+      width={480}
       onClose={close}
+      footer={
+        <>
+          <Button variant="primary" onClick={() => dispatch({ type: "artist/save" })}>
+            Save artist
+          </Button>
+          <Button onClick={close}>Cancel</Button>
+          {editing && (
+            <Button variant="danger" className="ml-auto" onClick={remove}>
+              Delete
+            </Button>
+          )}
+        </>
+      }
     >
-      <LabelledField label="Artist name">
+      <LabelledField label="Name">
         <NameInput
           value={draft.name}
           onChange={(name) => set({ name })}
@@ -39,7 +66,7 @@ export function ArtistDrawer({
         />
       </LabelledField>
 
-      <LabelledField label="Categories (multi-select)" gap={9}>
+      <LabelledField label="Categories" hint="Every discipline they work in">
         <div className="flex flex-wrap gap-[6px]">
           {categories.map((cat) => (
             <Chip
@@ -52,39 +79,37 @@ export function ArtistDrawer({
         </div>
       </LabelledField>
 
-      <LabelledField label="Territory" gap={9}>
-        <div className="flex gap-[6px]">
-          {TERRITORIES.map((territory) => (
-            <Chip
-              key={territory}
-              label={territory}
-              active={draft.territory === territory}
-              onClick={() => set({ territory })}
-            />
-          ))}
+      <LabelledField label="Territory">
+        <div>
+          <Segmented
+            label="Territory"
+            options={TERRITORY_OPTIONS}
+            value={draft.territory}
+            onChange={(territory) => set({ territory })}
+          />
         </div>
       </LabelledField>
 
-      <LabelledField label="Portrait" gap={9}>
-        <div className="flex items-start gap-[12px]">
-          <div className="h-[120px] w-[96px] shrink-0 overflow-hidden bg-well">
+      <LabelledField label="Portrait" hint="A path under /assets or an https:// link">
+        <div className="flex items-start gap-[14px]">
+          <div className="h-[124px] w-[96px] shrink-0 overflow-hidden rounded-[2px] bg-well">
             <CoverImage src={draft.image} pos="50% 22%" />
           </div>
           <div className="flex min-w-0 flex-1 flex-col gap-[8px]">
             <ProseInput
               value={draft.image}
               onChange={(image) => set({ image })}
-              placeholder="/assets/… or https://…"
+              placeholder="https://…"
             />
             <ImagePickButton
               onPick={(image) => set({ image })}
-              className="flex h-[40px] items-center justify-center border border-dashed border-ink bg-shell font-sans text-[12px] leading-none font-bold tracking-[-0.3px]"
+              className={`${buttonClass("secondary", "sm")} self-start`}
             >
               Preview a file
             </ImagePickButton>
-            <p className="font-serif text-[13px] leading-[120%] text-dim">
-              Portrait JPG, at least 1400px wide. A picked file only previews —
-              storage isn&apos;t connected yet, so publish with an image address.
+            <p className="font-sans text-[12px] leading-[140%] text-graphite">
+              A picked file only previews here. Storage isn&apos;t connected yet, so
+              publish with an image address.
             </p>
           </div>
         </div>
@@ -92,47 +117,19 @@ export function ArtistDrawer({
 
       <LabelledField label="Bio">
         <ProseTextarea
+          rows={5}
           value={draft.bio}
           onChange={(bio) => set({ bio })}
-          placeholder="A short paragraph shown on the artist page."
+          placeholder="A short paragraph about their work."
         />
       </LabelledField>
 
-      <div className="flex items-center justify-between gap-4 border-t border-b border-rule py-[14px]">
-        <div>
-          <p className="font-sans text-[14px] leading-none font-bold tracking-[-0.5px]">
-            Show in directory
-          </p>
-          <p className="mt-[5px] font-serif text-[14px] leading-none text-dim">
-            {draft.live ? "Published" : "Draft"}
-          </p>
-        </div>
-        <Switch
-          on={draft.live}
-          label="Toggle visibility"
-          onClick={() => set({ live: !draft.live })}
-        />
-      </div>
-
-      <div className="flex items-center gap-[10px]">
-        <SolidButton onClick={() => dispatch({ type: "artist/save" })}>
-          Save artist
-        </SolidButton>
-        <button
-          type="button"
-          onClick={close}
-          className="cursor-pointer border border-ink px-[18px] py-[12px] font-sans text-[13px] leading-none font-bold tracking-[-0.4px]"
-        >
-          Cancel
-        </button>
-        {index >= 0 && (
-          <span className="ml-auto">
-            <UnderlineButton muted onClick={() => dispatch({ type: "artist/delete" })}>
-              Delete
-            </UnderlineButton>
-          </span>
-        )}
-      </div>
+      <SwitchRow
+        title="Show in directory"
+        note={draft.live ? "Visitors can find this artist" : "Draft, hidden from visitors"}
+        on={draft.live}
+        onToggle={() => set({ live: !draft.live })}
+      />
     </Drawer>
   );
 }

@@ -20,8 +20,8 @@ export function CoverImage({
 }) {
   if (!src) {
     return (
-      <div className="flex h-full w-full items-center justify-center bg-well px-1 text-center font-sans text-[9px] leading-[110%] font-bold tracking-[0.06em] text-subtle uppercase">
-        No image
+      <div className="flex h-full w-full items-center justify-center bg-well px-1 text-center font-sans text-[11px] leading-[120%] font-medium text-subtle">
+        No picture
       </div>
     );
   }

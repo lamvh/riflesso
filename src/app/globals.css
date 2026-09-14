@@ -17,6 +17,42 @@
   --color-rule: #e6e6e6;
   --color-well: #f0f0f0;
   --color-shell: #fafafa;
+
+  /* Dashboard: a photo studio. The canvas is seamless-paper grey, work happens
+     on white sheets, and colour is spent only on publish state. */
+  --color-seamless: #e8e8e6;
+  --color-graphite: #686866;
+  --color-line: #d6d6d3;
+  --color-hover: #f3f3f1;
+  --color-live: #1e7a4c;
+  --color-live-soft: #e2f0e8;
+  --color-draft: #a35a00;
+  --color-draft-soft: #f7ead6;
+  --color-danger: #b42318;
+  --color-danger-soft: #fbe8e6;
+
+  --animate-drawer-in: drawer-in 200ms cubic-bezier(0.22, 1, 0.36, 1);
+  --animate-scrim-in: scrim-in 200ms ease-out;
+
+  @keyframes drawer-in {
+    from {
+      transform: translateX(28px);
+      opacity: 0;
+    }
+    to {
+      transform: none;
+      opacity: 1;
+    }
+  }
+
+  @keyframes scrim-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
 }
 
 /*
@@ -43,7 +79,14 @@
     border-radius: 0;
   }
 
-  input::placeholder {
+  input::placeholder,
+  textarea::placeholder {
     color: var(--color-subtle);
+  }
+
+  /* Keyboard focus is always visible in the dashboard. */
+  [data-admin] :focus-visible {
+    outline: 2px solid var(--color-ink);
+    outline-offset: 2px;
   }
 }

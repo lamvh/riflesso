@@ -1,89 +1,123 @@
 "use client";
 
-import { useAdmin } from "../admin-store";
-import { OutlineButton, SolidButton, Switch } from "../ui/controls";
-import { ColumnHead } from "../ui/fields";
+import { plural } from "@/lib/dashboard/admin-changes";
 
-const GRID = "grid grid-cols-[32px_1.6fr_90px_150px_120px] gap-[16px]";
+import { useAdmin } from "../admin-store";
+import { Button, IconButton, Switch } from "../ui/controls";
+import { NameInput } from "../ui/fields";
+import { ArrowDownIcon, ArrowUpIcon, CrossIcon } from "../ui/icons";
+import { Panel } from "../ui/panel";
 
 export function CategoriesScreen() {
   const { state, dispatch } = useAdmin();
 
-  /** How many artists carry a discipline. Linked by id, so a rename keeps the count. */
+  /** Linked by id, so a rename keeps the count. */
   const countFor = (id: string) =>
     state.artists.filter((artist) => artist.categoryIds.includes(id)).length;
 
+  const remove = (index: number) => {
+    const cat = state.cats[index];
+    const count = countFor(cat.id);
+    if (
+      count === 0 ||
+      window.confirm(`Remove ${cat.name}? It is taken off ${plural(count, "artist")}.`)
+    ) {
+      dispatch({ type: "cat/remove", index });
+    }
+  };
+
   return (
-    <section className="max-w-[900px] px-[28px] pt-[24px] pb-[60px]">
-      <div className="flex items-center gap-[10px] border-b border-ink pb-[20px]">
-        <label htmlFor="new-cat" className="sr-only">
-          New category name
-        </label>
-        <input
-          id="new-cat"
-          type="text"
-          value={state.newCat}
-          placeholder="New category name..."
-          onChange={(event) =>
-            dispatch({ type: "cat/setNew", name: event.target.value })
-          }
-          className="min-w-0 flex-1 border border-ink bg-paper px-[11px] py-[10px] font-serif text-[15px] leading-none"
-        />
-        <SolidButton onClick={() => dispatch({ type: "cat/add" })}>Add</SolidButton>
-      </div>
-
-      <div className={`${GRID} border-b border-ink px-[2px] py-[12px]`}>
-        <ColumnHead>#</ColumnHead>
-        <ColumnHead>Category</ColumnHead>
-        <ColumnHead>Artists</ColumnHead>
-        <ColumnHead>Show in directory</ColumnHead>
-        <ColumnHead align="right">Order</ColumnHead>
-      </div>
-
-      {state.cats.map((cat, index) => (
-        <div
-          key={cat.id}
-          className={`${GRID} items-center border-b border-rule px-[2px] py-[9px]`}
+    <div className="max-w-[820px]">
+      <Panel
+        title="Directory categories"
+        description="The filter lists them in this order. A hidden category stays on artists but leaves the filter."
+        bodyClassName=""
+      >
+        <form
+          onSubmit={(event) => {
+            event.preventDefault();
+            dispatch({ type: "cat/add" });
+          }}
+          className="flex gap-[8px] border-b border-line px-[16px] py-[14px]"
         >
-          <span className="font-sans text-[12px] leading-none font-bold text-dim">
-            {index + 1}
-          </span>
-
-          <input
-            type="text"
-            value={cat.name}
-            aria-label={`Rename ${cat.name}`}
-            onChange={(event) =>
-              dispatch({ type: "cat/rename", index, name: event.target.value })
-            }
-            className="w-full border border-transparent bg-paper px-[8px] py-[7px] font-sans text-[15px] leading-none font-bold tracking-[-0.6px] focus:border-ink"
-          />
-
-          <span className="font-serif text-[15px] leading-none">
-            {countFor(cat.id)}
-          </span>
-
-          <span className="justify-self-start">
-            <Switch
-              on={cat.visible}
-              label={`Toggle ${cat.name}`}
-              onClick={() => dispatch({ type: "cat/toggle", index })}
+          <label htmlFor="new-cat" className="sr-only">
+            New category name
+          </label>
+          <div className="min-w-0 flex-1">
+            <NameInput
+              id="new-cat"
+              size={15}
+              value={state.newCat}
+              placeholder="New category name"
+              onChange={(name) => dispatch({ type: "cat/setNew", name })}
             />
-          </span>
-
-          <div className="flex justify-self-end gap-[6px]">
-            <OutlineButton small onClick={() => dispatch({ type: "cat/move", index, delta: -1 })}>
-              ↑
-            </OutlineButton>
-            <OutlineButton small onClick={() => dispatch({ type: "cat/move", index, delta: 1 })}>
-              ↓
-            </OutlineButton>
-            <OutlineButton small onClick={() => dispatch({ type: "cat/remove", index })}>
-              ✕
-            </OutlineButton>
           </div>
-        </div>
-      ))}
-    </section>
+          <Button type="submit" variant="primary" className="h-[40px]">
+            Add
+          </Button>
+        </form>
+
+        <ul>
+          {state.cats.map((cat, index) => {
+            const count = countFor(cat.id);
+            return (
+              <li
+                key={cat.id}
+                className="flex items-center gap-[10px] border-b border-line px-[16px] py-[8px] last:border-b-0"
+              >
+                <span className="w-[20px] shrink-0 text-right font-sans text-[12px] text-graphite tabular-nums">
+                  {index + 1}
+                </span>
+
+                <input
+                  type="text"
+                  value={cat.name}
+                  aria-label={`Name of category ${index + 1}`}
+                  onChange={(event) =>
+                    dispatch({ type: "cat/rename", index, name: event.target.value })
+                  }
+                  className={`min-w-0 flex-1 rounded-[2px] border border-transparent bg-transparent px-[8px] py-[7px] font-sans text-[15px] font-bold tracking-[-0.3px] transition-colors hover:border-line focus:border-ink focus:bg-paper focus:outline-none ${
+                    cat.visible ? "text-ink" : "text-graphite"
+                  }`}
+                />
+
+                <span className="hidden w-[84px] shrink-0 font-sans text-[13px] text-graphite tabular-nums sm:block">
+                  {plural(count, "artist")}
+                </span>
+
+                <span className="hidden w-[56px] shrink-0 text-right font-sans text-[13px] text-graphite sm:block">
+                  {cat.visible ? "In filter" : "Hidden"}
+                </span>
+                <Switch
+                  on={cat.visible}
+                  label={`Show ${cat.name} in the directory filter`}
+                  onClick={() => dispatch({ type: "cat/toggle", index })}
+                />
+
+                <div className="ml-[6px] flex shrink-0">
+                  <IconButton
+                    label={`Move ${cat.name} up`}
+                    disabled={index === 0}
+                    onClick={() => dispatch({ type: "cat/move", index, delta: -1 })}
+                  >
+                    <ArrowUpIcon />
+                  </IconButton>
+                  <IconButton
+                    label={`Move ${cat.name} down`}
+                    disabled={index === state.cats.length - 1}
+                    onClick={() => dispatch({ type: "cat/move", index, delta: 1 })}
+                  >
+                    <ArrowDownIcon />
+                  </IconButton>
+                  <IconButton label={`Remove ${cat.name}`} tone="danger" onClick={() => remove(index)}>
+                    <CrossIcon />
+                  </IconButton>
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      </Panel>
+    </div>
   );
 }

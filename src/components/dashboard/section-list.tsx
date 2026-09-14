@@ -6,16 +6,44 @@ import type { AdminAction } from "@/lib/dashboard/admin-reducer";
 import type { Album, Block } from "@/lib/dashboard/admin-types";
 
 import { CoverImage } from "./cover-image";
-import { OutlineButton, Switch } from "./ui/controls";
+import { IconButton, Switch, buttonClass } from "./ui/controls";
+import { ArrowDownIcon, ArrowUpIcon } from "./ui/icons";
+import { Panel } from "./ui/panel";
+
+type Thumb = { id: string; src: string; pos: string; video?: boolean };
 
 /**
- * A section shows what it would pull: the first four albums of its kind. If no
- * album carries that kind yet, the row falls back to the head of the library so
- * the strip never renders as four empty wells.
+ * What a section would show: its banner image, the album a feature fronts, or
+ * the first four albums of a row's kind.
  */
-const coversFor = (albums: Album[], source: Block["source"]) => {
-  const matching = albums.filter((album) => album.kind === source);
-  return (matching.length ? matching : albums).slice(0, 4);
+function thumbsFor(block: Block, albums: Album[]): Thumb[] {
+  const toThumb = (album: Album): Thumb => ({
+    id: album.id,
+    src: album.cover,
+    pos: album.pos,
+    video: album.video,
+  });
+
+  if (block.kind === "Banner") {
+    return block.image ? [{ id: "banner", src: block.image, pos: "50% 50%" }] : [];
+  }
+  const matching = albums.filter((album) => album.kind === block.source);
+  if (block.kind === "Full-bleed") {
+    const featured = albums.find((album) => album.id === block.albumId) ?? matching[0];
+    return featured ? [toThumb(featured)] : [];
+  }
+  return matching.slice(0, 4).map(toThumb);
+}
+
+const describe = (block: Block) => {
+  switch (block.kind) {
+    case "Banner":
+      return "Banner image";
+    case "Full-bleed":
+      return `Full-width feature from ${block.source} albums`;
+    case "Scroll row":
+      return `Scrolling row of ${block.source} albums`;
+  }
 };
 
 export function SectionList({
@@ -30,90 +58,70 @@ export function SectionList({
   const live = blocks.filter((block) => block.on).length;
 
   return (
-    <div>
-      <div className="flex items-end justify-between gap-5 border-b border-ink pb-[12px]">
-        <div>
-          <h2 className="font-sans text-[22px] leading-[95%] font-bold tracking-[-1.1px]">
-            Page sections
-          </h2>
-          <p className="mt-[7px] font-serif text-[15px] leading-none text-dim">
-            {live} of {blocks.length} sections live, top to bottom
-          </p>
-        </div>
-        <Link
-          href="/dashboard/albums"
-          className="border-b border-ink font-sans text-[12px] leading-none font-bold tracking-[-0.3px]"
-        >
+    <Panel
+      title="Page sections"
+      description={`${live} of ${blocks.length} showing, in page order`}
+      action={
+        <Link href="/dashboard/albums" className={buttonClass("ghost", "sm")}>
           Manage albums
         </Link>
-      </div>
-
-      <div className="mt-[16px] flex flex-col gap-[12px]">
+      }
+      bodyClassName=""
+    >
+      <ul>
         {blocks.map((block, index) => (
-          <div
+          <li
             key={block.id}
-            className={`grid grid-cols-[44px_minmax(0,1fr)_auto] items-center gap-[18px] border px-[16px] py-[14px] ${
-              block.on ? "border-ink bg-paper" : "border-[#d9d9d9] bg-shell"
+            className={`flex items-center gap-[14px] border-b border-line px-[16px] py-[12px] last:border-b-0 ${
+              block.on ? "" : "bg-[#fafaf9]"
             }`}
           >
             <Switch
               on={block.on}
-              label={`Toggle ${block.label}`}
+              label={`Show ${block.label} on the homepage`}
               onClick={() => dispatch({ type: "block/toggle", index })}
             />
 
-            <div className="flex min-w-0 items-center gap-[18px]">
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2">
-                  <p
-                    className={`font-sans text-[17px] leading-none font-bold tracking-[-0.8px] ${
-                      block.on ? "text-ink" : "text-[#8c8c8c]"
-                    }`}
-                  >
-                    {block.label}
-                  </p>
-                  <span
-                    className={`border px-[6px] py-[3px] font-sans text-[10px] leading-none font-bold tracking-[0.04em] uppercase ${
-                      block.on
-                        ? "border-ink text-ink"
-                        : "border-[#c9c9c9] text-[#8c8c8c]"
-                    }`}
-                  >
-                    {block.kind}
-                  </span>
+            <div className="min-w-0 flex-1">
+              <p
+                className={`truncate font-sans text-[15px] leading-[125%] font-bold tracking-[-0.3px] ${
+                  block.on ? "text-ink" : "text-graphite"
+                }`}
+              >
+                {block.label}
+              </p>
+              <p className="mt-[3px] truncate font-sans text-[13px] leading-[130%] text-graphite">
+                {block.on ? describe(block) : "Hidden from the homepage"}
+              </p>
+            </div>
+
+            <div className="hidden shrink-0 gap-[4px] sm:flex">
+              {thumbsFor(block, albums).map((thumb) => (
+                <div key={thumb.id} className="h-[44px] w-[34px] overflow-hidden rounded-[1px] bg-well">
+                  <CoverImage src={thumb.src} pos={thumb.pos} video={thumb.video} dim={block.on ? 1 : 0.4} />
                 </div>
-                <p className="mt-[7px] font-serif text-[14px] leading-none text-dim">
-                  {block.on
-                    ? `Live · sourced from ${block.source} albums`
-                    : "Hidden from the homepage"}
-                </p>
-              </div>
-
-              <div className="flex shrink-0 gap-[5px]">
-                {coversFor(albums, block.source).map((album) => (
-                  <div key={album.id} className="h-[46px] w-[36px] overflow-hidden bg-well">
-                    <CoverImage
-                      src={album.cover}
-                      pos={album.pos}
-                      video={album.video}
-                      dim={block.on ? 1 : 0.4}
-                    />
-                  </div>
-                ))}
-              </div>
+              ))}
             </div>
 
-            <div className="flex gap-[6px]">
-              <OutlineButton small onClick={() => dispatch({ type: "block/move", index, delta: -1 })}>
-                ↑
-              </OutlineButton>
-              <OutlineButton small onClick={() => dispatch({ type: "block/move", index, delta: 1 })}>
-                ↓
-              </OutlineButton>
+            <div className="flex shrink-0">
+              <IconButton
+                label={`Move ${block.label} up`}
+                disabled={index === 0}
+                onClick={() => dispatch({ type: "block/move", index, delta: -1 })}
+              >
+                <ArrowUpIcon />
+              </IconButton>
+              <IconButton
+                label={`Move ${block.label} down`}
+                disabled={index === blocks.length - 1}
+                onClick={() => dispatch({ type: "block/move", index, delta: 1 })}
+              >
+                <ArrowDownIcon />
+              </IconButton>
             </div>
-          </div>
+          </li>
         ))}
-      </div>
-    </div>
+      </ul>
+    </Panel>
   );
 }

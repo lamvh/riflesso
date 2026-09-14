@@ -56,20 +56,17 @@ export function adminTotals(state: AdminState) {
   };
 }
 
+/** Sidebar counts, only for the screens that are lists. */
 export function navCount(view: View, totals: ReturnType<typeof adminTotals>) {
   switch (view) {
-    case "overview":
-      return totals.drafts;
     case "artists":
       return totals.artists;
     case "albums":
       return totals.albums;
     case "cats":
       return totals.cats;
-    case "home":
-      return totals.slides + totals.liveBlocks;
-    case "settings":
-      return totals.contacts;
+    default:
+      return null;
   }
 }
 
@@ -82,26 +79,20 @@ export function pageTitle(
     case "artists":
       return [
         "Artists",
-        `${totals.artists} artists · ${totals.liveArtists} visible in the directory`,
+        `${totals.artists} artists, ${totals.liveArtists} visible in the directory`,
       ];
     case "albums":
-      return [
-        "Albums",
-        `${totals.albums} albums · ${totals.images} images in the library`,
-      ];
+      return ["Albums", `${totals.albums} albums holding ${totals.images} images`];
     case "cats":
-      return ["Categories", "Used by the directory filter and artist credits"];
+      return ["Categories", "The disciplines that filter the directory and describe artists"];
     case "home":
       return [
         "Homepage",
-        `${totals.slides} hero slides · ${totals.liveBlocks} of ${totals.blocks} sections live`,
+        `${totals.slides} hero slides and ${totals.liveBlocks} of ${totals.blocks} sections showing`,
       ];
     case "settings":
-      return [
-        "Site settings",
-        `Logo, search listing, About copy, footer · ${totals.contacts} contact cards`,
-      ];
+      return ["Site settings", "Logo, search listing, About copy, contact cards and footer"];
     case "overview":
-      return ["Overview", "What is live on the Riflesso site right now"];
+      return ["Overview", "What visitors see on the Riflesso site right now"];
   }
 }

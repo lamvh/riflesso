@@ -16,12 +16,13 @@ import {
   type SiteContent,
   type SiteContentSource,
 } from "@/lib/content/site-content-types";
-import { adminReducer, type AdminAction } from "@/lib/dashboard/admin-reducer";
 import {
-  initialAdminState,
-  serializeContent,
-  type AdminState,
-} from "@/lib/dashboard/admin-state";
+  countChanges,
+  totalChanges,
+  type ChangeCounts,
+} from "@/lib/dashboard/admin-changes";
+import { adminReducer, type AdminAction } from "@/lib/dashboard/admin-reducer";
+import { initialAdminState, type AdminState } from "@/lib/dashboard/admin-state";
 import type { Activity } from "@/lib/dashboard/admin-types";
 
 /**
@@ -31,8 +32,8 @@ import type { Activity } from "@/lib/dashboard/admin-types";
  */
 const DRAFT_KEY = "riflesso.admin.draft";
 
-/** How long a toast stays up, matching the design's own timing. */
-const TOAST_MS = 2200;
+/** How long a toast stays up. Errors wait long enough to be read and acted on. */
+const TOAST_MS = { info: 2400, error: 6000 };
 
 type StoredDraft = {
   revision: number;
@@ -53,7 +54,9 @@ function readDraft(): StoredDraft | null {
 type AdminContextValue = {
   state: AdminState;
   dispatch: Dispatch<AdminAction>;
-  /** Content differs from what was loaded or last published. */
+  /** Unpublished changes per area of the dashboard. */
+  changes: ChangeCounts;
+  /** Anything differs from what was loaded or last published. */
   dirty: boolean;
 };
 
@@ -99,17 +102,21 @@ export function AdminProvider({
 
   useEffect(() => {
     if (!state.toast) return;
-    const timer = setTimeout(() => dispatch({ type: "toast", message: "" }), TOAST_MS);
+    const timer = setTimeout(
+      () => dispatch({ type: "toast", message: "" }),
+      TOAST_MS[state.toastTone],
+    );
     return () => clearTimeout(timer);
-  }, [state.toast]);
+  }, [state.toast, state.toastTone]);
 
   const { settings, contacts, artists, albums, cats, slides, blocks, baseline } = state;
-  const dirty = useMemo(
+  const published = useMemo(() => JSON.parse(baseline) as SiteContent, [baseline]);
+  const changes = useMemo(
     () =>
-      serializeContent({ settings, contacts, artists, albums, cats, slides, blocks }) !==
-      baseline,
-    [settings, contacts, artists, albums, cats, slides, blocks, baseline],
+      countChanges({ settings, contacts, artists, albums, cats, slides, blocks }, published),
+    [settings, contacts, artists, albums, cats, slides, blocks, published],
   );
+  const dirty = totalChanges(changes) > 0;
 
   /* The draft survives a reload, but not a closed tab. */
   useEffect(() => {
@@ -119,7 +126,7 @@ export function AdminProvider({
     return () => window.removeEventListener("beforeunload", warn);
   }, [dirty]);
 
-  const value = useMemo(() => ({ state, dispatch, dirty }), [state, dirty]);
+  const value = useMemo(() => ({ state, dispatch, changes, dirty }), [state, changes, dirty]);
 
   return <AdminContext value={value}>{children}</AdminContext>;
 }

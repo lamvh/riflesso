@@ -10,6 +10,7 @@ const ACTIVITY_LIMIT = 8;
 export const note = (state: AdminState, text: string): AdminState => ({
   ...state,
   toast: text,
+  toastTone: "info",
   activity: [text, ...state.activity].slice(0, ACTIVITY_LIMIT),
 });
 

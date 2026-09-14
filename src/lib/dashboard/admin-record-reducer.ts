@@ -39,7 +39,9 @@ export function recordReducer(state: AdminState, action: RecordAction): AdminSta
     case "artist/save": {
       if (state.drawer?.kind !== "artist") return state;
       const { draft, index } = state.drawer;
-      if (!draft.name.trim()) return { ...state, toast: "Artist name is required" };
+      if (!draft.name.trim()) {
+        return { ...state, toast: "Add the artist's name to save", toastTone: "error" };
+      }
       const record: AdminArtist = {
         id: draft.id,
         name: draft.name.trim(),
@@ -90,7 +92,9 @@ export function recordReducer(state: AdminState, action: RecordAction): AdminSta
     case "album/save": {
       if (state.drawer?.kind !== "album") return state;
       const { draft, index } = state.drawer;
-      if (!draft.title.trim()) return { ...state, toast: "Album title is required" };
+      if (!draft.title.trim()) {
+        return { ...state, toast: "Add an album title to save", toastTone: "error" };
+      }
       const record = fromDraft(draft);
       const albums =
         index >= 0 ? patchAt(state.albums, index, record) : [record, ...state.albums];

@@ -2,32 +2,45 @@
 
 import { useMemo, useState } from "react";
 
+import { plural } from "@/lib/dashboard/admin-changes";
+
 import { useAdmin } from "../admin-store";
 import { CoverImage } from "../cover-image";
-import { Chip } from "../ui/controls";
-import { ColumnHead } from "../ui/fields";
+import { Button, Segmented, StatusPill, liveTone } from "../ui/controls";
+import { ColumnHead, SearchField, SelectField } from "../ui/fields";
+import { Panel } from "../ui/panel";
 
-const ALL = "All";
-const TERRITORIES = [ALL, "US", "EUROPE"];
+const ALL = "all";
 
-/** The design shows the first six disciplines as chips; the rest live in the drawer. */
-const CHIP_COUNT = 6;
+const TERRITORY_OPTIONS = [
+  { value: ALL, label: "All" },
+  { value: "US", label: "US" },
+  { value: "EUROPE", label: "Europe" },
+];
 
-const GRID = "grid grid-cols-[64px_1.4fr_1.5fr_100px_90px_110px_80px] gap-[16px]";
+const STATUS_OPTIONS = [
+  { value: ALL, label: "All" },
+  { value: "live", label: "Live" },
+  { value: "draft", label: "Draft" },
+];
+
+const GRID =
+  "grid grid-cols-[44px_minmax(0,1fr)_auto] items-center gap-x-[16px] md:grid-cols-[44px_minmax(0,1fr)_80px_64px_88px]";
 
 export function ArtistsScreen() {
   const { state, dispatch } = useAdmin();
   const [query, setQuery] = useState("");
   const [cat, setCat] = useState(ALL);
-  const [terr, setTerr] = useState(ALL);
+  const [territory, setTerritory] = useState(ALL);
+  const [status, setStatus] = useState(ALL);
 
   const nameById = useMemo(
     () => new Map(state.cats.map((category) => [category.id, category.name])),
     [state.cats],
   );
 
-  /* Works is the count of albums an artist is credited on, so it moves when a
-     credit is edited rather than being a number kept by hand. */
+  /* Albums an artist is credited on, so it moves when a credit is edited
+     rather than being a number kept by hand. */
   const works = useMemo(() => {
     const counts = new Map<string, number>();
     for (const album of state.albums) {
@@ -46,115 +59,112 @@ export function ArtistsScreen() {
         ({ artist }) =>
           (!needle || artist.name.toLowerCase().includes(needle)) &&
           (cat === ALL || artist.categoryIds.includes(cat)) &&
-          (terr === ALL || artist.territory === terr),
+          (territory === ALL || artist.territory === territory) &&
+          (status === ALL || artist.live === (status === "live")),
       );
-  }, [state.artists, query, cat, terr]);
+  }, [state.artists, query, cat, territory, status]);
 
-  const chips = [{ id: ALL, name: ALL }, ...state.cats.slice(0, CHIP_COUNT)];
+  const filtered = Boolean(query.trim()) || cat !== ALL || territory !== ALL || status !== ALL;
+  const clearFilters = () => {
+    setQuery("");
+    setCat(ALL);
+    setTerritory(ALL);
+    setStatus(ALL);
+  };
 
   return (
-    <section className="px-[28px] pt-[24px] pb-[60px]">
-      <div className="flex flex-wrap items-center gap-[16px] border-b border-ink pb-[16px]">
-        <div className="flex basis-[300px] items-center gap-2 border border-ink px-[11px] py-[9px]">
-          <label htmlFor="artist-query" className="sr-only">
-            Search by name
-          </label>
-          <input
-            id="artist-query"
-            type="text"
-            value={query}
-            placeholder="Search by name..."
-            onChange={(event) => setQuery(event.target.value)}
-            className="min-w-0 flex-1 border-none bg-paper font-serif text-[15px] leading-none"
-          />
-        </div>
-
-        <div className="flex flex-wrap gap-[6px]">
-          {chips.map((option) => (
-            <Chip
-              key={option.id}
-              label={option.name}
-              active={cat === option.id}
-              onClick={() => setCat(option.id)}
-            />
-          ))}
-        </div>
-
-        <div className="ml-auto flex gap-[6px]">
-          {TERRITORIES.map((option) => (
-            <Chip
-              key={option}
-              label={option}
-              active={terr === option}
-              onClick={() => setTerr(option)}
-            />
-          ))}
-        </div>
-      </div>
-
-      <div className={`${GRID} border-b border-ink px-[2px] py-[12px]`}>
-        <ColumnHead>Photo</ColumnHead>
-        <ColumnHead>Artist</ColumnHead>
-        <ColumnHead>Categories</ColumnHead>
-        <ColumnHead>Territory</ColumnHead>
-        <ColumnHead>Works</ColumnHead>
-        <ColumnHead>Status</ColumnHead>
-        <ColumnHead align="right">Edit</ColumnHead>
-      </div>
-
-      {rows.map(({ artist, index }) => (
-        <div
-          key={artist.id}
-          className={`${GRID} items-center border-b border-rule px-[2px] py-[10px] hover:bg-[#f7f7f7]`}
-        >
-          <div className="h-[60px] w-[48px] overflow-hidden bg-well">
-            <CoverImage src={artist.image} pos={artist.pos} />
-          </div>
-
-          <span className="font-sans text-[16px] leading-none font-bold tracking-[-0.7px]">
-            {artist.name}
-          </span>
-
-          <span className="font-serif text-[15px] leading-[115%] text-[#333]">
-            {artist.categoryIds
-              .map((id) => nameById.get(id))
-              .filter(Boolean)
-              .join(", ") || "—"}
-          </span>
-
-          <span className="font-sans text-[12px] leading-none font-bold">
-            {artist.territory}
-          </span>
-
-          <span className="font-serif text-[15px] leading-none">
-            {works.get(artist.name) ?? 0}
-          </span>
-
-          <button
-            type="button"
-            onClick={() => dispatch({ type: "artist/toggleLive", index })}
-            className={`cursor-pointer justify-self-start border border-ink px-[9px] py-[5px] font-sans text-[11px] leading-none font-bold ${
-              artist.live ? "bg-ink text-paper" : "bg-paper text-ink"
-            }`}
-          >
-            {artist.live ? "Live" : "Draft"}
-          </button>
-
-          <button
-            type="button"
-            onClick={() => dispatch({ type: "artist/open", index })}
-            className="cursor-pointer justify-self-end border-b border-ink font-sans text-[12px] leading-none font-bold tracking-[-0.3px]"
-          >
-            Edit
-          </button>
-        </div>
-      ))}
-
-      {rows.length === 0 && (
-        <p className="px-[2px] py-[40px] font-serif text-[24px] leading-none text-subtle">
-          No artists found.
+    <div className="flex flex-col gap-[14px]">
+      <div className="flex flex-wrap items-center gap-[10px]">
+        <SearchField
+          label="Search artists"
+          value={query}
+          onChange={setQuery}
+          placeholder="Search by name"
+        />
+        <SelectField
+          label="Category"
+          value={cat}
+          onChange={setCat}
+          options={[
+            { value: ALL, label: "All categories" },
+            ...state.cats.map((category) => ({ value: category.id, label: category.name })),
+          ]}
+        />
+        <Segmented label="Territory" options={TERRITORY_OPTIONS} value={territory} onChange={setTerritory} />
+        <Segmented label="Status" options={STATUS_OPTIONS} value={status} onChange={setStatus} />
+        <p className="font-sans text-[13px] text-graphite tabular-nums sm:ml-auto">
+          {filtered
+            ? `${rows.length} of ${plural(state.artists.length, "artist")}`
+            : plural(state.artists.length, "artist")}
         </p>
-      )}
-    </section>
+      </div>
+
+      <Panel bodyClassName="">
+        <div className={`${GRID} border-b border-line px-[16px] py-[10px]`}>
+          <span />
+          <ColumnHead>Artist</ColumnHead>
+          <ColumnHead className="hidden md:block">Territory</ColumnHead>
+          <ColumnHead className="hidden md:block">Albums</ColumnHead>
+          <ColumnHead>Status</ColumnHead>
+        </div>
+
+        {rows.map(({ artist, index }) => {
+          const categories = artist.categoryIds
+            .map((id) => nameById.get(id))
+            .filter(Boolean)
+            .join(", ");
+
+          return (
+            <div
+              key={artist.id}
+              className={`${GRID} relative border-b border-line px-[16px] py-[10px] transition-colors last:border-b-0 hover:bg-hover`}
+            >
+              <div className="h-[56px] w-[44px] overflow-hidden rounded-[2px] bg-well">
+                <CoverImage src={artist.image} pos={artist.pos} />
+              </div>
+
+              <div className="min-w-0">
+                {/* The name's hit area stretches over the whole row. */}
+                <button
+                  type="button"
+                  onClick={() => dispatch({ type: "artist/open", index })}
+                  className="block max-w-full cursor-pointer truncate text-left font-sans text-[15px] leading-[125%] font-bold tracking-[-0.3px] after:absolute after:inset-0 after:content-['']"
+                >
+                  {artist.name}
+                </button>
+                <p className="mt-[3px] truncate font-serif text-[14px] leading-[130%] text-graphite">
+                  {categories || "No categories"}
+                </p>
+              </div>
+
+              <span className="hidden font-sans text-[13px] font-medium md:block">
+                {artist.territory === "EUROPE" ? "Europe" : "US"}
+              </span>
+              <span className="hidden font-sans text-[13px] text-graphite tabular-nums md:block">
+                {works.get(artist.name) ?? 0}
+              </span>
+              <span>
+                <StatusPill
+                  tone={liveTone(artist.live)}
+                  title={artist.live ? "Move to draft" : "Show in the directory"}
+                  onClick={() => dispatch({ type: "artist/toggleLive", index })}
+                >
+                  {artist.live ? "Live" : "Draft"}
+                </StatusPill>
+              </span>
+            </div>
+          );
+        })}
+
+        {rows.length === 0 && (
+          <div className="flex flex-col items-start gap-[12px] px-[20px] py-[28px]">
+            <p className="font-sans text-[15px] font-medium">No artists match these filters.</p>
+            <Button size="sm" onClick={clearFilters}>
+              Clear filters
+            </Button>
+          </div>
+        )}
+      </Panel>
+    </div>
   );
 }

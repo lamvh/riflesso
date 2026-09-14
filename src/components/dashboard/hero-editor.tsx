@@ -1,23 +1,26 @@
 "use client";
 
+import { plural } from "@/lib/dashboard/admin-changes";
 import type { AdminAction } from "@/lib/dashboard/admin-reducer";
 import type { Slide } from "@/lib/dashboard/admin-types";
 
 import { CoverImage } from "./cover-image";
-import { Chip, OutlineButton, UnderlineButton } from "./ui/controls";
+import { Button, Segmented, buttonClass } from "./ui/controls";
 import { LabelledField, NameInput, ProseInput } from "./ui/fields";
+import { ArrowUpIcon, PlusIcon } from "./ui/icons";
 import { ImagePickButton } from "./ui/image-pick";
+import { Panel } from "./ui/panel";
 
-const INKS = [
-  { label: "Light", value: "#fff" },
-  { label: "Dark", value: "#000" },
+const INKS: { value: string; label: string }[] = [
+  { value: "#fff", label: "Light" },
+  { value: "#000", label: "Dark" },
 ];
 
 /** The three crops the design offers, rather than free-typed object-position. */
-const CROPS = [
-  { label: "Top", value: "50% 10%" },
-  { label: "Centre", value: "50% 45%" },
-  { label: "Bottom", value: "50% 85%" },
+const CROPS: { value: string; label: string }[] = [
+  { value: "50% 10%", label: "Top" },
+  { value: "50% 45%", label: "Centre" },
+  { value: "50% 85%", label: "Bottom" },
 ];
 
 export function HeroEditor({
@@ -33,156 +36,135 @@ export function HeroEditor({
   const slide = slides[current];
   const set = (patch: Partial<Slide>) => dispatch({ type: "slide/set", patch });
 
+  const remove = () => {
+    if (window.confirm(`Remove the ${slide.pub} slide from the banner?`)) {
+      dispatch({ type: "slide/remove" });
+    }
+  };
+
   return (
-    <div>
-      <div className="flex items-end justify-between gap-5 border-b border-ink pb-[12px]">
-        <div>
-          <h2 className="font-sans text-[22px] leading-[95%] font-bold tracking-[-1.1px]">
-            Hero banner
-          </h2>
-          <p className="mt-[7px] font-serif text-[15px] leading-none text-dim">
-            {slides.length} slides in rotation · click a thumbnail to edit
-          </p>
-        </div>
-        <OutlineButton onClick={() => dispatch({ type: "slide/add" })}>
-          + Add slide
-        </OutlineButton>
+    <Panel
+      title="Hero banner"
+      description={`${plural(slides.length, "slide")} rotating at the top of the homepage`}
+      action={
+        <Button size="sm" onClick={() => dispatch({ type: "slide/add" })}>
+          <PlusIcon />
+          Add slide
+        </Button>
+      }
+      bodyClassName="flex flex-col gap-[18px] p-[20px]"
+    >
+      <div className="-mx-[20px] flex gap-[10px] overflow-x-auto px-[20px] pt-[2px] pb-[4px]">
+        {slides.map((entry, index) => {
+          const active = index === current;
+          return (
+            <button
+              key={entry.id}
+              type="button"
+              aria-pressed={active}
+              onClick={() => dispatch({ type: "slide/select", index })}
+              className="flex w-[120px] shrink-0 cursor-pointer flex-col gap-[6px] text-left"
+            >
+              <span
+                className={`relative block h-[76px] overflow-hidden rounded-[2px] bg-well transition-opacity ${
+                  active ? "shadow-[0_0_0_2px_var(--color-ink)]" : "opacity-70 hover:opacity-100"
+                }`}
+              >
+                <CoverImage src={entry.src} pos={entry.pos} />
+                <span className="absolute top-[4px] left-[4px] rounded-[2px] bg-paper/90 px-[5px] py-[3px] font-sans text-[11px] leading-none font-bold tabular-nums">
+                  {index + 1}
+                </span>
+              </span>
+              <span
+                className={`truncate font-sans text-[12px] leading-[120%] ${
+                  active ? "font-bold" : "font-medium text-graphite"
+                }`}
+              >
+                {entry.pub}
+              </span>
+            </button>
+          );
+        })}
       </div>
 
-      {slide && (
-        <div className="mt-[18px] grid grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)] items-start gap-[22px]">
-          <div className="relative aspect-16/10 overflow-hidden bg-well">
+      {slide ? (
+        <div className="grid items-start gap-[20px] lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
+          <div className="relative aspect-16/10 overflow-hidden rounded-[2px] bg-well">
             <CoverImage src={slide.src} pos={slide.pos} />
-            <div className="absolute inset-x-0 bottom-0 flex justify-center bg-linear-to-t from-black/45 to-transparent p-[18px]">
+            <div className="absolute inset-x-0 bottom-0 flex justify-center bg-linear-to-t from-black/45 to-transparent px-[16px] pt-[40px] pb-[14px]">
               <p
-                className="text-center font-serif text-[14px] leading-[120%]"
+                className="text-center font-serif text-[14px] leading-[130%]"
                 style={{ color: slide.ink }}
               >
-                {slide.credit} · {slide.pub}
+                {slide.credit} <em>{slide.pub}</em>
               </p>
             </div>
-            <span className="absolute top-[10px] left-[10px] bg-paper px-[8px] py-[4px] font-sans text-[10px] leading-none font-bold tracking-[0.06em] uppercase">
-              Slide {current + 1}
-            </span>
           </div>
 
           <div className="flex min-w-0 flex-col gap-[16px]">
             <LabelledField label="Publication">
               <NameInput
-                size={16}
                 value={slide.pub}
                 placeholder="e.g. Vogue UK"
                 onChange={(pub) => set({ pub })}
               />
             </LabelledField>
 
-            <LabelledField label="Credit line">
+            <LabelledField label="Credit line" hint="Name — Role, separated by commas">
               <ProseInput
                 value={slide.credit}
-                placeholder="Artist — Role"
+                placeholder="May Truong — Hair"
                 onChange={(credit) => set({ credit })}
               />
             </LabelledField>
 
-            <LabelledField label="Caption colour" gap={8}>
-              <div className="flex gap-[6px]">
-                {INKS.map((option) => (
-                  <Chip
-                    key={option.value}
-                    label={option.label}
-                    active={slide.ink === option.value}
-                    onClick={() => set({ ink: option.value })}
-                  />
-                ))}
-              </div>
-            </LabelledField>
+            <div className="flex flex-wrap gap-[16px]">
+              <LabelledField label="Caption colour">
+                <Segmented label="Caption colour" options={INKS} value={slide.ink} onChange={(ink) => set({ ink })} />
+              </LabelledField>
+              <LabelledField label="Crop focus">
+                <Segmented label="Crop focus" options={CROPS} value={slide.pos} onChange={(pos) => set({ pos })} />
+              </LabelledField>
+            </div>
 
-            <LabelledField label="Crop focus" gap={8}>
-              <div className="flex gap-[6px]">
-                {CROPS.map((option) => (
-                  <Chip
-                    key={option.value}
-                    label={option.label}
-                    active={slide.pos === option.value}
-                    onClick={() => set({ pos: option.value })}
-                  />
-                ))}
-              </div>
-            </LabelledField>
-
-            <LabelledField label="Frame" gap={8}>
-              <ProseInput
-                value={slide.src}
-                placeholder="/assets/… or https://…"
-                onChange={(src) => set({ src })}
-              />
+            <LabelledField label="Image address" hint="A path under /assets or an https:// link">
+              <ProseInput value={slide.src} placeholder="/assets/…" onChange={(src) => set({ src })} />
               <ImagePickButton
                 onPick={(src) => set({ src })}
-                className="flex h-[40px] items-center justify-center border border-dashed border-ink bg-shell font-sans text-[12px] leading-none font-bold tracking-[-0.3px]"
+                className={`${buttonClass("secondary", "sm")} self-start`}
               >
-                Replace image
+                Preview a file
               </ImagePickButton>
             </LabelledField>
 
-            <div className="flex gap-[8px] pt-[4px]">
-              <OutlineButton onClick={() => dispatch({ type: "slide/move", delta: -1 })}>
-                ← Move earlier
-              </OutlineButton>
-              <OutlineButton onClick={() => dispatch({ type: "slide/move", delta: 1 })}>
-                Move later →
-              </OutlineButton>
-              <span className="ml-auto self-center">
-                <UnderlineButton muted onClick={() => dispatch({ type: "slide/remove" })}>
-                  Remove
-                </UnderlineButton>
-              </span>
+            <div className="flex flex-wrap items-center gap-[6px] border-t border-line pt-[14px]">
+              <Button
+                size="sm"
+                disabled={current === 0}
+                onClick={() => dispatch({ type: "slide/move", delta: -1 })}
+              >
+                <ArrowUpIcon className="-rotate-90" />
+                Move earlier
+              </Button>
+              <Button
+                size="sm"
+                disabled={current === slides.length - 1}
+                onClick={() => dispatch({ type: "slide/move", delta: 1 })}
+              >
+                <ArrowUpIcon className="rotate-90" />
+                Move later
+              </Button>
+              <Button size="sm" variant="danger" className="ml-auto" onClick={remove}>
+                Remove slide
+              </Button>
             </div>
           </div>
         </div>
+      ) : (
+        <p className="font-sans text-[14px] text-graphite">
+          No slides yet. Add one to show a banner at the top of the homepage.
+        </p>
       )}
-
-      <div className="mt-[18px] flex gap-[10px] overflow-x-auto pb-[4px] [scrollbar-width:none]">
-        {slides.map((entry, index) => (
-          <button
-            key={`${entry.src}-${index}`}
-            type="button"
-            onClick={() => dispatch({ type: "slide/select", index })}
-            className="flex w-[126px] shrink-0 cursor-pointer flex-col gap-[6px]"
-          >
-            <span
-              className="relative block h-[82px] overflow-hidden bg-well"
-              style={{
-                outline: index === current ? "2px solid #000" : "1px solid #e6e6e6",
-                outlineOffset: "-2px",
-              }}
-            >
-              <CoverImage
-                src={entry.src}
-                pos={entry.pos}
-                dim={index === current ? 1 : 0.62}
-              />
-              <span
-                className={`absolute top-0 left-0 px-[5px] py-[3px] font-sans text-[10px] leading-none font-bold ${
-                  index === current ? "bg-ink text-paper" : "bg-paper text-ink"
-                }`}
-              >
-                {index + 1}
-              </span>
-            </span>
-            <span className="truncate text-left font-sans text-[12px] leading-[110%] font-bold tracking-[-0.4px]">
-              {entry.pub}
-            </span>
-          </button>
-        ))}
-
-        <button
-          type="button"
-          onClick={() => dispatch({ type: "slide/add" })}
-          className="flex h-[82px] w-[126px] shrink-0 cursor-pointer items-center justify-center border border-dashed border-ink bg-shell font-sans text-[22px] leading-none font-bold"
-        >
-          +
-        </button>
-      </div>
-    </div>
+    </Panel>
   );
 }

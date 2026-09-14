@@ -26,14 +26,16 @@ export default async function DashboardLayout({
 
   return (
     <AdminProvider initial={initial}>
-      <div className="flex min-h-svh bg-paper">
+      <div data-admin className="min-h-svh bg-seamless font-sans text-ink">
         <DashboardSidebar />
-        <main className="ml-[236px] min-w-[1100px] flex-1">
+        <div className="lg:pl-[232px]">
           <DashboardHeader />
-          {children}
-        </main>
+          <main className="mx-auto w-full max-w-[1400px] px-[16px] pt-[20px] pb-[72px] sm:px-[28px]">
+            {children}
+          </main>
+        </div>
+        <AdminChrome />
       </div>
-      <AdminChrome />
     </AdminProvider>
   );
 }

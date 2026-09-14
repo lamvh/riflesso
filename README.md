@@ -31,8 +31,10 @@ album, hero, section trang chủ — nằm trong Supabase Postgres. Chưa cấu 
 (hoặc chưa chạy migration, hoặc chưa publish lần nào) thì site vẫn chạy bằng
 nội dung gốc trong `src/data/*`.
 
-1. **Backup DB**, rồi chạy `supabase/migrations/20260913142200_create_site_content.sql`
-   (SQL Editor của Supabase, hoặc `supabase db push`).
+1. **Backup DB**, rồi chạy lần lượt (SQL Editor của Supabase, hoặc `supabase db push`):
+   - `supabase/migrations/20260913142200_create_site_content.sql` — schema
+   - `supabase/migrations/20260913150700_seed_site_content.sql` — nạp nội dung hiện
+     có của repo (revision 1). Chỉ chạy khi DB trống, chạy lại không làm gì.
 2. `cp .env.example .env.local` rồi điền:
    - `SUPABASE_URL`
    - `SUPABASE_ANON_KEY` — publishable key, dùng cho đọc public

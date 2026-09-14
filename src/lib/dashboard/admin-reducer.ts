@@ -27,7 +27,9 @@ export function adminReducer(state: AdminState, action: AdminAction): AdminState
 
     case "cat/add": {
       const name = state.newCat.trim();
-      if (!name) return { ...state, toast: "Type a category name first" };
+      if (!name) {
+        return { ...state, toast: "Type a category name first", toastTone: "error" };
+      }
       const cats: CategoryRow[] = [...state.cats, { id: newId(), name, visible: true }];
       return note({ ...state, cats, newCat: "" }, `Added ${name}`);
     }
@@ -121,7 +123,7 @@ export function adminReducer(state: AdminState, action: AdminAction): AdminState
       return { ...state, blocks: swap(state.blocks, action.index, action.delta) };
 
     case "toast":
-      return { ...state, toast: action.message };
+      return { ...state, toast: action.message, toastTone: action.tone ?? "info" };
 
     case "restore":
       return {
