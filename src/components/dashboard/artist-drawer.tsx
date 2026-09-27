@@ -8,7 +8,7 @@ import { CoverImage } from "./cover-image";
 import { Button, Chip, Segmented, buttonClass } from "./ui/controls";
 import { Drawer } from "./ui/drawer";
 import { LabelledField, NameInput, ProseInput, ProseTextarea } from "./ui/fields";
-import { ImagePickButton } from "./ui/image-pick";
+import { UploadButton } from "./ui/upload-button";
 import { SwitchRow } from "./ui/switch-row";
 
 const TERRITORY_OPTIONS: { value: Territory; label: string }[] = [
@@ -101,15 +101,14 @@ export function ArtistDrawer({
               onChange={(image) => set({ image })}
               placeholder="https://…"
             />
-            <ImagePickButton
-              onPick={(image) => set({ image })}
+            <UploadButton
+              onUploaded={(image) => set({ image })}
               className={`${buttonClass("secondary", "sm")} self-start`}
             >
-              Preview a file
-            </ImagePickButton>
+              Upload a file
+            </UploadButton>
             <p className="font-sans text-[12px] leading-[140%] text-graphite">
-              A picked file only previews here. Storage isn&apos;t connected yet, so
-              publish with an image address.
+              Uploads are resized to 2400px, re-compressed and stored on R2.
             </p>
           </div>
         </div>

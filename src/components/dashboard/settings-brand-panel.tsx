@@ -8,10 +8,11 @@ import { plural } from "@/lib/dashboard/admin-changes";
 import type { AdminAction } from "@/lib/dashboard/admin-reducer";
 import { isPublishableSrc } from "@/lib/media-src";
 
-import { Button, IconButton } from "./ui/controls";
+import { Button, IconButton, buttonClass } from "./ui/controls";
 import { FieldLabel, LabelledField, NameInput, ProseInput, ProseTextarea } from "./ui/fields";
 import { CrossIcon, PlusIcon } from "./ui/icons";
 import { Panel } from "./ui/panel";
+import { UploadButton } from "./ui/upload-button";
 
 /** About copy is edited as one block of text; a blank line starts a paragraph. */
 const PARAGRAPH_BREAK = /\n\s*\n/;
@@ -39,8 +40,17 @@ export function SettingsBrandPanel({
           <div className="flex h-[88px] items-center justify-center rounded-[2px] bg-hover px-[20px]">
             <img src={logo} alt={settings.logoAlt} className="block h-[24px] w-auto max-w-full" />
           </div>
-          <LabelledField label="Logo address" hint="A file under /public, like /riflesso.png, or an https:// link">
+          <LabelledField
+            label="Logo address"
+            hint="A file under /public, like /riflesso.png, or an uploaded file"
+          >
             <ProseInput value={settings.logoUrl} onChange={(logoUrl) => set({ logoUrl })} />
+            <UploadButton
+              onUploaded={(logoUrl) => set({ logoUrl })}
+              className={`${buttonClass("secondary", "sm")} self-start`}
+            >
+              Upload a file
+            </UploadButton>
           </LabelledField>
           <div className="grid gap-[16px] sm:grid-cols-2">
             <LabelledField label="Brand name">

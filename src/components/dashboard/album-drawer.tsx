@@ -9,7 +9,7 @@ import { Button, Chip, IconButton } from "./ui/controls";
 import { Drawer } from "./ui/drawer";
 import { LabelledField, NameInput, ProseInput, ProseTextarea } from "./ui/fields";
 import { CrossIcon, PlusIcon } from "./ui/icons";
-import { ImagePickButton } from "./ui/image-pick";
+import { UploadButton } from "./ui/upload-button";
 import { SwitchRow } from "./ui/switch-row";
 
 export function AlbumDrawer({
@@ -87,12 +87,13 @@ export function AlbumDrawer({
                 <CrossIcon size={12} />
               </button>
               {!shot.src && (
-                <ImagePickButton
-                  onPick={(src) => setShot(position, src)}
+                <UploadButton
+                  onUploaded={(src) => setShot(position, src)}
+                  accept="image/*,video/mp4,video/webm"
                   className="absolute inset-x-0 bottom-0 flex justify-center bg-paper/90 py-[6px] font-sans text-[11px] leading-none font-medium"
                 >
-                  Pick file
-                </ImagePickButton>
+                  Upload
+                </UploadButton>
               )}
               {position === 0 && shot.src && (
                 <span className="absolute bottom-[4px] left-[4px] rounded-[2px] bg-ink px-[6px] py-[3px] font-sans text-[11px] leading-none font-medium text-paper">
@@ -115,7 +116,7 @@ export function AlbumDrawer({
 
       <LabelledField
         label="Image addresses"
-        hint="One per line, cover first. Picked files only preview until storage is connected."
+        hint="One per line, cover first. Uploaded files are stored on R2."
       >
         <ProseTextarea
           rows={4}

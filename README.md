@@ -71,6 +71,39 @@ nội dung gốc trong `src/data/*`.
   (`src/lib/content/public-site-content.ts`). Cache bằng `unstable_cache` tag
   `site-content`; publish gọi `updateTag` + `revalidatePath("/", "layout")`.
 
+### Ảnh: Cloudflare R2
+
+Ảnh và video upload từ dashboard nằm trong bucket R2. Chưa cấu hình thì nút
+upload báo lỗi rõ ràng, phần còn lại của dashboard vẫn chạy bình thường.
+
+1. R2 → **Manage API tokens** → tạo token quyền *Object Read & Write*, lấy
+   Access Key ID + Secret.
+2. Chọn nơi phục vụ ảnh, một trong hai:
+   - **Custom domain** (nên dùng cho production): bucket → Settings → Connect
+     Domain → `cdn.riflesso.studio`. Domain phải nằm trong Cloudflare.
+   - **r2.dev**: bucket → Settings → Public Development URL → Enable. Tiện để
+     thử, Cloudflare khuyến cáo không dùng cho production.
+3. Điền vào `.env.local`: `R2_ENDPOINT`, `R2_BUCKET`, `R2_ACCESS_KEY_ID`,
+   `R2_SECRET_ACCESS_KEY`, `NEXT_PUBLIC_MEDIA_BASE_URL`. Đổi chỗ phục vụ ảnh sau
+   này chỉ cần sửa `NEXT_PUBLIC_MEDIA_BASE_URL` (ảnh cũ vẫn giữ URL đã lưu trong DB).
+
+**Đường đi của một file** (`src/lib/media/`, `src/app/api/media/upload/`):
+
+- Trình duyệt POST file tới `/api/media/upload` (không cần cấu hình CORS cho bucket).
+- Ảnh: `sharp` xoay theo EXIF, resize cạnh dài tối đa **2400px**, rồi encode cả
+  **WebP** lẫn **JPEG** (mozjpeg) ở chất lượng 80 và **giữ bản nhẹ hơn** — WebP
+  không phải lúc nào cũng nhỏ hơn, ảnh nhiều hạt đã nén sẵn có khi còn phình ra.
+  Ảnh gốc đã nhẹ hơn cả hai và không cần resize thì giữ nguyên (trường hợp duy
+  nhất metadata không bị xoá). Ảnh máy ảnh 8MB thường còn 300–600KB.
+- Video (mp4/webm/mov) giữ nguyên, không nén. Giới hạn 50MB mỗi file.
+- Key dạng `uploads/2026/09/<tên-file>-<8 ký tự>.webp` — mỗi lần upload là một
+  object mới, nên cache `immutable` một năm.
+- Route trả về URL công khai, dashboard điền vào ô địa chỉ; ảnh chỉ thật sự lên
+  site sau khi bấm **Publish**.
+
+> **Chưa có auth.** `/api/media/upload` mở cho bất kỳ ai gọi tới. Thêm đăng nhập
+> trước khi deploy public, nếu không bucket có thể bị lạm dụng.
+
 ## Cấu trúc
 
 ```
@@ -131,6 +164,9 @@ src/
     ├── work-detail.ts                 # dựng gallery: nguyên bộ shoot, hoặc hàng xóm trong rail
     ├── media-item.ts                  # type + constructor cho item rail
     ├── media-src.ts                   # URL publish được? next/image tối ưu được? video?
+    ├── media/
+    │   ├── r2-storage.ts              # client R2 (S3 API) + đặt key cho object
+    │   └── optimize-image.ts          # resize 2400px + encode WebP bằng sharp
     ├── supabase/supabase-clients.ts   # client anon (đọc public) + service role (dashboard)
     ├── content/
     │   ├── site-content-types.ts      # SiteContent: settings, contacts, artists, albums…
@@ -250,9 +286,10 @@ Draft lưu ở `sessionStorage` kèm revision — chỉ khôi phục khi DB vẫ
 revision đó, để draft cũ không âm thầm đè publish mới hơn. Đóng tab khi còn thay
 đổi chưa publish sẽ bị hỏi lại.
 
-**Ảnh là địa chỉ, chưa có storage.** Mọi ô ảnh có input URL (`/assets/…` hoặc
-`https://…`). Nút chọn file vẫn cho xem trước bằng `blob:` URL, nhưng publish từ
-chối `blob:`. Ảnh ngoài hai host của `next.config.ts` render `unoptimized`.
+**Ảnh upload thẳng lên R2.** Mọi ô ảnh có input URL (`/assets/…` hoặc
+`https://…`) kèm nút **Upload a file**: file đi qua `/api/media/upload`, được
+nén rồi lưu vào R2, và địa chỉ trả về được điền sẵn vào ô. Publish từ chối
+`blob:`. Ảnh ngoài các host khai báo trong `next.config.ts` render `unoptimized`.
 
 **Khác design ở ba điểm, đều có lý do:**
 

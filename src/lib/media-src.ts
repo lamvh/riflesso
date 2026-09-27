@@ -3,10 +3,28 @@
  * next.config.ts → images.remotePatterns; anything else renders unoptimised
  * rather than throwing, since editors can paste any URL into the dashboard.
  */
+type Remote = { hostname: string; pathname: string };
+
+/** Where uploads are served from, once R2 is configured. */
+function mediaRemote(): Remote | null {
+  const base = process.env.NEXT_PUBLIC_MEDIA_BASE_URL;
+  if (!base) return null;
+  try {
+    const url = new URL(base);
+    return {
+      hostname: url.hostname,
+      pathname: url.pathname.endsWith("/") ? url.pathname : `${url.pathname}/`,
+    };
+  } catch {
+    return null;
+  }
+}
+
 const OPTIMIZABLE_REMOTES = [
   { hostname: "thewallgroup.bynder.com", pathname: "/transform/" },
   { hostname: "thewallgroup.com", pathname: "/wp-content/uploads/" },
-];
+  mediaRemote(),
+].filter((remote): remote is Remote => remote !== null);
 
 export function canOptimizeImage(src: string): boolean {
   if (src.startsWith("/") && !src.startsWith("//")) return true;
