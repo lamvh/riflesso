@@ -1,16 +1,16 @@
-"use client";
+"use client"
 
-import Image from "next/image";
+import Image from "next/image"
 
-import { canOptimizeImage } from "@/lib/media-src";
+import { canOptimizeImage } from "@/lib/media-src"
 
 type ArtistPreviewImageProps = {
-  src: string | null;
-  alt: string;
-};
+  src: string | null
+  alt: string
+}
 
 /** Aspect ratio taken from the source design (portrait, ~3:4). */
-const ASPECT_RATIO_PADDING = "133.0134357006%";
+const ASPECT_RATIO_PADDING = "133.0134357006%"
 
 export function ArtistPreviewImage({ src, alt }: ArtistPreviewImageProps) {
   return (
@@ -32,5 +32,5 @@ export function ArtistPreviewImage({ src, alt }: ArtistPreviewImageProps) {
         )}
       </div>
     </div>
-  );
+  )
 }
