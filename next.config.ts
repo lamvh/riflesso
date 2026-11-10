@@ -28,19 +28,7 @@ const nextConfig: NextConfig = {
     root: import.meta.dirname,
   },
   images: {
-    remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "thewallgroup.bynder.com",
-        pathname: "/transform/**",
-      },
-      {
-        protocol: "https",
-        hostname: "thewallgroup.com",
-        pathname: "/wp-content/uploads/**",
-      },
-      ...mediaPattern(),
-    ],
+    remotePatterns: mediaPattern(),
   },
 };
 

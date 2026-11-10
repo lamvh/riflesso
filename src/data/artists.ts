@@ -34,43 +34,11 @@ export type Artist = {
   territory: Territory;
 };
 
-/** Represented out of the European offices; everyone else falls to US. */
-const EUROPE = new Set([
-  "Aika Flores",
-  "Alice Moore",
-  "Anne Sophie Costa",
-  "Bjorn Krischker",
-  "Brooke Turnbull",
-  "Charlotte Prevel",
-  "Emma Day",
-  "Emma Jade Morrison",
-  "Fabio Petri",
-  "Halley Brisker",
-  "Harold James",
-  "Hos",
-  "Ilham Mestour",
-  "Issac Poleon",
-  "Iván Gómez",
-  "James Yardley",
-  "Joey Choy",
-  "Kirsty Stewart",
-  "Leith Clark",
-  "Liz Taw",
-  "María Pélo",
-  "Martin Cullen",
-  "Marty Harper",
-  "Mona Leanne",
-  "Morgane Martini",
-  "Philipp Verheyen",
-  "Ricky Fraser",
-  "Romane Martini",
-  "Rose Forde",
-  "Sasha Nesterchuk",
-  "Sky Cripps-Jackson",
-  "Sophia Sinot",
-  "Takuya Yamaguchi",
-  "Yacine Diallo",
-]);
+/**
+ * Represented out of the European offices; everyone else falls to US.
+ * Add a credited name here to file them under Europe.
+ */
+const EUROPE = new Set<string>();
 
 /**
  * Scan order for the derivation below. It decides both which credit names an

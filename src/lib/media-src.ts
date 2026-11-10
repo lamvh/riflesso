@@ -20,11 +20,9 @@ function mediaRemote(): Remote | null {
   }
 }
 
-const OPTIMIZABLE_REMOTES = [
-  { hostname: "thewallgroup.bynder.com", pathname: "/transform/" },
-  { hostname: "thewallgroup.com", pathname: "/wp-content/uploads/" },
-  mediaRemote(),
-].filter((remote): remote is Remote => remote !== null);
+const OPTIMIZABLE_REMOTES = [mediaRemote()].filter(
+  (remote): remote is Remote => remote !== null,
+);
 
 export function canOptimizeImage(src: string): boolean {
   if (src.startsWith("/") && !src.startsWith("//")) return true;

@@ -152,7 +152,7 @@ src/
 │   ├── use-drag-scroll.ts             # kéo chuột để cuộn rail
 │   └── use-video-autoplay.ts          # play/pause video theo viewport
 ├── data/
-│   ├── media-url.ts                   # helper URL cho Bynder DAM, WordPress, public/assets
+│   ├── media-url.ts                   # helper URL cho public/assets + credit mặc định của studio
 │   ├── stories.ts                     # 7 bộ ảnh (shoot), mỗi bộ mở nguyên set ở work detail
 │   ├── artists.ts                     # danh bạ artist, suy ra từ rail
 │   ├── home-hero-slides.ts            # 8 slide hero
