@@ -53,10 +53,11 @@ export type SiteContent = {
 
 /**
  * Where content came from: the database, the repo's built-in content because
- * nothing has been published yet, or the built-in content because Supabase is
- * not configured.
+ * nothing has been published yet, the built-in content because Supabase is
+ * not configured, or the built-in content because Supabase is configured but
+ * not answering (typically a paused project).
  */
-export type SiteContentSource = "database" | "seed" | "unconfigured";
+export type SiteContentSource = "database" | "seed" | "unconfigured" | "unreachable";
 
 export type LoadedSiteContent = {
   content: SiteContent;

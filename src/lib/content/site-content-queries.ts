@@ -28,7 +28,26 @@ import {
 /** Supabase caps a response at 1000 rows by default; read in pages of that. */
 const PAGE_SIZE = 1000;
 
-type PageResult<T> = { data: T[] | null; error: { message: string } | null };
+type ReadError = { code?: string; message: string };
+type PageResult<T> = { data: T[] | null; error: ReadError | null };
+
+/**
+ * The request never got an answer from the database: the host does not
+ * resolve, refused the connection or timed out. This is what a paused (or
+ * deleted) Supabase project looks like. Every PostgREST answer carries an
+ * error code, and supabase-js reports transport failures with an empty one.
+ */
+export class DatabaseUnreachableError extends Error {
+  constructor(detail: string) {
+    super(`Supabase is unreachable: ${detail}`);
+    this.name = "DatabaseUnreachableError";
+  }
+}
+
+function readFailed(error: ReadError): Error {
+  if (!error.code) return new DatabaseUnreachableError(error.message);
+  return new Error(`Supabase read failed: ${error.message}`);
+}
 
 async function selectAll<T>(
   page: (from: number, to: number) => PromiseLike<unknown>,
@@ -36,7 +55,7 @@ async function selectAll<T>(
   const rows: T[] = [];
   for (let from = 0; ; from += PAGE_SIZE) {
     const { data, error } = (await page(from, from + PAGE_SIZE - 1)) as PageResult<T>;
-    if (error) throw new Error(`Supabase read failed: ${error.message}`);
+    if (error) throw readFailed(error);
     rows.push(...(data ?? []));
     if (!data || data.length < PAGE_SIZE) return rows;
   }
@@ -52,7 +71,7 @@ const bySortOrder = (a: { sort_order: number }, b: { sort_order: number }) =>
  * not been run. The site keeps serving its built-in content rather than
  * failing every page.
  */
-function isMissingSchema(error: { code?: string; message: string }) {
+function isMissingSchema(error: ReadError) {
   if (error.code !== "PGRST205" && error.code !== "42P01") return false;
   console.warn(
     `Supabase tables missing (${error.message}) — run supabase/migrations. Serving built-in content.`,
@@ -69,7 +88,7 @@ export async function queryRevision(client: SupabaseClient): Promise<number | nu
     .maybeSingle();
   if (error) {
     if (isMissingSchema(error)) return null;
-    throw new Error(`Supabase read failed: ${error.message}`);
+    throw readFailed(error);
   }
   return data ? Number(data.revision) : null;
 }
@@ -94,7 +113,7 @@ export async function querySettings(
     .maybeSingle();
   if (row.error) {
     if (isMissingSchema(row.error)) return null;
-    throw new Error(`Supabase read failed: ${row.error.message}`);
+    throw readFailed(row.error);
   }
   const settings = row.data as SettingsRow | null;
   if (!settings) return null;

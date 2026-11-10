@@ -26,11 +26,15 @@ export function PublishTray() {
   const areas = changedAreas(changes).map((area) => CHANGE_AREA_LABEL[area]);
 
   const unconfigured = state.source === "unconfigured";
+  const unreachable = state.source === "unreachable";
   /* The first publish is allowed with no edits: it seeds the database. */
-  const canPublish = !unconfigured && !publishing && (dirty || state.source === "seed");
+  const canPublish =
+    !unconfigured && !unreachable && !publishing && (dirty || state.source === "seed");
 
   const [dot, headline, detail] = unconfigured
     ? ["bg-graphite", "Not connected", "Add the Supabase keys to publish"]
+    : unreachable
+      ? ["bg-danger", "Database paused", "Restore the Supabase project to publish"]
     : publishing
       ? ["bg-draft motion-safe:animate-pulse", "Publishing…", ""]
       : dirty

@@ -75,6 +75,12 @@ export function AdminProvider({
      stored draft is layered on only if it was made against the same revision:
      restoring an older one would quietly undo someone else's publish. */
   useEffect(() => {
+    /* Offline content is a stand-in: leave any real draft stored for when the
+       database is back, and don't restore one onto the wrong baseline. */
+    if (initial.source === "unreachable") {
+      dispatch({ type: "hydrated" });
+      return;
+    }
     const draft = readDraft();
     if (draft && draft.revision === initial.revision && draft.source === initial.source) {
       dispatch({ type: "restore", content: draft.content, activity: draft.activity });
@@ -86,7 +92,7 @@ export function AdminProvider({
 
   useEffect(() => {
     /* Writing before the read lands would overwrite the draft. */
-    if (!state.hydrated) return;
+    if (!state.hydrated || state.source === "unreachable") return;
     const draft: StoredDraft = {
       revision: state.revision,
       source: state.source,

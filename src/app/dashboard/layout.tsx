@@ -4,6 +4,7 @@ import { connection } from "next/server";
 import { AdminChrome } from "@/components/dashboard/admin-chrome";
 import { AdminProvider } from "@/components/dashboard/admin-store";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
+import { DatabaseUnreachableNotice } from "@/components/dashboard/database-unreachable-notice";
 import { DashboardSidebar } from "@/components/dashboard/dashboard-sidebar";
 import { loadDashboardContent } from "@/lib/content/load-dashboard-content";
 
@@ -29,6 +30,7 @@ export default async function DashboardLayout({
       <div data-admin className="min-h-svh bg-seamless font-sans text-ink">
         <DashboardSidebar />
         <div className="lg:pl-[232px]">
+          {initial.source === "unreachable" && <DatabaseUnreachableNotice />}
           <DashboardHeader />
           <main className="mx-auto w-full max-w-[1400px] px-[16px] pt-[20px] pb-[72px] sm:px-[28px]">
             {children}
