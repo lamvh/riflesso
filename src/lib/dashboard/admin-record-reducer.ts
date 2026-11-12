@@ -9,6 +9,7 @@ import {
   type ArtistDraft,
   type Shot,
 } from "./admin-state";
+import { plural } from "./admin-changes";
 import { dropAt, fromDraft, note, patchAt, withDraft } from "./admin-helpers";
 import type { AdminArtist } from "./admin-types";
 
@@ -147,5 +148,80 @@ export function recordReducer(state: AdminState, action: RecordAction): AdminSta
 
     case "drawer/close":
       return { ...state, drawer: null };
+
+    case "draft/appendShots":
+      return withDraft(state, (draft: AlbumDraft) => {
+        /* Fill empty frames first, then add new ones. */
+        const queue = [...action.srcs];
+        const shots = draft.shots.map((shot) =>
+          !shot.src.trim() && queue.length ? { ...shot, src: queue.shift()! } : shot,
+        );
+        return { shots: [...shots, ...queue.map((src): Shot => ({ src, pos: "50% 18%" }))] };
+      });
+
+    case "artist/bulkLive": {
+      const ids = new Set(action.ids);
+      const artists = state.artists.map((artist) =>
+        ids.has(artist.id) ? { ...artist, live: action.live } : artist,
+      );
+      return note(
+        { ...state, artists, drawer: null },
+        `${plural(ids.size, "artist")} ${action.live ? "shown in" : "hidden from"} the directory`,
+      );
+    }
+
+    case "artist/bulkCategory": {
+      const ids = new Set(action.ids);
+      const cat = state.cats.find((entry) => entry.id === action.catId);
+      if (!cat) return state;
+      const artists = state.artists.map((artist) => {
+        if (!ids.has(artist.id)) return artist;
+        const has = artist.categoryIds.includes(cat.id);
+        if (has === action.add) return artist;
+        return {
+          ...artist,
+          categoryIds: action.add
+            ? [...artist.categoryIds, cat.id]
+            : artist.categoryIds.filter((id) => id !== cat.id),
+        };
+      });
+      return note(
+        { ...state, artists, drawer: null },
+        `${cat.name} ${action.add ? "added to" : "removed from"} ${plural(ids.size, "artist")}`,
+      );
+    }
+
+    case "artist/bulkDelete": {
+      const ids = new Set(action.ids);
+      return note(
+        { ...state, artists: state.artists.filter((artist) => !ids.has(artist.id)), drawer: null },
+        `Deleted ${plural(ids.size, "artist")}`,
+      );
+    }
+
+    case "album/bulkSet": {
+      const ids = new Set(action.ids);
+      const albums = state.albums.map((album) =>
+        ids.has(album.id) ? { ...album, ...action.patch } : album,
+      );
+      const { live, home } = action.patch;
+      const what =
+        live !== undefined
+          ? live
+            ? "published"
+            : "moved to draft"
+          : home
+            ? "featured on the homepage"
+            : "removed from the homepage";
+      return note({ ...state, albums, drawer: null }, `${plural(ids.size, "album")} ${what}`);
+    }
+
+    case "album/bulkDelete": {
+      const ids = new Set(action.ids);
+      return note(
+        { ...state, albums: state.albums.filter((album) => !ids.has(album.id)), drawer: null },
+        `Deleted ${plural(ids.size, "album")}`,
+      );
+    }
   }
 }

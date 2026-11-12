@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -24,8 +24,10 @@ import {
 } from "@/lib/content/site-visibility";
 
 import { useAdmin } from "./admin-store";
+import { refreshConnectionHealth, useConnectionHealth } from "./use-connection-health";
 import {
   AlbumIcon,
+  ClockIcon,
   EyeIcon,
   EyeOffIcon,
   GearIcon,
@@ -49,7 +51,7 @@ const GROUPS: { label?: string; views: View[] }[] = [
   { views: ["overview"] },
   { label: "Library", views: ["artists", "albums", "cats", "media"] },
   { label: "Site", views: ["home", "settings"] },
-  { label: "System", views: ["status"] },
+  { label: "System", views: ["history", "status"] },
 ];
 
 /**
@@ -68,11 +70,27 @@ const VIEW_ICON: Record<View, (props: { size?: number }) => ReactNode> = {
   media: StackIcon,
   home: HomeIcon,
   settings: GearIcon,
+  history: ClockIcon,
   status: PulseIcon,
 };
 
+const HEALTH_DOT = {
+  ok: ["bg-live", "All services connected"],
+  unconfigured: ["bg-graphite", "Some services are not configured"],
+  warning: ["bg-draft", "A service needs attention"],
+  error: ["bg-danger", "A service is down"],
+} as const;
+
+/** How often the sidebar re-probes the services while the dashboard is open. */
+const HEALTH_POLL_MS = 5 * 60 * 1000;
+
 export function DashboardSidebar() {
   const { state, dispatch, changes } = useAdmin();
+  const { overall } = useConnectionHealth();
+  useEffect(() => {
+    const timer = setInterval(() => void refreshConnectionHealth(), HEALTH_POLL_MS);
+    return () => clearInterval(timer);
+  }, []);
 
   const togglePart = (part: HideablePart) => {
     const label = HIDEABLE_PARTS.find((entry) => entry.key === part)?.label ?? "Page";
@@ -169,6 +187,16 @@ export function DashboardSidebar() {
                         className="h-[7px] w-[7px] rounded-full bg-draft"
                       >
                         <span className="sr-only">{plural(pending, "unsaved change")}</span>
+                      </span>
+                    )}
+                    {view === "status" && overall && (
+                      <span
+                        title={HEALTH_DOT[overall][1]}
+                        className={`h-[8px] w-[8px] rounded-full ${HEALTH_DOT[overall][0]} ${
+                          overall === "error" ? "motion-safe:animate-pulse" : ""
+                        }`}
+                      >
+                        <span className="sr-only">{HEALTH_DOT[overall][1]}</span>
                       </span>
                     )}
                     {count !== null && (

@@ -144,6 +144,38 @@ export function adminReducer(state: AdminState, action: AdminAction): AdminState
         revision: action.revision,
         baseline: action.baseline,
         source: "database",
+        /* Lines logged while the save was in flight belong to the next one. */
+        unsavedActivity: state.unsavedActivity.slice(
+          0,
+          Math.max(0, state.unsavedActivity.length - action.sentActivity),
+        ),
+        restoring: false,
+      };
+
+    case "history/restore":
+      return {
+        ...note(
+          {
+            ...state,
+            ...pickSiteContent(withVisibilityDefaults(action.content)),
+            drawer: null,
+            slide: 0,
+            /* The restore is the whole story of the next save. */
+            unsavedActivity: [],
+          },
+          `Restored the site as of ${action.label}`,
+        ),
+        restoring: true,
+      };
+
+    case "autosave/pause":
+      return {
+        ...state,
+        autosavePaused: action.paused,
+        toast: action.paused
+          ? "Auto-save paused — edits stay here until you save"
+          : "Auto-save is back on",
+        toastTone: "info",
       };
   }
 }

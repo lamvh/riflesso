@@ -3,6 +3,7 @@
 import { AlbumDrawer } from "./album-drawer";
 import { ArtistDrawer } from "./artist-drawer";
 import { useAdmin } from "./admin-store";
+import { CommandPalette } from "./command-palette";
 
 /**
  * The drawer and the toast, mounted once above the router outlet: the page
@@ -15,6 +16,7 @@ export function AdminChrome() {
 
   return (
     <>
+      <CommandPalette />
       {drawer?.kind === "artist" && (
         <ArtistDrawer
           draft={drawer.draft}
@@ -29,7 +31,7 @@ export function AdminChrome() {
       )}
 
       {toast && (
-        <div className="pointer-events-none fixed inset-x-0 bottom-[20px] z-50 flex justify-center px-[16px] lg:pl-[232px]">
+        <div className="admin-toast pointer-events-none fixed inset-x-0 bottom-[20px] z-50 flex justify-center px-[16px] lg:pl-[232px]">
           <p
             role={error ? "alert" : "status"}
             className={`pointer-events-auto max-w-[560px] rounded-[8px] px-[16px] py-[11px] font-sans text-[14px] leading-[140%] font-medium shadow-[0_12px_32px_-6px_rgba(28,24,16,0.35)] ${

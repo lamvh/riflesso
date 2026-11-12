@@ -23,6 +23,13 @@ export type ToastTone = "info" | "error";
 
 export type AdminState = SiteContent & {
   activity: Activity;
+  /** Activity since the last save, newest first: it becomes that save's
+      entry in the edit history. */
+  unsavedActivity: Activity;
+  /** The pending save puts back an earlier history entry. */
+  restoring: boolean;
+  /** Edits stay in this browser until saved by hand — used to preview. */
+  autosavePaused: boolean;
   /** Which hero slide the homepage screen is editing. */
   slide: number;
   /** Pending name in the categories screen's add field, so the page header's
@@ -55,6 +62,9 @@ export const initialAdminState = ({
 }: LoadedSiteContent): AdminState => ({
   ...pickSiteContent(content),
   activity: [],
+  unsavedActivity: [],
+  restoring: false,
+  autosavePaused: false,
   slide: 0,
   newCat: "",
   drawer: null,

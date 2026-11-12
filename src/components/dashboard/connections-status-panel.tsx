@@ -1,16 +1,13 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
-
-import { checkExternalConnections } from "@/lib/dashboard/check-external-connections";
 import type {
-  ConnectionReport,
   ConnectionState,
   ConnectionStatus,
 } from "@/lib/dashboard/external-connection-types";
 
 import { Button, StatusPill, type Tone } from "./ui/controls";
 import { Panel } from "./ui/panel";
+import { useConnectionHealth } from "./use-connection-health";
 
 const STATE_PILL: Record<ConnectionState, [Tone, string]> = {
   ok: ["live", "Connected"],
@@ -28,22 +25,9 @@ const timeOf = (iso: string) =>
  * results are never cached, so "Check again" always hits the services.
  */
 export function ConnectionsStatusPanel() {
-  const [report, setReport] = useState<ConnectionReport | null>(null);
-  const [failure, setFailure] = useState<string | null>(null);
-  const [checking, startChecking] = useTransition();
-
-  const check = () =>
-    startChecking(async () => {
-      try {
-        setReport(await checkExternalConnections());
-        setFailure(null);
-      } catch (error) {
-        setFailure(error instanceof Error ? error.message : "The check could not run");
-      }
-    });
-
-  /* Probe once when the screen opens. */
-  useEffect(check, []);
+  /* Opening the screen probes again unless a check just ran. */
+  const { report, failure, checking, refresh } = useConnectionHealth(10_000);
+  const check = () => void refresh();
 
   const description = checking
     ? "Checking…"

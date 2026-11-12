@@ -1,41 +1,50 @@
 "use client";
 
-import { Button } from "./ui/controls";
+import { totalChanges, plural } from "@/lib/dashboard/admin-changes";
+
+import { useAdmin } from "./admin-store";
+import { Button, IconButton } from "./ui/controls";
+import { PauseIcon, PlayIcon } from "./ui/icons";
 import { useAutosave, type SaveStatus } from "./use-autosave";
 
 const LOOK: Record<SaveStatus["kind"], [dot: string, headline: string]> = {
   off: ["bg-graphite", ""],
   saved: ["bg-live", "All changes saved"],
   pending: ["bg-draft", "Unsaved changes…"],
+  paused: ["bg-draft", "Auto-save paused"],
   saving: ["bg-draft motion-safe:animate-pulse", "Saving…"],
   failed: ["bg-danger", "Not saved"],
 };
 
 /**
- * Where the header used to hold Publish: edits now save on their own, so this
- * only reports how that is going, and offers a retry when it is not.
+ * Edits save on their own; this reports how that is going, offers a retry when
+ * it is not, and can pause saving so edits can be previewed before they go live.
  */
 export function SaveStatusIndicator() {
+  const { state, dispatch, changes } = useAdmin();
   const { status, retry } = useAutosave();
   const [dot, defaultHeadline] = LOOK[status.kind];
+  const paused = state.autosavePaused;
+  const off = status.kind === "off";
 
-  const headline =
-    status.kind === "off"
-      ? status.reason === "unconfigured"
-        ? "Not connected"
-        : "Database paused"
-      : defaultHeadline;
+  const headline = off
+    ? status.reason === "unconfigured"
+      ? "Not connected"
+      : "Database paused"
+    : defaultHeadline;
   const detail =
     status.kind === "failed"
       ? status.message
-      : status.kind === "off"
-        ? status.reason === "unconfigured"
-          ? "Add the Supabase keys to save"
-          : "Edits are kept in this tab until it is back"
-        : "";
+      : status.kind === "paused"
+        ? `${plural(totalChanges(changes), "change")} not on the site yet`
+        : off
+          ? status.reason === "unconfigured"
+            ? "Add the Supabase keys to save"
+            : "Edits are kept in this tab until it is back"
+          : "";
 
   return (
-    <div className="flex max-w-full items-center gap-[4px] rounded-[8px] border border-line bg-paper shadow-sheet py-[3px] pr-[3px] pl-[12px]">
+    <div className="flex max-w-full items-center gap-[4px] rounded-[8px] border border-line bg-paper py-[3px] pr-[3px] pl-[12px] shadow-sheet">
       <p
         role="status"
         aria-live="polite"
@@ -52,10 +61,18 @@ export function SaveStatusIndicator() {
           </span>
         )}
       </p>
-      {status.kind === "failed" && (
-        <Button size="sm" onClick={retry}>
-          Retry
+      {(status.kind === "failed" || status.kind === "paused") && (
+        <Button size="sm" variant={status.kind === "paused" ? "primary" : "secondary"} onClick={retry}>
+          {status.kind === "paused" ? "Save now" : "Retry"}
         </Button>
+      )}
+      {!off && (
+        <IconButton
+          label={paused ? "Resume auto-save" : "Pause auto-save to preview edits before they go live"}
+          onClick={() => dispatch({ type: "autosave/pause", paused: !paused })}
+        >
+          {paused ? <PlayIcon size={13} /> : <PauseIcon size={13} />}
+        </IconButton>
       )}
     </div>
   );

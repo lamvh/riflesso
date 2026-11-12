@@ -11,6 +11,7 @@ import { CoverImage } from "../cover-image";
 import { Button, Segmented, StatusPill, Switch, liveTone } from "../ui/controls";
 import { SearchField } from "../ui/fields";
 import { PlusIcon } from "../ui/icons";
+import { BulkBar, BulkButton, SelectBox, toggleId } from "../ui/selection-controls";
 
 const ALL = "all";
 
@@ -30,6 +31,7 @@ export function AlbumsScreen() {
   const [query, setQuery] = useState("");
   const [kind, setKind] = useState(ALL);
   const [status, setStatus] = useState(ALL);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
 
   const needle = query.trim().toLowerCase();
   const cards = state.albums
@@ -42,6 +44,18 @@ export function AlbumsScreen() {
           album.title.toLowerCase().includes(needle) ||
           album.credits.some((credit) => credit.name.toLowerCase().includes(needle))),
     );
+
+  const picked = state.albums.filter((album) => selected.has(album.id)).map((album) => album.id);
+  const shownIds = cards.map(({ album }) => album.id);
+  const allShown = shownIds.length > 0 && shownIds.every((id) => selected.has(id));
+  const clearSelection = () => setSelected(new Set());
+  const bulkSet = (patch: { live?: boolean; home?: boolean }) =>
+    dispatch({ type: "album/bulkSet", ids: picked, patch });
+  const bulkDelete = () => {
+    if (!window.confirm(`Delete ${plural(picked.length, "album")}? They leave the site right away — History can bring them back.`)) return;
+    dispatch({ type: "album/bulkDelete", ids: picked });
+    clearSelection();
+  };
 
   const filtered = Boolean(needle) || kind !== ALL || status !== ALL;
   const clearFilters = () => {
@@ -61,7 +75,27 @@ export function AlbumsScreen() {
         />
         <Segmented label="Album type" options={KIND_OPTIONS} value={kind} onChange={setKind} />
         <Segmented label="Status" options={STATUS_OPTIONS} value={status} onChange={setStatus} />
-        <p className="font-sans text-[13px] text-graphite tabular-nums sm:ml-auto">
+        {shownIds.length > 0 && (
+          <label className="flex cursor-pointer items-center gap-[8px] font-sans text-[13px] font-medium text-body sm:ml-auto">
+            <SelectBox
+              label={allShown ? "Deselect all albums shown" : "Select all albums shown"}
+              checked={allShown}
+              mixed={!allShown && shownIds.some((id) => selected.has(id))}
+              onChange={(on) =>
+                setSelected((previous) => {
+                  const next = new Set(previous);
+                  for (const id of shownIds) {
+                    if (on) next.add(id);
+                    else next.delete(id);
+                  }
+                  return next;
+                })
+              }
+            />
+            Select all
+          </label>
+        )}
+        <p className="font-sans text-[13px] text-graphite tabular-nums">
           {filtered
             ? `${cards.length} of ${plural(state.albums.length, "album")}`
             : plural(state.albums.length, "album")}
@@ -92,8 +126,26 @@ export function AlbumsScreen() {
           {cards.map(({ album, index }) => (
             <article
               key={album.id}
-              className="relative flex min-w-0 flex-col overflow-hidden rounded-[10px] border border-line bg-paper shadow-sheet transition-[border-color,box-shadow] hover:border-line-strong hover:shadow-lift"
+              className={`group/card relative flex min-w-0 flex-col overflow-hidden rounded-[10px] border bg-paper shadow-sheet transition-[border-color,box-shadow] hover:shadow-lift ${
+                selected.has(album.id)
+                  ? "border-ink shadow-[0_0_0_1px_var(--color-ink)]"
+                  : "border-line hover:border-line-strong"
+              }`}
             >
+              {/* Hidden until hover or a pick is under way, so the grid stays calm. */}
+              <span
+                className={`absolute top-[8px] right-[8px] z-[2] flex h-[26px] w-[26px] items-center justify-center rounded-[6px] bg-paper/95 shadow-sheet transition-opacity ${
+                  selected.size > 0 || selected.has(album.id)
+                    ? "opacity-100"
+                    : "opacity-0 group-hover/card:opacity-100 focus-within:opacity-100"
+                }`}
+              >
+                <SelectBox
+                  label={`Select ${album.title}`}
+                  checked={selected.has(album.id)}
+                  onChange={(on) => setSelected((previous) => toggleId(previous, album.id, on))}
+                />
+              </span>
               <div className="relative aspect-4/5 overflow-hidden bg-well">
                 <CoverImage src={album.cover} pos={album.pos} video={album.video} />
                 <span className="absolute top-[8px] left-[8px]">
@@ -129,6 +181,18 @@ export function AlbumsScreen() {
             </article>
           ))}
         </div>
+      )}
+
+      {picked.length > 0 && (
+        <BulkBar count={picked.length} noun="album" onClear={clearSelection}>
+          <BulkButton onClick={() => bulkSet({ live: true })}>Publish</BulkButton>
+          <BulkButton onClick={() => bulkSet({ live: false })}>Move to draft</BulkButton>
+          <BulkButton onClick={() => bulkSet({ home: true })}>Add to homepage</BulkButton>
+          <BulkButton onClick={() => bulkSet({ home: false })}>Remove from homepage</BulkButton>
+          <BulkButton danger onClick={bulkDelete}>
+            Delete
+          </BulkButton>
+        </BulkBar>
       )}
     </div>
   );

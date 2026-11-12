@@ -9,6 +9,7 @@ import { CoverImage } from "../cover-image";
 import { Button, Segmented, Switch } from "../ui/controls";
 import { ColumnHead, SearchField, SelectField } from "../ui/fields";
 import { Panel } from "../ui/panel";
+import { BulkBar, BulkButton, BulkSelect, SelectBox, toggleId } from "../ui/selection-controls";
 
 const ALL = "all";
 
@@ -25,7 +26,7 @@ const STATUS_OPTIONS = [
 ];
 
 const GRID =
-  "grid grid-cols-[44px_minmax(0,1fr)_auto] items-center gap-x-[16px] md:grid-cols-[44px_minmax(0,1fr)_80px_64px_112px]";
+  "grid grid-cols-[16px_44px_minmax(0,1fr)_auto] items-center gap-x-[14px] md:grid-cols-[16px_44px_minmax(0,1fr)_80px_64px_112px]";
 
 export function ArtistsScreen() {
   const { state, dispatch } = useAdmin();
@@ -33,6 +34,7 @@ export function ArtistsScreen() {
   const [cat, setCat] = useState(ALL);
   const [territory, setTerritory] = useState(ALL);
   const [status, setStatus] = useState(ALL);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
 
   const nameById = useMemo(
     () => new Map(state.cats.map((category) => [category.id, category.name])),
@@ -63,6 +65,19 @@ export function ArtistsScreen() {
           (status === ALL || artist.live === (status === "live")),
       );
   }, [state.artists, query, cat, territory, status]);
+
+  /* Only ids still on the roster count — a bulk delete empties the pick. */
+  const picked = state.artists.filter((artist) => selected.has(artist.id)).map((artist) => artist.id);
+  const shownIds = rows.map(({ artist }) => artist.id);
+  const allShown = shownIds.length > 0 && shownIds.every((id) => selected.has(id));
+  const someShown = shownIds.some((id) => selected.has(id));
+  const clearSelection = () => setSelected(new Set());
+
+  const bulkDelete = () => {
+    if (!window.confirm(`Delete ${plural(picked.length, "artist")}? They leave the site right away — History can bring them back.`)) return;
+    dispatch({ type: "artist/bulkDelete", ids: picked });
+    clearSelection();
+  };
 
   const filtered = Boolean(query.trim()) || cat !== ALL || territory !== ALL || status !== ALL;
   const clearFilters = () => {
@@ -101,6 +116,21 @@ export function ArtistsScreen() {
 
       <Panel bodyClassName="">
         <div className={`${GRID} border-b border-line px-[16px] py-[10px]`}>
+          <SelectBox
+            label={allShown ? "Deselect all artists shown" : "Select all artists shown"}
+            checked={allShown}
+            mixed={someShown && !allShown}
+            onChange={(on) =>
+              setSelected((previous) => {
+                const next = new Set(previous);
+                for (const id of shownIds) {
+                  if (on) next.add(id);
+                  else next.delete(id);
+                }
+                return next;
+              })
+            }
+          />
           <span />
           <ColumnHead>Artist</ColumnHead>
           <ColumnHead className="hidden md:block">Territory</ColumnHead>
@@ -117,8 +147,15 @@ export function ArtistsScreen() {
           return (
             <div
               key={artist.id}
-              className={`${GRID} relative border-b border-line px-[16px] py-[10px] transition-colors last:border-b-0 hover:bg-hover`}
+              className={`${GRID} relative border-b border-line px-[16px] py-[10px] transition-colors last:border-b-0 ${
+                selected.has(artist.id) ? "bg-hover" : "hover:bg-hover"
+              }`}
             >
+              <SelectBox
+                label={`Select ${artist.name}`}
+                checked={selected.has(artist.id)}
+                onChange={(on) => setSelected((previous) => toggleId(previous, artist.id, on))}
+              />
               <div className="h-[56px] w-[44px] overflow-hidden rounded-[6px] bg-well">
                 <CoverImage src={artist.image} pos={artist.pos} />
               </div>
@@ -170,6 +207,30 @@ export function ArtistsScreen() {
           </div>
         )}
       </Panel>
+
+      {picked.length > 0 && (
+        <BulkBar count={picked.length} noun="artist" onClear={clearSelection}>
+          <BulkButton onClick={() => dispatch({ type: "artist/bulkLive", ids: picked, live: true })}>
+            Show
+          </BulkButton>
+          <BulkButton onClick={() => dispatch({ type: "artist/bulkLive", ids: picked, live: false })}>
+            Hide
+          </BulkButton>
+          <BulkSelect
+            label="Add category…"
+            options={state.cats.map((cat) => ({ value: cat.id, label: cat.name }))}
+            onPick={(catId) => dispatch({ type: "artist/bulkCategory", ids: picked, catId, add: true })}
+          />
+          <BulkSelect
+            label="Remove category…"
+            options={state.cats.map((cat) => ({ value: cat.id, label: cat.name }))}
+            onPick={(catId) => dispatch({ type: "artist/bulkCategory", ids: picked, catId, add: false })}
+          />
+          <BulkButton danger onClick={bulkDelete}>
+            Delete
+          </BulkButton>
+        </BulkBar>
+      )}
     </div>
   );
 }

@@ -11,6 +11,19 @@ import {
 import { findPublishProblem } from "@/lib/content/site-content-validation";
 import { serviceRoleClient } from "@/lib/supabase/supabase-clients";
 
+import type { SaveLog } from "./content-history-types";
+import { recordSave, snapshotBeforeSave } from "./record-content-revision";
+
+/** History is a convenience: a failure there never blocks or fails a save. */
+async function bestEffort(what: string, run: () => Promise<void>) {
+  try {
+    await run();
+  } catch (error) {
+    const message = error instanceof Error ? error.message : (error as { message?: string })?.message;
+    console.warn(`Edit history: ${what} skipped — ${message ?? error}`);
+  }
+}
+
 /** Whether anything is switched off with a flag the visibility migration added. */
 const usesHideFlags = (content: SiteContent) =>
   (content.settings.hiddenParts ?? []).length > 0 ||
@@ -19,7 +32,8 @@ const usesHideFlags = (content: SiteContent) =>
   content.slides.some((slide) => slide.hidden);
 
 /**
- * Writes the dashboard's content to Supabase in one transaction.
+ * Writes the dashboard's content to Supabase in one transaction, then files
+ * it in the edit history with what led to it.
  *
  * There is no sign-in yet, so anyone who can reach this action can publish.
  * Put an auth check here before the dashboard is deployed anywhere public.
@@ -27,6 +41,7 @@ const usesHideFlags = (content: SiteContent) =>
 export async function publishSiteContent(
   content: SiteContent,
   expectedRevision: number,
+  log: SaveLog = { summary: [], restore: false },
 ): Promise<PublishResult> {
   const problem = findPublishProblem(content);
   if (problem) return { ok: false, error: problem };
@@ -56,6 +71,8 @@ export async function publishSiteContent(
     }
   }
 
+  await bestEffort("snapshot", () => snapshotBeforeSave(client, expectedRevision));
+
   const { data, error } = await client.rpc("publish_site_content", {
     p_content: toPublishPayload(content),
     p_expected_revision: expectedRevision,
@@ -74,5 +91,18 @@ export async function publishSiteContent(
      sit on all of them. */
   updateTag(SITE_CONTENT_TAG);
   revalidatePath("/", "layout");
-  return { ok: true, revision: Number(data) };
+
+  const revision = Number(data);
+  const summary = Array.isArray(log.summary)
+    ? log.summary.filter((line): line is string => typeof line === "string").map((line) => line.slice(0, 200))
+    : [];
+  await bestEffort("record", () =>
+    recordSave(client, {
+      content,
+      revision,
+      previousRevision: expectedRevision,
+      log: { summary, restore: Boolean(log.restore) },
+    }),
+  );
+  return { ok: true, revision };
 }

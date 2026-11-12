@@ -133,3 +133,35 @@ export const PulseIcon = (props: IconProps) => (
     <path d="M1.5 8.5h3l1.8-4.5 3.2 8 1.8-3.5h3.2" />
   </Svg>
 );
+
+export const PauseIcon = (props: IconProps) => (
+  <Svg {...props}>
+    <path d="M5.5 3.5v9M10.5 3.5v9" />
+  </Svg>
+);
+
+export const PlayIcon = (props: IconProps) => (
+  <Svg {...props}>
+    <path d="M5 3.2v9.6L12.8 8Z" />
+  </Svg>
+);
+
+export const ClockIcon = (props: IconProps) => (
+  <Svg {...props}>
+    <circle cx="8" cy="8" r="5.8" />
+    <path d="M8 4.8V8l2.2 1.5" />
+  </Svg>
+);
+
+export const SearchMarkIcon = (props: IconProps) => (
+  <Svg {...props}>
+    <circle cx="7" cy="7" r="4.2" />
+    <path d="M10.2 10.2l3.3 3.3" />
+  </Svg>
+);
+
+export const UploadIcon = (props: IconProps) => (
+  <Svg {...props}>
+    <path d="M8 10.5V2.8M4.8 6 8 2.8 11.2 6M2.8 10.5v2a1 1 0 0 0 1 1h8.4a1 1 0 0 0 1-1v-2" />
+  </Svg>
+);

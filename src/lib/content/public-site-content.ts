@@ -4,6 +4,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { unstable_cache } from "next/cache";
 import { cache } from "react";
 
+import { readContentPreview } from "@/lib/preview/read-content-preview";
 import { publicReadClient } from "@/lib/supabase/supabase-clients";
 
 import {
@@ -49,6 +50,10 @@ function publicQuery<T>(
      public page down: it renders the built-in content. The fallback sits
      outside the cache so it is not stored — the next request tries again. */
   return cache(async (): Promise<T> => {
+    /* An editor previewing unsaved dashboard edits sees those instead. The
+       projection is the same one the built-in content goes through. */
+    const preview = await readContentPreview();
+    if (preview) return fromSeed(preview);
     try {
       return await cached();
     } catch (error) {

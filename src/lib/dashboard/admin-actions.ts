@@ -25,7 +25,13 @@ export type RecordAction =
   | { type: "draft/removeCredit"; index: number }
   | { type: "draft/addShot" }
   | { type: "draft/removeShot"; index: number }
-  | { type: "drawer/close" };
+  | { type: "drawer/close" }
+  | { type: "draft/appendShots"; srcs: string[] }
+  | { type: "artist/bulkLive"; ids: string[]; live: boolean }
+  | { type: "artist/bulkCategory"; ids: string[]; catId: string; add: boolean }
+  | { type: "artist/bulkDelete"; ids: string[] }
+  | { type: "album/bulkSet"; ids: string[]; patch: { live?: boolean; home?: boolean } }
+  | { type: "album/bulkDelete"; ids: string[] };
 
 /** Edits to how the site is arranged rather than to what it holds. */
 export type SiteAction =
@@ -60,7 +66,11 @@ export type SessionAction =
   | { type: "restore"; content: SiteContent; activity: Activity }
   | { type: "hydrated" }
   /** An autosave landed: this content is now what the site shows. */
-  | { type: "saved"; revision: number; baseline: string };
+  | { type: "saved"; revision: number; baseline: string; sentActivity: number }
+  /** Load an earlier history entry as the working copy; autosave then
+      writes it as a new revision. */
+  | { type: "history/restore"; content: SiteContent; label: string }
+  | { type: "autosave/pause"; paused: boolean };
 
 export type AdminAction = RecordAction | SiteAction | SettingsAction | SessionAction;
 

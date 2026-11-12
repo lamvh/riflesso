@@ -10,7 +10,7 @@ Implement các màn hình cho Riflesso Studio bằng Next.js 16
 | `/about` | Giới thiệu — 2 đoạn copy + lưới liên hệ |
 | `/contact` | Liên hệ — lưới đầy đủ 9 card |
 | `not-found` | Trang 404 — số "404" khoét ảnh hero, cross-fade 8 slide |
-| `/dashboard/*` | Content admin — 8 màn quản trị nội dung, tự lưu lên Supabase, xem mục riêng bên dưới |
+| `/dashboard/*` | Content admin — 9 màn quản trị nội dung, tự lưu lên Supabase, xem mục riêng bên dưới |
 
 Work detail không có route riêng: trong design nó là overlay `position:fixed`
 phủ lên trang chủ, mở khi click card của rail, và đóng bằng nút X hoặc `Esc`.
@@ -50,8 +50,12 @@ nội dung gốc trong `src/data/*`.
    — cột ẩn/hiện cho trang, hero slide, contact card, social link. Chưa chạy thì
    site vẫn đọc bình thường (mọi thứ coi là đang hiện), nhưng lần lưu nào có mục
    bị ẩn sẽ bị từ chối kèm lời nhắn chạy migration.
+5. **Backup DB**, rồi chạy `supabase/migrations/20261113013000_add_revisions_and_previews.sql`
+   — bảng `content_revisions` (History + Recent activity qua mọi phiên) và
+   `content_previews` (Preview). Chưa chạy thì việc lưu vẫn bình thường; History
+   và Preview chỉ hiện lời nhắn chạy migration.
 
-> **Chưa có auth.** Server action publish mở cho bất kỳ ai gọi được tới nó. Phải
+> **Chưa có auth.** Server action publish (và đọc History, tạo Preview) mở cho bất kỳ ai gọi được tới nó. Phải
 > thêm đăng nhập vào `src/lib/dashboard/publish-site-content.ts` + `/dashboard`
 > trước khi deploy public.
 
@@ -313,6 +317,7 @@ một route, dùng chung sidebar 236px + header dính (sticky):
 | `/dashboard/media` | Mọi file trong bucket R2 — dung lượng, ngày upload, record nào đang dùng; lọc file **Unused** và xoá (từng file hoặc cả loạt) |
 | `/dashboard/homepage` | Hero banner + Page sections + khung preview dính |
 | `/dashboard/settings` | Site settings — ẩn/hiện, logo, SEO, copy About, footer, contact card (địa chỉ, phone, email) |
+| `/dashboard/history` | History — mỗi lần lưu (các lần lưu cách nhau < 2 phút gộp một mục), nội dung đã đổi, Preview / Restore bất kỳ mục nào. Cần migration bước 5 |
 | `/dashboard/status` | Status — trạng thái kết nối (Supabase service role + anon, R2 bucket, media URL; check lúc mở màn + nút "Check again") |
 
 **Dữ liệu là dữ liệu thật của site, không phải demo.** Dashboard đọc từ Supabase;

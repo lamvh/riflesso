@@ -8,6 +8,7 @@ import { CoverImage } from "./cover-image";
 import { Button, Segmented, StatusPill, Switch, buttonClass } from "./ui/controls";
 import { LabelledField, NameInput, ProseInput } from "./ui/fields";
 import { ArrowUpIcon, PlusIcon } from "./ui/icons";
+import { MediaDropZone } from "./ui/media-drop-zone";
 import { UploadButton } from "./ui/upload-button";
 import { Panel } from "./ui/panel";
 
@@ -109,7 +110,11 @@ export function HeroEditor({
 
       {slide ? (
         <div className="grid items-start gap-[20px] lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
-          <div className="relative aspect-16/10 overflow-hidden rounded-[6px] bg-well">
+          <MediaDropZone
+            onUploaded={([src]) => set({ src })}
+            label="Drop to replace this slide's image"
+            className="aspect-16/10 overflow-hidden rounded-[6px] bg-well"
+          >
             <CoverImage src={slide.src} pos={slide.pos} />
             <div className="absolute inset-x-0 bottom-0 flex justify-center bg-linear-to-t from-black/45 to-transparent px-[16px] pt-[40px] pb-[14px]">
               <p
@@ -119,7 +124,7 @@ export function HeroEditor({
                 {slide.credit} <em>{slide.pub}</em>
               </p>
             </div>
-          </div>
+          </MediaDropZone>
 
           <div className="flex min-w-0 flex-col gap-[16px]">
             <div className="flex items-center justify-between gap-[12px] rounded-[6px] border border-line px-[12px] py-[10px]">

@@ -97,3 +97,9 @@
     outline-offset: 2px;
   }
 }
+
+/* Toasts sit above the bulk-selection bar while it is showing. Unlayered, so
+   it outranks the toast's own bottom utility. */
+body[data-bulk] .admin-toast {
+  bottom: 80px;
+}

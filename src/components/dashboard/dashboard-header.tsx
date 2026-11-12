@@ -13,7 +13,9 @@ import {
 import { useAdmin } from "./admin-store";
 import { SaveStatusIndicator } from "./save-status";
 import { Button, buttonClass } from "./ui/controls";
-import { ExternalIcon, PlusIcon } from "./ui/icons";
+import { openCommandPalette } from "./command-palette-events";
+import { ExternalIcon, PlusIcon, SearchMarkIcon } from "./ui/icons";
+import { useContentPreview } from "./use-content-preview";
 
 /** The sidebar group each screen sits in, repeated above its title. */
 const EYEBROW: Record<View, string> = {
@@ -24,6 +26,7 @@ const EYEBROW: Record<View, string> = {
   media: "Library",
   home: "Site",
   settings: "Site",
+  history: "System",
   status: "System",
 };
 
@@ -43,6 +46,7 @@ function addActionFor(view: View): [string, AdminAction] | null {
       return ["Add contact card", { type: "contact/add" }];
     case "media":
     case "status":
+    case "history":
       return null;
     case "albums":
     case "overview":
@@ -55,6 +59,7 @@ export function DashboardHeader() {
   const view = viewFromPath(usePathname());
   const [title, note] = pageTitle(view, adminTotals(state));
   const add = addActionFor(view);
+  const { openPreview, opening } = useContentPreview();
 
   return (
     <header className="sticky top-0 z-10 border-b border-line bg-seamless/90 backdrop-blur-md">
@@ -70,6 +75,25 @@ export function DashboardHeader() {
         </div>
 
         <div className="flex flex-wrap items-center gap-[8px]">
+          <button
+            type="button"
+            onClick={openCommandPalette}
+            className={`${buttonClass("secondary")} w-[200px] justify-start text-graphite max-sm:w-auto`}
+          >
+            <SearchMarkIcon size={14} />
+            <span className="flex-1 text-left max-sm:hidden">Search…</span>
+            <kbd className="rounded-[4px] border border-line bg-hover px-[5px] py-[2px] font-sans text-[11px] text-graphite max-sm:hidden">
+              ⌘K
+            </kbd>
+          </button>
+          <Button
+            variant="ghost"
+            disabled={opening}
+            title="Open the site with the edits made here, saved or not"
+            onClick={() => openPreview("/")}
+          >
+            {opening ? "Opening…" : "Preview"}
+          </Button>
           <a href="/" target="_blank" rel="noreferrer" className={buttonClass("ghost")}>
             View site
             <ExternalIcon size={13} />

@@ -5,6 +5,8 @@ import type { Album } from "./admin-types";
 
 /** Newest first, and short — the panel it feeds shows five rows. */
 const ACTIVITY_LIMIT = 8;
+/** Lines one save can file in the history. */
+const UNSAVED_LIMIT = 40;
 
 /** Record what an action did: the same sentence toasts and joins the feed. */
 export const note = (state: AdminState, text: string): AdminState => ({
@@ -12,6 +14,7 @@ export const note = (state: AdminState, text: string): AdminState => ({
   toast: text,
   toastTone: "info",
   activity: [text, ...state.activity].slice(0, ACTIVITY_LIMIT),
+  unsavedActivity: [text, ...state.unsavedActivity].slice(0, UNSAVED_LIMIT),
 });
 
 export function swap<T>(list: T[], index: number, delta: number): T[] {

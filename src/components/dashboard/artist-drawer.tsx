@@ -8,6 +8,7 @@ import { CoverImage } from "./cover-image";
 import { Button, Chip, Segmented, buttonClass } from "./ui/controls";
 import { Drawer } from "./ui/drawer";
 import { LabelledField, NameInput, ProseInput, ProseTextarea } from "./ui/fields";
+import { MediaDropZone } from "./ui/media-drop-zone";
 import { UploadButton } from "./ui/upload-button";
 import { SwitchRow } from "./ui/switch-row";
 
@@ -92,9 +93,13 @@ export function ArtistDrawer({
 
       <LabelledField label="Portrait" hint="A path under /assets or an https:// link">
         <div className="flex items-start gap-[14px]">
-          <div className="h-[124px] w-[96px] shrink-0 overflow-hidden rounded-[6px] bg-well">
+          <MediaDropZone
+            onUploaded={([image]) => set({ image })}
+            label="Drop portrait"
+            className="h-[124px] w-[96px] shrink-0 overflow-hidden rounded-[6px] bg-well"
+          >
             <CoverImage src={draft.image} pos="50% 22%" />
-          </div>
+          </MediaDropZone>
           <div className="flex min-w-0 flex-1 flex-col gap-[8px]">
             <ProseInput
               value={draft.image}
@@ -108,7 +113,7 @@ export function ArtistDrawer({
               Upload a file
             </UploadButton>
             <p className="font-sans text-[12px] leading-[140%] text-graphite">
-              Uploads are resized to 2400px, re-compressed and stored on R2.
+              Or drop a file on the picture. Uploads are resized to 2400px, re-compressed and stored on R2.
             </p>
           </div>
         </div>

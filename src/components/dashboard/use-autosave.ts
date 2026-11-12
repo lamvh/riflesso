@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import { pickSiteContent } from "@/lib/content/site-content-types";
 import { findPublishProblem } from "@/lib/content/site-content-validation";
+import { CHANGE_AREA_LABEL, changedAreas } from "@/lib/dashboard/admin-changes";
 import { serializeContent } from "@/lib/dashboard/admin-state";
 import { publishSiteContent } from "@/lib/dashboard/publish-site-content";
 
@@ -16,6 +17,7 @@ export type SaveStatus =
   | { kind: "off"; reason: "unconfigured" | "unreachable" }
   | { kind: "saved" }
   | { kind: "pending" }
+  | { kind: "paused" }
   | { kind: "saving" }
   | { kind: "failed"; message: string };
 
@@ -30,7 +32,7 @@ export type SaveStatus =
  * forces it. The browser draft keeps unsaved edits through a reload.
  */
 export function useAutosave(): { status: SaveStatus; retry: () => void } {
-  const { state, dispatch, dirty } = useAdmin();
+  const { state, dispatch, dirty, changes } = useAdmin();
   const [saving, setSaving] = useState(false);
   const [failure, setFailure] = useState<{ content: string; message: string } | null>(null);
   const inFlight = useRef(false);
@@ -54,10 +56,23 @@ export function useAutosave(): { status: SaveStatus; retry: () => void } {
     inFlight.current = true;
     setSaving(true);
     try {
-      const result = await publishSiteContent(snapshot, state.revision);
+      /* Typed edits (copy, settings) log no line of their own; name the
+         areas they touched so the history entry is never blank. */
+      const summary = state.unsavedActivity.length
+        ? state.unsavedActivity
+        : changedAreas(changes).map((area) => `Edited ${CHANGE_AREA_LABEL[area]}`);
+      const result = await publishSiteContent(snapshot, state.revision, {
+        summary,
+        restore: state.restoring,
+      });
       if (result.ok) {
         setFailure(null);
-        dispatch({ type: "saved", revision: result.revision, baseline: snapshotText });
+        dispatch({
+          type: "saved",
+          revision: result.revision,
+          baseline: snapshotText,
+          sentActivity: state.unsavedActivity.length,
+        });
       } else {
         setFailure({ content: snapshotText, message: result.error });
       }
@@ -67,13 +82,13 @@ export function useAutosave(): { status: SaveStatus; retry: () => void } {
       inFlight.current = false;
       setSaving(false);
     }
-  }, [state, dispatch]);
+  }, [state, dispatch, changes]);
 
   useEffect(() => {
-    if (!state.hydrated || off || !dirty || saving || failedThis) return;
+    if (!state.hydrated || off || !dirty || saving || failedThis || state.autosavePaused) return;
     const timer = setTimeout(save, DEBOUNCE_MS);
     return () => clearTimeout(timer);
-  }, [state.hydrated, off, dirty, saving, failedThis, save]);
+  }, [state.hydrated, off, dirty, saving, failedThis, save, state.autosavePaused]);
 
   const retry = () => {
     setFailure(null);
@@ -86,8 +101,10 @@ export function useAutosave(): { status: SaveStatus; retry: () => void } {
       ? { kind: "saving" }
       : failedThis
         ? { kind: "failed", message: failure.message }
-        : dirty
-          ? { kind: "pending" }
+        : dirty && state.autosavePaused
+          ? { kind: "paused" }
+          : dirty
+            ? { kind: "pending" }
           : { kind: "saved" };
 
   return { status, retry };

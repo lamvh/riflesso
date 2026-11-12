@@ -1,4 +1,7 @@
 import type { Metadata } from "next";
+import { draftMode } from "next/headers";
+
+import { ContentPreviewBanner } from "@/components/content-preview-banner";
 
 import { getSiteSettings } from "@/lib/content/public-site-content";
 
@@ -10,12 +13,15 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: metaTitle, description: metaDescription };
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        {children}
+        {(await draftMode()).isEnabled && <ContentPreviewBanner />}
+      </body>
     </html>
   );
 }

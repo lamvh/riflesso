@@ -9,6 +9,7 @@ import { Button, Chip, IconButton } from "./ui/controls";
 import { Drawer } from "./ui/drawer";
 import { LabelledField, NameInput, ProseInput, ProseTextarea } from "./ui/fields";
 import { CrossIcon, PlusIcon } from "./ui/icons";
+import { MediaDropZone } from "./ui/media-drop-zone";
 import { UploadButton } from "./ui/upload-button";
 import { SwitchRow } from "./ui/switch-row";
 
@@ -73,7 +74,14 @@ export function AlbumDrawer({
         </div>
       </LabelledField>
 
-      <LabelledField label="Images" hint="The first image is the cover">
+      <LabelledField label="Images" hint="The first image is the cover. Drop files here to add them.">
+        <MediaDropZone
+          multiple
+          accept="image/*,video/mp4,video/webm"
+          label="Drop to add images"
+          onUploaded={(srcs) => dispatch({ type: "draft/appendShots", srcs })}
+          className="rounded-[8px]"
+        >
         <div className="grid grid-cols-4 gap-[8px]">
           {draft.shots.map((shot, position) => (
             <div key={position} className="relative aspect-3/4 overflow-hidden rounded-[6px] bg-well">
@@ -112,6 +120,7 @@ export function AlbumDrawer({
             <PlusIcon size={18} />
           </button>
         </div>
+        </MediaDropZone>
       </LabelledField>
 
       <LabelledField

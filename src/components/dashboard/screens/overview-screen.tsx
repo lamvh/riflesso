@@ -8,9 +8,13 @@ import {
   plural,
 } from "@/lib/dashboard/admin-changes";
 import { VIEW_HREF, adminTotals } from "@/lib/dashboard/admin-views";
+import { formatRelativeTime } from "@/lib/dashboard/format-relative-time";
 
 import { useAdmin } from "../admin-store";
+import { StatusPill } from "../ui/controls";
 import { Panel } from "../ui/panel";
+import { useConnectionHealth } from "../use-connection-health";
+import { useRevisionHistory } from "../use-revision-history";
 
 type AttentionItem = {
   key: string;
@@ -119,28 +123,96 @@ export function OverviewScreen() {
           )}
         </Panel>
 
-        <Panel title="Recent activity" description="Edits made in this session" bodyClassName="">
-          {state.activity.length > 0 ? (
-            <ol>
-              {state.activity.map((entry, index) => (
-                <li
-                  key={`${entry}-${index}`}
-                  className="flex gap-[14px] border-b border-line px-[20px] py-[12px] last:border-b-0"
-                >
-                  <span className="w-[64px] shrink-0 font-sans text-[12px] leading-[150%] font-medium text-graphite">
-                    {index === 0 ? "Just now" : "Earlier"}
-                  </span>
-                  <span className="font-sans text-[14px] leading-[140%]">{entry}</span>
-                </li>
-              ))}
-            </ol>
-          ) : (
-            <p className="px-[20px] py-[18px] font-sans text-[14px] leading-[150%] text-graphite">
-              Nothing edited yet. Edits you make in this session are listed here.
-            </p>
-          )}
-        </Panel>
+        <div className="flex flex-col gap-[16px]">
+          <ServicesStrip />
+          <RecentActivity />
+        </div>
       </div>
     </div>
+  );
+}
+
+const HEALTH_LINE = {
+  ok: ["live", "All connected", "Database, storage and media delivery are answering"],
+  unconfigured: ["neutral", "Not configured", "Some services have no keys yet"],
+  warning: ["draft", "Needs attention", "A service answered with a problem"],
+  error: ["danger", "Service down", "A service is not answering — saving or images may fail"],
+} as const;
+
+/** One line on whether the services behind the site are up, linking to Status. */
+function ServicesStrip() {
+  const { overall, checking } = useConnectionHealth();
+  const [tone, label, note] = overall
+    ? HEALTH_LINE[overall]
+    : (["neutral", checking ? "Checking…" : "Not checked", "Database, storage and media delivery"] as const);
+
+  return (
+    <Link
+      href={VIEW_HREF.status}
+      className="flex items-center justify-between gap-[12px] rounded-[10px] border border-line bg-paper px-[20px] py-[14px] shadow-sheet transition-colors hover:bg-hover"
+    >
+      <div className="min-w-0">
+        <p className="font-sans text-[16px] leading-[120%] font-bold tracking-[-0.3px]">Services</p>
+        <p className="mt-[3px] truncate font-sans text-[13px] leading-[140%] text-graphite">{note}</p>
+      </div>
+      <StatusPill tone={tone}>{label}</StatusPill>
+    </Link>
+  );
+}
+
+const FEED_LIMIT = 8;
+
+/**
+ * What happened lately: edits not saved yet, then saves from the edit history
+ * — from every session, not just this one, with when they happened.
+ */
+function RecentActivity() {
+  const { state } = useAdmin();
+  const { list } = useRevisionHistory();
+
+  const pending = state.unsavedActivity.map((text) => ({ text, when: "Not saved yet" }));
+  const saved =
+    list?.state === "ok"
+      ? list.entries.flatMap((entry) =>
+          entry.summary.map((text) => ({ text, when: formatRelativeTime(entry.updatedAt) })),
+        )
+      : state.activity.map((text) => ({ text, when: "This session" }));
+  const feed = [...pending, ...saved].slice(0, FEED_LIMIT);
+
+  return (
+    <Panel
+      title="Recent activity"
+      description={list?.state === "ok" ? "Across every session" : "Edits made in this session"}
+      action={
+        <Link href={VIEW_HREF.history} className="font-sans text-[13px] font-medium text-graphite hover:text-ink">
+          History →
+        </Link>
+      }
+      bodyClassName=""
+    >
+      {feed.length > 0 ? (
+        <ol>
+          {feed.map((entry, index) => (
+            <li
+              key={`${entry.text}-${index}`}
+              className="flex gap-[14px] border-b border-line px-[20px] py-[12px] last:border-b-0"
+            >
+              <span
+                className={`w-[84px] shrink-0 font-sans text-[12px] leading-[150%] font-medium ${
+                  entry.when === "Not saved yet" ? "text-draft" : "text-graphite"
+                }`}
+              >
+                {entry.when}
+              </span>
+              <span className="min-w-0 font-sans text-[14px] leading-[140%]">{entry.text}</span>
+            </li>
+          ))}
+        </ol>
+      ) : (
+        <p className="px-[20px] py-[18px] font-sans text-[14px] leading-[150%] text-graphite">
+          Nothing edited yet. Saves are listed here as they happen.
+        </p>
+      )}
+    </Panel>
   );
 }
