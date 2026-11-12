@@ -22,7 +22,11 @@ npm install
 npm run dev     # http://localhost:3000
 npm run build   # build production (route public prerender, dashboard render theo request)
 npm run lint
+node scripts/generate-favicons.mjs   # tạo lại favicon/icon từ design/favicon-source.jpg
 ```
+
+Ảnh gốc favicon (`design/*-source.*`) chỉ nằm ở máy, không commit, không deploy;
+chỉ các file icon nhỏ trong `src/app/` được commit.
 
 ### Supabase
 
