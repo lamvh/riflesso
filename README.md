@@ -262,7 +262,7 @@ một route, dùng chung sidebar 236px + header dính (sticky):
 | `/dashboard/albums` | Lưới album 4 cột — lọc theo loại, gắn/bỏ khỏi trang chủ |
 | `/dashboard/categories` | Danh mục — đổi tên tại chỗ, ẩn/hiện, đổi thứ tự |
 | `/dashboard/homepage` | Hero banner + Page sections + khung preview dính |
-| `/dashboard/settings` | Site settings — logo, SEO, copy About, footer, contact card (địa chỉ, phone, email) |
+| `/dashboard/settings` | Site settings — trạng thái kết nối (Supabase service role + anon, R2 bucket, media URL; check lúc mở màn + nút "Check again"), logo, SEO, copy About, footer, contact card (địa chỉ, phone, email) |
 
 **Dữ liệu là dữ liệu thật của site, không phải demo.** Dashboard đọc từ Supabase;
 trước lần publish đầu nó dùng nội dung gốc dựng trong

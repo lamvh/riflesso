@@ -91,7 +91,7 @@ export function pageTitle(
         `${totals.slides} hero slides and ${totals.liveBlocks} of ${totals.blocks} sections showing`,
       ];
     case "settings":
-      return ["Site settings", "Logo, search listing, About copy, contact cards and footer"];
+      return ["Site settings", "Connections, logo, search listing, About copy, contact cards and footer"];
     case "overview":
       return ["Overview", "What visitors see on the Riflesso site right now"];
   }
