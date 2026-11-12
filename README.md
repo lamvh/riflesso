@@ -345,7 +345,7 @@ dữ liệu (`src/lib/content/site-visibility.ts`):
 
 | Ẩn gì | Ở đâu trên dashboard |
 | --- | --- |
-| Trang Artists / About / Contact (trả 404, rời menu và footer) | Site settings → Visibility |
+| Trang Artists / About / Contact (trả 404, rời menu và footer) | Site settings → Visibility; riêng Artists còn có nút con mắt ngay cạnh mục Artists ở sidebar |
 | Hero banner, copy About, contact grid trên About, cột social link | Site settings → Visibility (hero cũng có công tắc ở Homepage) |
 | Từng hero slide | Homepage → Hero banner → "Show this slide" |
 | Từng contact card / social link | Site settings → Contact cards / Footer |

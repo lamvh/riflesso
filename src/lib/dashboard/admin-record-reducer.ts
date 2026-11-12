@@ -32,7 +32,7 @@ export function recordReducer(state: AdminState, action: RecordAction): AdminSta
       const artists = patchAt(state.artists, action.index, { live: !artist.live });
       return note(
         { ...state, artists },
-        `${artist.name} is now ${artist.live ? "a draft" : "live"}`,
+        `${artist.name} is now ${artist.live ? "hidden" : "visible"}`,
       );
     }
 

@@ -15,8 +15,15 @@ import {
   type View,
 } from "@/lib/dashboard/admin-views";
 import { canOptimizeImage, isPublishableSrc } from "@/lib/media-src";
+import {
+  HIDEABLE_PARTS,
+  isPartShown,
+  toggledParts,
+  type HideablePart,
+} from "@/lib/content/site-visibility";
 
 import { useAdmin } from "./admin-store";
+import { EyeIcon, EyeOffIcon } from "./ui/icons";
 
 /**
  * The wordmark renders at the site's locked dimensions. Its file comes from
@@ -32,8 +39,29 @@ const GROUPS: { label?: string; views: View[] }[] = [
   { label: "Site", views: ["home", "settings"] },
 ];
 
+/**
+ * Menu items that double as a quick switch for the public page they manage, so
+ * hiding it does not mean a trip to Site settings → Visibility.
+ */
+const QUICK_HIDE: Partial<Record<View, HideablePart>> = {
+  artists: "page:artists",
+};
+
 export function DashboardSidebar() {
-  const { state, changes } = useAdmin();
+  const { state, dispatch, changes } = useAdmin();
+
+  const togglePart = (part: HideablePart) => {
+    const label = HIDEABLE_PARTS.find((entry) => entry.key === part)?.label ?? "Page";
+    const willHide = isPartShown(state.settings, part);
+    dispatch({
+      type: "settings/set",
+      patch: { hiddenParts: toggledParts(state.settings, part) },
+    });
+    dispatch({
+      type: "toast",
+      message: willHide ? `${label} hidden from visitors` : `${label} is back on the site`,
+    });
+  };
   const current = viewFromPath(usePathname());
   const totals = adminTotals(state);
   const typed = state.settings.logoUrl.trim();
@@ -76,32 +104,64 @@ export function DashboardSidebar() {
               const pending = CHANGE_AREAS.includes(view as ChangeArea)
                 ? changes[view as ChangeArea]
                 : 0;
+              const quickPart = QUICK_HIDE[view];
+              const pageShown = !quickPart || isPartShown(state.settings, quickPart);
               return (
-                <Link
-                  key={view}
-                  href={VIEW_HREF[view]}
-                  aria-current={active ? "page" : undefined}
-                  className={`flex h-[34px] shrink-0 items-center gap-[10px] rounded-[2px] px-[10px] font-sans text-[14px] leading-none whitespace-nowrap transition-colors ${
-                    active
-                      ? "bg-paper font-bold text-ink shadow-[inset_0_0_0_1px_var(--color-line)]"
-                      : "font-medium text-[#3d3d3b] hover:bg-[#dcdcd9]"
-                  }`}
-                >
-                  <span className="flex-1">{VIEW_LABEL[view]}</span>
-                  {pending > 0 && (
+                <div key={view} className="relative flex shrink-0">
+                  <Link
+                    href={VIEW_HREF[view]}
+                    aria-current={active ? "page" : undefined}
+                    className={`flex h-[34px] flex-1 items-center gap-[10px] rounded-[2px] px-[10px] font-sans text-[14px] leading-none whitespace-nowrap transition-colors ${
+                      quickPart ? "pr-[40px]" : ""
+                    } ${
+                      active
+                        ? "bg-paper font-bold text-ink shadow-[inset_0_0_0_1px_var(--color-line)]"
+                        : "font-medium text-[#3d3d3b] hover:bg-[#dcdcd9]"
+                    }`}
+                  >
                     <span
-                      title={`${plural(pending, "unsaved change")}`}
-                      className="h-[7px] w-[7px] rounded-full bg-draft"
+                      className={`flex-1 ${pageShown ? "" : "text-graphite line-through decoration-1"}`}
                     >
-                      <span className="sr-only">{plural(pending, "unsaved change")}</span>
+                      {VIEW_LABEL[view]}
                     </span>
+                    {pending > 0 && (
+                      <span
+                        title={`${plural(pending, "unsaved change")}`}
+                        className="h-[7px] w-[7px] rounded-full bg-draft"
+                      >
+                        <span className="sr-only">{plural(pending, "unsaved change")}</span>
+                      </span>
+                    )}
+                    {count !== null && (
+                      <span className="font-sans text-[12px] font-medium text-graphite tabular-nums">
+                        {count}
+                      </span>
+                    )}
+                  </Link>
+                  {/* Beside the link, not inside it: a button inside <a> is invalid. */}
+                  {quickPart && (
+                    <button
+                      type="button"
+                      aria-pressed={!pageShown}
+                      aria-label={
+                        pageShown
+                          ? `Hide the ${VIEW_LABEL[view]} page from visitors`
+                          : `Show the ${VIEW_LABEL[view]} page to visitors`
+                      }
+                      title={
+                        pageShown
+                          ? "Visible on the site — click to hide"
+                          : "Hidden from visitors — click to show"
+                      }
+                      onClick={() => togglePart(quickPart)}
+                      className={`absolute top-1/2 right-[5px] flex h-[26px] w-[26px] -translate-y-1/2 cursor-pointer items-center justify-center rounded-[2px] transition-colors hover:bg-hover ${
+                        pageShown ? "text-graphite hover:text-ink" : "text-draft"
+                      }`}
+                    >
+                      {pageShown ? <EyeIcon /> : <EyeOffIcon />}
+                    </button>
                   )}
-                  {count !== null && (
-                    <span className="font-sans text-[12px] font-medium text-graphite tabular-nums">
-                      {count}
-                    </span>
-                  )}
-                </Link>
+                </div>
               );
             })}
           </div>

@@ -6,7 +6,7 @@ import { plural } from "@/lib/dashboard/admin-changes";
 
 import { useAdmin } from "../admin-store";
 import { CoverImage } from "../cover-image";
-import { Button, Segmented, StatusPill, liveTone } from "../ui/controls";
+import { Button, Segmented, Switch } from "../ui/controls";
 import { ColumnHead, SearchField, SelectField } from "../ui/fields";
 import { Panel } from "../ui/panel";
 
@@ -20,12 +20,12 @@ const TERRITORY_OPTIONS = [
 
 const STATUS_OPTIONS = [
   { value: ALL, label: "All" },
-  { value: "live", label: "Live" },
-  { value: "draft", label: "Draft" },
+  { value: "live", label: "Visible" },
+  { value: "draft", label: "Hidden" },
 ];
 
 const GRID =
-  "grid grid-cols-[44px_minmax(0,1fr)_auto] items-center gap-x-[16px] md:grid-cols-[44px_minmax(0,1fr)_80px_64px_88px]";
+  "grid grid-cols-[44px_minmax(0,1fr)_auto] items-center gap-x-[16px] md:grid-cols-[44px_minmax(0,1fr)_80px_64px_112px]";
 
 export function ArtistsScreen() {
   const { state, dispatch } = useAdmin();
@@ -105,7 +105,7 @@ export function ArtistsScreen() {
           <ColumnHead>Artist</ColumnHead>
           <ColumnHead className="hidden md:block">Territory</ColumnHead>
           <ColumnHead className="hidden md:block">Albums</ColumnHead>
-          <ColumnHead>Status</ColumnHead>
+          <ColumnHead>On site</ColumnHead>
         </div>
 
         {rows.map(({ artist, index }) => {
@@ -143,14 +143,19 @@ export function ArtistsScreen() {
               <span className="hidden font-sans text-[13px] text-graphite tabular-nums md:block">
                 {works.get(artist.name) ?? 0}
               </span>
-              <span>
-                <StatusPill
-                  tone={liveTone(artist.live)}
-                  title={artist.live ? "Move to draft" : "Show in the directory"}
+              {/* A real switch, not a pill: hiding should not need a click into the
+                  artist. It sits above the row's open-drawer hit area. */}
+              <span className="flex items-center gap-[8px]">
+                <Switch
+                  on={artist.live}
+                  label={artist.live ? `Hide ${artist.name} from the directory` : `Show ${artist.name} in the directory`}
                   onClick={() => dispatch({ type: "artist/toggleLive", index })}
+                />
+                <span
+                  className={`font-sans text-[13px] font-medium ${artist.live ? "text-live" : "text-draft"}`}
                 >
-                  {artist.live ? "Live" : "Draft"}
-                </StatusPill>
+                  {artist.live ? "Visible" : "Hidden"}
+                </span>
               </span>
             </div>
           );
