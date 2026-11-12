@@ -26,7 +26,7 @@ export function HomepageScreen() {
   const liveBlocks = state.blocks.filter((block) => block.on);
 
   return (
-    <div className="grid items-start gap-[16px] xl:grid-cols-[minmax(0,1fr)_280px]">
+    <div className="grid grid-cols-[minmax(0,1fr)] items-start gap-[16px] xl:grid-cols-[minmax(0,1fr)_280px]">
       <div className="flex min-w-0 flex-col gap-[16px]">
         <HeroEditor
           slides={state.slides}

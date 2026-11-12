@@ -10,6 +10,7 @@ import { Drawer } from "./ui/drawer";
 import { LabelledField, NameInput, ProseInput, ProseTextarea } from "./ui/fields";
 import { CrossIcon, PlusIcon } from "./ui/icons";
 import { MediaDropZone } from "./ui/media-drop-zone";
+import { SortableItem, SortableList } from "./ui/sortable-list";
 import { UploadButton } from "./ui/upload-button";
 import { SwitchRow } from "./ui/switch-row";
 
@@ -74,7 +75,7 @@ export function AlbumDrawer({
         </div>
       </LabelledField>
 
-      <LabelledField label="Images" hint="The first image is the cover. Drop files here to add them.">
+      <LabelledField label="Images" hint="The first image is the cover. Drag to reorder, drop files here to add them.">
         <MediaDropZone
           multiple
           accept="image/*,video/mp4,video/webm"
@@ -82,9 +83,21 @@ export function AlbumDrawer({
           onUploaded={(srcs) => dispatch({ type: "draft/appendShots", srcs })}
           className="rounded-[8px]"
         >
+        <SortableList
+          layout="grid"
+          ids={draft.shots.map((_, position) => `shot-${position}`)}
+          onReorder={(from, to) => dispatch({ type: "draft/reorderShots", from, to })}
+        >
         <div className="grid grid-cols-4 gap-[8px]">
           {draft.shots.map((shot, position) => (
-            <div key={position} className="relative aspect-3/4 overflow-hidden rounded-[6px] bg-well">
+            <SortableItem key={`shot-${position}`} id={`shot-${position}`} as="div" className="rounded-[6px]">
+            {({ handleProps }) => (
+            <div
+              {...handleProps}
+              aria-roledescription="sortable image"
+              aria-label={`Image ${position + 1}${position === 0 ? ", the cover" : ""} — drag to reorder`}
+              className="relative aspect-3/4 cursor-grab touch-manipulation overflow-hidden rounded-[6px] bg-well active:cursor-grabbing"
+            >
               <CoverImage src={shot.src} pos={shot.pos} video={position === 0 && draft.video} />
               <button
                 type="button"
@@ -109,6 +122,8 @@ export function AlbumDrawer({
                 </span>
               )}
             </div>
+            )}
+            </SortableItem>
           ))}
 
           <button
@@ -120,6 +135,7 @@ export function AlbumDrawer({
             <PlusIcon size={18} />
           </button>
         </div>
+        </SortableList>
         </MediaDropZone>
       </LabelledField>
 

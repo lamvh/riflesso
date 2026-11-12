@@ -61,7 +61,7 @@ export function BulkBar({
   }, []);
 
   return (
-    <div className="pointer-events-none fixed inset-x-0 bottom-[20px] z-30 flex justify-center px-[16px] lg:pl-[248px]">
+    <div className="pointer-events-none fixed inset-x-0 bottom-[calc(72px+env(safe-area-inset-bottom))] z-30 flex justify-center px-[12px] lg:bottom-[20px] lg:pl-[248px]">
     <div
       role="toolbar"
       aria-label={`Actions for ${plural(count, noun)}`}
@@ -98,7 +98,7 @@ export function BulkButton({
       type="button"
       onClick={onClick}
       className={`h-[28px] cursor-pointer rounded-[6px] px-[10px] text-[13px] font-medium whitespace-nowrap transition-colors ${
-        danger ? "text-[#ff9b8f] hover:bg-[#ff9b8f]/15" : "text-paper hover:bg-paper/12"
+        danger ? "text-danger-on-ink hover:bg-danger-on-ink/15" : "text-paper hover:bg-paper/12"
       }`}
     >
       {children}

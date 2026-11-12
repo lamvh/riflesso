@@ -96,6 +96,8 @@ export function ArtistsScreen() {
           onChange={setQuery}
           placeholder="Search by name"
         />
+        {/* On a phone the filters share one row that scrolls sideways. */}
+        <div className="-mx-[16px] flex w-[calc(100%+32px)] items-center gap-[8px] overflow-x-auto px-[16px] [scrollbar-width:none] sm:contents">
         <SelectField
           label="Category"
           value={cat}
@@ -107,11 +109,12 @@ export function ArtistsScreen() {
         />
         <Segmented label="Territory" options={TERRITORY_OPTIONS} value={territory} onChange={setTerritory} />
         <Segmented label="Status" options={STATUS_OPTIONS} value={status} onChange={setStatus} />
-        <p className="font-sans text-[13px] text-graphite tabular-nums sm:ml-auto">
+        <p className="shrink-0 font-sans text-[13px] whitespace-nowrap text-graphite tabular-nums sm:ml-auto">
           {filtered
             ? `${rows.length} of ${plural(state.artists.length, "artist")}`
             : plural(state.artists.length, "artist")}
         </p>
+        </div>
       </div>
 
       <Panel bodyClassName="">

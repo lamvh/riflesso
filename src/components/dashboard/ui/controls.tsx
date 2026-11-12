@@ -15,7 +15,7 @@ const BUTTON_BASE =
 
 const VARIANT: Record<Variant, string> = {
   primary:
-    "border-ink bg-ink text-paper shadow-[0_1px_2px_rgba(28,24,16,0.18)] hover:bg-[#2c2a26] disabled:border-line disabled:bg-hover disabled:text-subtle disabled:shadow-none",
+    "border-ink bg-ink text-paper shadow-[0_1px_2px_rgba(28,24,16,0.18)] hover:bg-ink/85 disabled:border-line disabled:bg-hover disabled:text-subtle disabled:shadow-none",
   secondary:
     "border-line bg-paper text-ink shadow-sheet hover:border-line-strong hover:bg-hover disabled:text-subtle disabled:hover:border-line disabled:hover:bg-paper",
   ghost: "border-transparent bg-transparent text-graphite hover:bg-hover hover:text-ink",
@@ -137,7 +137,7 @@ export function Segmented<T extends string>({
     <div
       role="radiogroup"
       aria-label={label}
-      className="inline-flex max-w-full gap-[2px] overflow-x-auto rounded-[8px] bg-sink p-[3px] [scrollbar-width:none]"
+      className="inline-flex max-w-full shrink-0 gap-[2px] overflow-x-auto rounded-[8px] bg-sink p-[3px] [scrollbar-width:none]"
     >
       {options.map((option) => {
         const active = option.value === value;

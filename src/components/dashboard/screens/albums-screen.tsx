@@ -73,10 +73,12 @@ export function AlbumsScreen() {
           onChange={setQuery}
           placeholder="Search titles and credits"
         />
+        {/* On a phone the filters share one row that scrolls sideways. */}
+        <div className="-mx-[16px] flex w-[calc(100%+32px)] items-center gap-[8px] overflow-x-auto px-[16px] [scrollbar-width:none] sm:contents">
         <Segmented label="Album type" options={KIND_OPTIONS} value={kind} onChange={setKind} />
         <Segmented label="Status" options={STATUS_OPTIONS} value={status} onChange={setStatus} />
         {shownIds.length > 0 && (
-          <label className="flex cursor-pointer items-center gap-[8px] font-sans text-[13px] font-medium text-body sm:ml-auto">
+          <label className="flex shrink-0 cursor-pointer items-center gap-[8px] font-sans text-[13px] font-medium whitespace-nowrap text-body sm:ml-auto">
             <SelectBox
               label={allShown ? "Deselect all albums shown" : "Select all albums shown"}
               checked={allShown}
@@ -95,11 +97,12 @@ export function AlbumsScreen() {
             Select all
           </label>
         )}
-        <p className="font-sans text-[13px] text-graphite tabular-nums">
+        <p className="shrink-0 font-sans text-[13px] whitespace-nowrap text-graphite tabular-nums">
           {filtered
             ? `${cards.length} of ${plural(state.albums.length, "album")}`
             : plural(state.albums.length, "album")}
         </p>
+        </div>
       </div>
 
       {cards.length === 0 ? (

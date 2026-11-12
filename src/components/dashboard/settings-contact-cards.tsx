@@ -9,6 +9,7 @@ import { Button, IconButton, StatusPill, Switch } from "./ui/controls";
 import { LabelledField, NameInput, ProseInput, ProseTextarea } from "./ui/fields";
 import { ArrowDownIcon, ArrowUpIcon, ChevronDownIcon, CrossIcon, PlusIcon } from "./ui/icons";
 import { Panel } from "./ui/panel";
+import { DragHandle, SortableItem, SortableList } from "./ui/sortable-list";
 import { SwitchRow } from "./ui/switch-row";
 
 /** First line of the address, else the email or phone: enough to recognise a card. */
@@ -58,6 +59,10 @@ export function SettingsContactCards({
       }
       bodyClassName=""
     >
+      <SortableList
+        ids={contacts.map((card) => card.id)}
+        onReorder={(from, to) => dispatch({ type: "list/reorder", list: "contacts", from, to })}
+      >
       <ul>
         {contacts.map((card, index) => {
           const open = openIds.has(card.id) || !card.heading.trim();
@@ -65,8 +70,11 @@ export function SettingsContactCards({
             dispatch({ type: "contact/set", index, patch });
 
           return (
-            <li key={card.id} className="border-b border-line last:border-b-0">
-              <div className="flex items-center gap-[8px] px-[16px] py-[10px]">
+            <SortableItem key={card.id} id={card.id} className="border-b border-line bg-paper last:border-b-0">
+              {({ handleProps }) => (
+              <>
+              <div className="flex items-center gap-[8px] px-[12px] py-[10px]">
+                <DragHandle label={`Drag ${card.heading || "card"} to reorder`} handleProps={handleProps} />
                 <button
                   type="button"
                   aria-expanded={open}
@@ -187,10 +195,13 @@ export function SettingsContactCards({
                   </div>
                 </div>
               )}
-            </li>
+              </>
+              )}
+            </SortableItem>
           );
         })}
       </ul>
+      </SortableList>
 
       {contacts.length === 0 && (
         <p className="px-[20px] py-[18px] font-sans text-[14px] leading-[150%] text-graphite">

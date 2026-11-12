@@ -10,7 +10,7 @@ import {
   type Shot,
 } from "./admin-state";
 import { plural } from "./admin-changes";
-import { dropAt, fromDraft, note, patchAt, withDraft } from "./admin-helpers";
+import { dropAt, fromDraft, moveItem, note, patchAt, withDraft } from "./admin-helpers";
 import type { AdminArtist } from "./admin-types";
 
 /** Everything that edits an artist or an album, drawer included. */
@@ -148,6 +148,11 @@ export function recordReducer(state: AdminState, action: RecordAction): AdminSta
 
     case "drawer/close":
       return { ...state, drawer: null };
+
+    case "draft/reorderShots":
+      return withDraft(state, (draft: AlbumDraft) => ({
+        shots: moveItem(draft.shots, action.from, action.to),
+      }));
 
     case "draft/appendShots":
       return withDraft(state, (draft: AlbumDraft) => {

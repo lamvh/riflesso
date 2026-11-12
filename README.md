@@ -54,6 +54,11 @@ nội dung gốc trong `src/data/*`.
    — bảng `content_revisions` (History + Recent activity qua mọi phiên) và
    `content_previews` (Preview). Chưa chạy thì việc lưu vẫn bình thường; History
    và Preview chỉ hiện lời nhắn chạy migration.
+6. **Backup DB**, rồi chạy `supabase/migrations/20261113020000_add_content_views.sql`
+   — bảng `content_views` đếm lượt xem cho panel Visitors ở Overview. Chỉ lưu
+   số đếm theo ngày cho (trang | album mở gallery | artist dừng chuột ~0.8s),
+   không lưu IP, cookie hay user agent. Bỏ qua bot, trình duyệt bật GPC/DNT, và
+   editor đang Preview. Chưa chạy thì site vẫn bình thường, panel báo cần migration.
 
 > **Chưa có auth.** Server action publish (và đọc History, tạo Preview) mở cho bất kỳ ai gọi được tới nó. Phải
 > thêm đăng nhập vào `src/lib/dashboard/publish-site-content.ts` + `/dashboard`

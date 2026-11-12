@@ -7,6 +7,7 @@ import { Button, IconButton, Switch } from "../ui/controls";
 import { NameInput } from "../ui/fields";
 import { ArrowDownIcon, ArrowUpIcon, CrossIcon } from "../ui/icons";
 import { Panel } from "../ui/panel";
+import { DragHandle, SortableItem, SortableList } from "../ui/sortable-list";
 
 export function CategoriesScreen() {
   const { state, dispatch } = useAdmin();
@@ -57,14 +58,22 @@ export function CategoriesScreen() {
           </Button>
         </form>
 
+        <SortableList
+          ids={state.cats.map((cat) => cat.id)}
+          onReorder={(from, to) => dispatch({ type: "list/reorder", list: "cats", from, to })}
+        >
         <ul>
           {state.cats.map((cat, index) => {
             const count = countFor(cat.id);
             return (
-              <li
+              <SortableItem
                 key={cat.id}
-                className="flex items-center gap-[10px] border-b border-line px-[16px] py-[8px] last:border-b-0"
+                id={cat.id}
+                className="flex items-center gap-[10px] border-b border-line bg-paper px-[12px] py-[8px] last:border-b-0"
               >
+                {({ handleProps }) => (
+                <>
+                <DragHandle label={`Drag ${cat.name} to reorder`} handleProps={handleProps} />
                 <span className="w-[20px] shrink-0 text-right font-sans text-[12px] text-graphite tabular-nums">
                   {index + 1}
                 </span>
@@ -113,10 +122,13 @@ export function CategoriesScreen() {
                     <CrossIcon />
                   </IconButton>
                 </div>
-              </li>
+                </>
+                )}
+              </SortableItem>
             );
           })}
         </ul>
+        </SortableList>
       </Panel>
     </div>
   );

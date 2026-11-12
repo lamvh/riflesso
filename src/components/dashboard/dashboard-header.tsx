@@ -62,23 +62,25 @@ export function DashboardHeader() {
   const { openPreview, opening } = useContentPreview();
 
   return (
-    <header className="sticky top-0 z-10 border-b border-line bg-seamless/90 backdrop-blur-md">
-      <div className="mx-auto flex max-w-[1400px] flex-wrap items-end justify-between gap-x-6 gap-y-3 px-[16px] pt-[20px] pb-[16px] sm:px-[28px]">
-        <div className="min-w-0">
-          <p className="font-sans text-[11px] leading-none font-bold tracking-[0.12em] text-graphite uppercase">
+    <header className="z-10 border-b border-line bg-seamless/90 backdrop-blur-md lg:sticky lg:top-0">
+      <div className="mx-auto flex max-w-[1400px] items-center justify-between gap-x-[12px] gap-y-3 px-[16px] pt-[12px] pb-[12px] sm:flex-wrap sm:px-[28px] lg:items-end lg:gap-x-6 lg:pt-[20px] lg:pb-[16px]">
+        <div className="min-w-0 flex-1 lg:flex-none">
+          <p className="hidden font-sans text-[11px] leading-none font-bold tracking-[0.12em] text-graphite uppercase lg:block">
             {EYEBROW[view]}
           </p>
-          <h1 className="mt-[8px] font-serif text-[32px] leading-[105%] tracking-[-0.6px] sm:text-[36px]">
+          <h1 className="truncate font-serif text-[24px] leading-[110%] tracking-[-0.4px] lg:mt-[8px] lg:text-[36px] lg:leading-[105%] lg:tracking-[-0.6px]">
             {title}
           </h1>
-          <p className="mt-[6px] font-sans text-[14px] leading-[140%] text-graphite">{note}</p>
+          <p className="mt-[3px] truncate font-sans text-[13px] leading-[140%] text-graphite lg:mt-[6px] lg:text-[14px] lg:whitespace-normal">
+            {note}
+          </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-[8px]">
+        <div className="flex shrink-0 items-center gap-[8px] sm:flex-wrap">
           <button
             type="button"
             onClick={openCommandPalette}
-            className={`${buttonClass("secondary")} w-[200px] justify-start text-graphite max-sm:w-auto`}
+            className={`${buttonClass("secondary")} w-[200px] justify-start text-graphite max-lg:hidden`}
           >
             <SearchMarkIcon size={14} />
             <span className="flex-1 text-left max-sm:hidden">Search…</span>
@@ -88,23 +90,28 @@ export function DashboardHeader() {
           </button>
           <Button
             variant="ghost"
+            className="max-sm:hidden"
             disabled={opening}
             title="Open the site with the edits made here, saved or not"
             onClick={() => openPreview("/")}
           >
             {opening ? "Opening…" : "Preview"}
           </Button>
-          <a href="/" target="_blank" rel="noreferrer" className={buttonClass("ghost")}>
+          <a href="/" target="_blank" rel="noreferrer" className={`${buttonClass("ghost")} max-sm:hidden`}>
             View site
             <ExternalIcon size={13} />
           </a>
           {add && (
-            <Button onClick={() => dispatch(add[1])}>
+            <Button onClick={() => dispatch(add[1])} title={add[0]}>
               <PlusIcon />
-              {add[0]}
+              {/* On a phone the plus alone stands for "New …". */}
+              <span className="max-sm:hidden">{add[0]}</span>
+              <span className="sr-only sm:hidden">{add[0]}</span>
             </Button>
           )}
-          <SaveStatusIndicator />
+          <div className="max-lg:hidden">
+            <SaveStatusIndicator />
+          </div>
         </div>
       </div>
     </header>

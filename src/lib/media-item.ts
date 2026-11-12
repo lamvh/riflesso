@@ -10,6 +10,8 @@ export type MediaItem = {
   credits: ArtistCredit[];
   /** Publication or brand, set in italics. Omitted on the New Signs rail. */
   title?: string;
+  /** The dashboard album this card comes from, for view counts. */
+  albumId?: string;
   /**
    * Every frame of the shoot this card fronts, in reading order and led by the
    * card itself. Cards that carry one open a gallery of exactly these frames

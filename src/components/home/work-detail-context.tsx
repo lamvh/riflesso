@@ -2,6 +2,7 @@
 
 import { createContext, useCallback, useContext, useState } from "react";
 
+import { trackContentView } from "@/lib/analytics/track-content-view";
 import type { MediaItem } from "@/lib/media-item";
 import {
   buildWorkDetail,
@@ -39,7 +40,10 @@ export function WorkDetailProvider({
   const [work, setWork] = useState<WorkDetail | null>(null);
 
   const openWork = useCallback<OpenWork>(
-    (item, section) => setWork(buildWorkDetail(item, section)),
+    (item, section) => {
+      if (item.albumId) trackContentView("album", item.albumId);
+      setWork(buildWorkDetail(item, section));
+    },
     [],
   );
 

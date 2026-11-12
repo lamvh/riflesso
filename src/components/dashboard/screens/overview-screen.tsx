@@ -12,6 +12,7 @@ import { formatRelativeTime } from "@/lib/dashboard/format-relative-time";
 
 import { useAdmin } from "../admin-store";
 import { StatusPill } from "../ui/controls";
+import { VisitorStatsPanel } from "../visitor-stats-panel";
 import { Panel } from "../ui/panel";
 import { useConnectionHealth } from "../use-connection-health";
 import { useRevisionHistory } from "../use-revision-history";
@@ -91,7 +92,9 @@ export function OverviewScreen() {
         ))}
       </Panel>
 
-      <div className="grid items-start gap-[16px] lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
+      <VisitorStatsPanel />
+
+      <div className="grid grid-cols-[minmax(0,1fr)] items-start gap-[16px] lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
         <Panel
           title="Needs attention"
           description={attention.length ? "Open an item to deal with it" : undefined}
@@ -123,7 +126,7 @@ export function OverviewScreen() {
           )}
         </Panel>
 
-        <div className="flex flex-col gap-[16px]">
+        <div className="flex min-w-0 flex-col gap-[16px]">
           <ServicesStrip />
           <RecentActivity />
         </div>

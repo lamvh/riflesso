@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, type ReactNode } from "react";
+import { useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -24,20 +24,12 @@ import {
 } from "@/lib/content/site-visibility";
 
 import { useAdmin } from "./admin-store";
+import { GROUPS, HEALTH_DOT, VIEW_ICON } from "./dashboard-nav-config";
+import { ThemeToggle } from "./ui/theme-toggle";
 import { refreshConnectionHealth, useConnectionHealth } from "./use-connection-health";
-import {
-  AlbumIcon,
-  ClockIcon,
-  EyeIcon,
-  EyeOffIcon,
-  GearIcon,
-  HomeIcon,
-  OverviewIcon,
-  PersonIcon,
-  PulseIcon,
-  StackIcon,
-  TagIcon,
-} from "./ui/icons";
+import { openCommandPalette } from "./command-palette-events";
+import { SaveStatusIndicator } from "./save-status";
+import { EyeIcon, EyeOffIcon, SearchMarkIcon } from "./ui/icons";
 
 /**
  * The wordmark renders at the site's locked dimensions. Its file comes from
@@ -46,13 +38,6 @@ import {
 const WORDMARK_WIDTH = 116;
 const WORDMARK_HEIGHT = 20;
 
-/** Library holds the records; Site holds how they are arranged and framed. */
-const GROUPS: { label?: string; views: View[] }[] = [
-  { views: ["overview"] },
-  { label: "Library", views: ["artists", "albums", "cats", "media"] },
-  { label: "Site", views: ["home", "settings"] },
-  { label: "System", views: ["history", "status"] },
-];
 
 /**
  * Menu items that double as a quick switch for the public page they manage, so
@@ -62,24 +47,7 @@ const QUICK_HIDE: Partial<Record<View, HideablePart>> = {
   artists: "page:artists",
 };
 
-const VIEW_ICON: Record<View, (props: { size?: number }) => ReactNode> = {
-  overview: OverviewIcon,
-  artists: PersonIcon,
-  albums: AlbumIcon,
-  cats: TagIcon,
-  media: StackIcon,
-  home: HomeIcon,
-  settings: GearIcon,
-  history: ClockIcon,
-  status: PulseIcon,
-};
 
-const HEALTH_DOT = {
-  ok: ["bg-live", "All services connected"],
-  unconfigured: ["bg-graphite", "Some services are not configured"],
-  warning: ["bg-draft", "A service needs attention"],
-  error: ["bg-danger", "A service is down"],
-} as const;
 
 /** How often the sidebar re-probes the services while the dashboard is open. */
 const HEALTH_POLL_MS = 5 * 60 * 1000;
@@ -110,9 +78,14 @@ export function DashboardSidebar() {
   const logo = isPublishableSrc(typed) ? typed : DEFAULT_LOGO_URL;
 
   return (
-    <aside className="border-b border-line bg-paper lg:fixed lg:inset-y-0 lg:left-0 lg:z-20 lg:flex lg:w-[232px] lg:flex-col lg:border-r lg:border-b-0">
-      <div className="flex items-center justify-between gap-4 px-[20px] pt-[18px] pb-[12px] lg:block lg:border-b lg:border-line lg:pt-[26px] lg:pb-[22px]">
-        <Link href="/dashboard" className="flex w-fit">
+    <aside className="sticky top-0 z-20 border-b border-line bg-paper/95 backdrop-blur-md lg:fixed lg:inset-y-0 lg:left-0 lg:flex lg:w-[232px] lg:flex-col lg:border-r lg:border-b-0 lg:bg-paper lg:backdrop-blur-none">
+      <div className="flex h-[52px] items-center justify-between gap-[10px] px-[16px] lg:block lg:h-auto lg:border-b lg:border-line lg:px-[20px] lg:pt-[26px] lg:pb-[22px]">
+        {/* In the dark theme the black wordmark sits on a paper plaque, so the
+            locked asset itself is never recoloured. */}
+        <Link
+          href="/dashboard"
+          className="flex w-fit admin-dark:rounded-[6px] admin-dark:bg-[#f2f0eb] admin-dark:px-[8px] admin-dark:py-[5px]"
+        >
           <Image
             src={logo}
             alt={state.settings.logoAlt || "Riflesso"}
@@ -123,14 +96,26 @@ export function DashboardSidebar() {
             className="h-[20px] w-auto"
           />
         </Link>
-        <p className="font-serif text-[14px] leading-none text-graphite italic lg:mt-[12px]">
+        <p className="hidden font-serif text-[14px] leading-none text-graphite italic lg:mt-[12px] lg:block">
           Content admin
         </p>
+        {/* Mobile: the header's search and save status move up beside the logo. */}
+        <div className="flex items-center gap-[6px] lg:hidden">
+          <button
+            type="button"
+            onClick={openCommandPalette}
+            aria-label="Search the dashboard"
+            className="flex h-[34px] w-[34px] cursor-pointer items-center justify-center rounded-[8px] border border-line bg-paper text-graphite shadow-sheet"
+          >
+            <SearchMarkIcon size={15} />
+          </button>
+          <SaveStatusIndicator compact />
+        </div>
       </div>
 
       <nav
         aria-label="Dashboard"
-        className="flex gap-[2px] overflow-x-auto px-[12px] pb-[12px] [scrollbar-width:none] lg:flex-1 lg:flex-col lg:gap-[22px] lg:overflow-y-auto lg:pt-[18px] lg:pb-[20px]"
+        className="hidden gap-[2px] px-[12px] pb-[12px] lg:flex lg:flex-1 lg:flex-col lg:gap-[22px] lg:overflow-y-auto lg:pt-[18px] lg:pb-[20px]"
       >
         {GROUPS.map((group) => (
           <div key={group.label ?? "top"} className="flex gap-[2px] lg:flex-col">
@@ -239,7 +224,11 @@ export function DashboardSidebar() {
         ))}
       </nav>
 
-      <div className="hidden items-center gap-[10px] border-t border-line px-[20px] py-[16px] lg:flex">
+      <div className="hidden items-center justify-between border-t border-line px-[20px] pt-[14px] lg:flex">
+        <span className="font-sans text-[12px] font-medium text-graphite">Theme</span>
+        <ThemeToggle />
+      </div>
+      <div className="hidden items-center gap-[10px] px-[20px] py-[16px] lg:flex">
         <span
           aria-hidden="true"
           className="flex h-[32px] w-[32px] shrink-0 items-center justify-center rounded-full bg-ink font-serif text-[14px] text-paper"

@@ -2,7 +2,7 @@ import { pickSiteContent } from "@/lib/content/site-content-types";
 import { withVisibilityDefaults } from "@/lib/content/site-visibility";
 
 import { isRecordAction, isSettingsAction, type AdminAction } from "./admin-actions";
-import { dropAt, note, patchAt, swap } from "./admin-helpers";
+import { dropAt, moveItem, note, patchAt, swap } from "./admin-helpers";
 import { recordReducer } from "./admin-record-reducer";
 import { settingsReducer } from "./admin-settings-reducer";
 import { newId, type AdminState } from "./admin-state";
@@ -116,6 +116,29 @@ export function adminReducer(state: AdminState, action: AdminAction): AdminState
         { ...state, blocks },
         `${block.label} ${block.on ? "hidden" : "shown"} on the homepage`,
       );
+    }
+
+    case "list/reorder": {
+      const { from, to } = action;
+      switch (action.list) {
+        case "cats":
+          return { ...state, cats: moveItem(state.cats, from, to) };
+        case "blocks":
+          return { ...state, blocks: moveItem(state.blocks, from, to) };
+        case "contacts":
+          return { ...state, contacts: moveItem(state.contacts, from, to) };
+        case "slides": {
+          /* The slide being edited stays selected wherever it lands. */
+          const selected = state.slides[state.slide]?.id;
+          const slides = moveItem(state.slides, from, to);
+          return {
+            ...state,
+            slides,
+            slide: Math.max(0, slides.findIndex((slide) => slide.id === selected)),
+          };
+        }
+      }
+      return state;
     }
 
     case "block/move":

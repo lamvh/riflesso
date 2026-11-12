@@ -9,6 +9,7 @@ import { Button, Segmented, StatusPill, Switch, buttonClass } from "./ui/control
 import { LabelledField, NameInput, ProseInput } from "./ui/fields";
 import { ArrowUpIcon, PlusIcon } from "./ui/icons";
 import { MediaDropZone } from "./ui/media-drop-zone";
+import { SortableItem, SortableList } from "./ui/sortable-list";
 import { UploadButton } from "./ui/upload-button";
 import { Panel } from "./ui/panel";
 
@@ -70,16 +71,25 @@ export function HeroEditor({
       }
       bodyClassName="flex flex-col gap-[18px] p-[20px]"
     >
+      <SortableList
+        layout="horizontal"
+        ids={slides.map((entry) => entry.id)}
+        onReorder={(from, to) => dispatch({ type: "list/reorder", list: "slides", from, to })}
+      >
       <div className="-mx-[20px] flex gap-[10px] overflow-x-auto px-[20px] pt-[2px] pb-[4px]">
         {slides.map((entry, index) => {
           const active = index === current;
           return (
+            <SortableItem key={entry.id} id={entry.id} as="div" className="shrink-0 rounded-[6px]">
+            {({ handleProps }) => (
             <button
-              key={entry.id}
               type="button"
+              {...handleProps}
               aria-pressed={active}
+              aria-roledescription="sortable slide"
+              title="Click to edit, drag to reorder"
               onClick={() => dispatch({ type: "slide/select", index })}
-              className="flex w-[120px] shrink-0 cursor-pointer flex-col gap-[6px] text-left"
+              className="flex w-[120px] shrink-0 cursor-pointer touch-manipulation flex-col gap-[6px] text-left"
             >
               <span
                 className={`relative block h-[76px] overflow-hidden rounded-[6px] bg-well transition-opacity ${
@@ -104,9 +114,12 @@ export function HeroEditor({
                 {entry.pub}
               </span>
             </button>
+            )}
+            </SortableItem>
           );
         })}
       </div>
+      </SortableList>
 
       {slide ? (
         <div className="grid items-start gap-[20px] lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">

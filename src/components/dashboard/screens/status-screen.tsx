@@ -8,7 +8,7 @@ import { ConnectionsStatusPanel } from "../connections-status-panel";
  */
 export function StatusScreen() {
   return (
-    <div className="grid items-start gap-[16px]">
+    <div className="grid grid-cols-[minmax(0,1fr)] items-start gap-[16px]">
       <ConnectionsStatusPanel />
     </div>
   );

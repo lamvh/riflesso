@@ -5,7 +5,8 @@ import { totalChanges, plural } from "@/lib/dashboard/admin-changes";
 import { useAdmin } from "./admin-store";
 import { Button, IconButton } from "./ui/controls";
 import { PauseIcon, PlayIcon } from "./ui/icons";
-import { useAutosave, type SaveStatus } from "./use-autosave";
+import { useAutosaveStatus } from "./autosave-context";
+import type { SaveStatus } from "./use-autosave";
 
 const LOOK: Record<SaveStatus["kind"], [dot: string, headline: string]> = {
   off: ["bg-graphite", ""],
@@ -16,13 +17,23 @@ const LOOK: Record<SaveStatus["kind"], [dot: string, headline: string]> = {
   failed: ["bg-danger", "Not saved"],
 };
 
+/** Short labels for the mobile top bar. */
+const SHORT: Record<SaveStatus["kind"], string> = {
+  off: "Offline",
+  saved: "Saved",
+  pending: "Unsaved",
+  paused: "Paused",
+  saving: "Saving…",
+  failed: "Not saved",
+};
+
 /**
  * Edits save on their own; this reports how that is going, offers a retry when
  * it is not, and can pause saving so edits can be previewed before they go live.
  */
-export function SaveStatusIndicator() {
+export function SaveStatusIndicator({ compact = false }: { compact?: boolean }) {
   const { state, dispatch, changes } = useAdmin();
-  const { status, retry } = useAutosave();
+  const { status, retry } = useAutosaveStatus();
   const [dot, defaultHeadline] = LOOK[status.kind];
   const paused = state.autosavePaused;
   const off = status.kind === "off";
@@ -44,7 +55,11 @@ export function SaveStatusIndicator() {
           : "";
 
   return (
-    <div className="flex max-w-full items-center gap-[4px] rounded-[8px] border border-line bg-paper py-[3px] pr-[3px] pl-[12px] shadow-sheet">
+    <div
+      className={`flex max-w-full items-center gap-[4px] rounded-[8px] border border-line bg-paper py-[3px] pr-[3px] shadow-sheet ${
+        compact ? "pl-[10px]" : "pl-[12px]"
+      }`}
+    >
       <p
         role="status"
         aria-live="polite"
@@ -52,8 +67,8 @@ export function SaveStatusIndicator() {
         className="flex h-[28px] min-w-0 items-center gap-[8px] pr-[6px] font-sans text-[13px] leading-none whitespace-nowrap"
       >
         <span aria-hidden="true" className={`h-[8px] w-[8px] shrink-0 rounded-full ${dot}`} />
-        <span className="font-medium">{headline}</span>
-        {detail && (
+        <span className="font-medium">{compact ? SHORT[status.kind] : headline}</span>
+        {detail && !compact && (
           <span
             className={`truncate xl:max-w-[360px] ${status.kind === "failed" ? "max-w-[220px] text-danger" : "hidden text-graphite xl:inline"}`}
           >

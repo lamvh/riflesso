@@ -172,7 +172,7 @@ export function SelectField({
   options: { value: string; label: string }[];
 }) {
   return (
-    <label className="relative block">
+    <label className="relative block shrink-0">
       <span className="sr-only">{label}</span>
       <select
         value={value}

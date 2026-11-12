@@ -26,6 +26,7 @@ export function albumToMediaItem(album: Album): MediaItem {
     kind: album.video ? "video" : "image",
     credits,
     title,
+    albumId: album.id,
   };
   if (album.frames.length > 1) {
     item.gallery = album.frames.map((src, index) => ({

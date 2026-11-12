@@ -9,6 +9,7 @@ import { CoverImage } from "./cover-image";
 import { IconButton, Switch, buttonClass } from "./ui/controls";
 import { ArrowDownIcon, ArrowUpIcon } from "./ui/icons";
 import { Panel } from "./ui/panel";
+import { DragHandle, SortableItem, SortableList } from "./ui/sortable-list";
 
 type Thumb = { id: string; src: string; pos: string; video?: boolean };
 
@@ -68,14 +69,22 @@ export function SectionList({
       }
       bodyClassName=""
     >
+      <SortableList
+        ids={blocks.map((block) => block.id)}
+        onReorder={(from, to) => dispatch({ type: "list/reorder", list: "blocks", from, to })}
+      >
       <ul>
         {blocks.map((block, index) => (
-          <li
+          <SortableItem
             key={block.id}
-            className={`flex items-center gap-[14px] border-b border-line px-[16px] py-[12px] last:border-b-0 ${
-              block.on ? "" : "bg-hover"
+            id={block.id}
+            className={`flex items-center gap-[12px] border-b border-line px-[12px] py-[12px] last:border-b-0 ${
+              block.on ? "bg-paper" : "bg-hover"
             }`}
           >
+            {({ handleProps }) => (
+            <>
+            <DragHandle label={`Drag ${block.label} to reorder`} handleProps={handleProps} />
             <Switch
               on={block.on}
               label={`Show ${block.label} on the homepage`}
@@ -119,9 +128,12 @@ export function SectionList({
                 <ArrowDownIcon />
               </IconButton>
             </div>
-          </li>
+            </>
+            )}
+          </SortableItem>
         ))}
       </ul>
+      </SortableList>
     </Panel>
   );
 }

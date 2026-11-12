@@ -25,6 +25,15 @@ export function swap<T>(list: T[], index: number, delta: number): T[] {
   return out;
 }
 
+/** Take the item at `from` out and put it back at `to` (a drag-and-drop move). */
+export function moveItem<T>(list: T[], from: number, to: number): T[] {
+  if (from === to || from < 0 || to < 0 || from >= list.length || to >= list.length) return list;
+  const out = list.slice();
+  const [item] = out.splice(from, 1);
+  out.splice(to, 0, item);
+  return out;
+}
+
 export const patchAt = <T,>(list: T[], index: number, patch: Partial<T>): T[] =>
   list.map((item, i) => (i === index ? { ...item, ...patch } : item));
 

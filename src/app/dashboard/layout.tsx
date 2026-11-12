@@ -3,8 +3,11 @@ import { connection } from "next/server";
 
 import { AdminChrome } from "@/components/dashboard/admin-chrome";
 import { AdminProvider } from "@/components/dashboard/admin-store";
+import { AutosaveProvider } from "@/components/dashboard/autosave-context";
+import { ADMIN_THEME_SCRIPT } from "@/components/dashboard/admin-theme-script";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 import { DatabaseUnreachableNotice } from "@/components/dashboard/database-unreachable-notice";
+import { DashboardMobileNav } from "@/components/dashboard/dashboard-mobile-nav";
 import { DashboardSidebar } from "@/components/dashboard/dashboard-sidebar";
 import { loadDashboardContent } from "@/lib/content/load-dashboard-content";
 
@@ -27,17 +30,22 @@ export default async function DashboardLayout({
 
   return (
     <AdminProvider initial={initial}>
+      <AutosaveProvider>
       <div data-admin className="min-h-svh bg-seamless font-sans text-ink">
+        {/* Sets the theme before first paint; see admin-theme.ts. */}
+        <script dangerouslySetInnerHTML={{ __html: ADMIN_THEME_SCRIPT }} />
         <DashboardSidebar />
         <div className="lg:pl-[232px]">
           {initial.source === "unreachable" && <DatabaseUnreachableNotice />}
           <DashboardHeader />
-          <main className="mx-auto w-full max-w-[1400px] px-[16px] pt-[20px] pb-[72px] sm:px-[28px]">
+          <main className="mx-auto w-full max-w-[1400px] px-[16px] pt-[20px] pb-[calc(96px+env(safe-area-inset-bottom))] sm:px-[28px] lg:pb-[72px]">
             {children}
           </main>
         </div>
+        <DashboardMobileNav />
         <AdminChrome />
       </div>
+      </AutosaveProvider>
     </AdminProvider>
   );
 }

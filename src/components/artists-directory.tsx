@@ -1,6 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+
+import { trackContentView } from "@/lib/analytics/track-content-view";
 
 import type { Artist, Territory } from "@/data/artists";
 import { filterArtists } from "@/lib/filter-artists";
@@ -41,6 +43,17 @@ export function ArtistsDirectory({
   // Filters shrink the list, so the stored index can outrun it between renders.
   const activeArtist = artists[Math.min(activeIndex, artists.length - 1)];
 
+  /* A visitor who rests on a name for a moment is looking at that artist;
+     sweeping the pointer down the list is not. */
+  const viewTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
+  useEffect(() => () => clearTimeout(viewTimer.current), []);
+  const activate = (index: number) => {
+    setActiveIndex(index);
+    clearTimeout(viewTimer.current);
+    const name = artists[index]?.name;
+    if (name) viewTimer.current = setTimeout(() => trackContentView("artist", name), 800);
+  };
+
   const resetTo = (apply: () => void) => {
     apply();
     setActiveIndex(0);
@@ -61,7 +74,7 @@ export function ArtistsDirectory({
       <ArtistsList
         artists={artists}
         activeIndex={Math.min(activeIndex, artists.length - 1)}
-        onActivate={setActiveIndex}
+        onActivate={activate}
       />
 
       {showActiveImage && (

@@ -165,3 +165,40 @@ export const UploadIcon = (props: IconProps) => (
     <path d="M8 10.5V2.8M4.8 6 8 2.8 11.2 6M2.8 10.5v2a1 1 0 0 0 1 1h8.4a1 1 0 0 0 1-1v-2" />
   </Svg>
 );
+
+export const GripIcon = (props: IconProps) => (
+  <Svg {...props}>
+    <circle cx="6" cy="4" r="0.9" fill="currentColor" stroke="none" />
+    <circle cx="10" cy="4" r="0.9" fill="currentColor" stroke="none" />
+    <circle cx="6" cy="8" r="0.9" fill="currentColor" stroke="none" />
+    <circle cx="10" cy="8" r="0.9" fill="currentColor" stroke="none" />
+    <circle cx="6" cy="12" r="0.9" fill="currentColor" stroke="none" />
+    <circle cx="10" cy="12" r="0.9" fill="currentColor" stroke="none" />
+  </Svg>
+);
+
+export const SunIcon = (props: IconProps) => (
+  <Svg {...props}>
+    <circle cx="8" cy="8" r="2.8" />
+    <path d="M8 1.5v1.6M8 12.9v1.6M14.5 8h-1.6M3.1 8H1.5M12.6 3.4l-1.1 1.1M4.5 11.5l-1.1 1.1M12.6 12.6l-1.1-1.1M4.5 4.5 3.4 3.4" />
+  </Svg>
+);
+
+export const MoonIcon = (props: IconProps) => (
+  <Svg {...props}>
+    <path d="M13.2 9.6A5.6 5.6 0 1 1 6.4 2.8a4.5 4.5 0 0 0 6.8 6.8Z" />
+  </Svg>
+);
+
+export const MonitorIcon = (props: IconProps) => (
+  <Svg {...props}>
+    <rect x="2" y="2.8" width="12" height="8.4" rx="1.2" />
+    <path d="M5.5 13.5h5M8 11.2v2.3" />
+  </Svg>
+);
+
+export const MenuIcon = (props: IconProps) => (
+  <Svg {...props}>
+    <path d="M2.5 4.5h11M2.5 8h11M2.5 11.5h11" />
+  </Svg>
+);

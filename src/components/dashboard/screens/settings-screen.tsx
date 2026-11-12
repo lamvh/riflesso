@@ -9,7 +9,7 @@ export function SettingsScreen() {
   const { state, dispatch } = useAdmin();
 
   return (
-    <div className="grid items-start gap-[16px] xl:grid-cols-2">
+    <div className="grid grid-cols-[minmax(0,1fr)] items-start gap-[16px] xl:grid-cols-2">
       <SettingsVisibilityPanel settings={state.settings} dispatch={dispatch} />
       <SettingsBrandPanel settings={state.settings} dispatch={dispatch} />
       <SettingsContactCards contacts={state.contacts} dispatch={dispatch} />

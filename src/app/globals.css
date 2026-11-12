@@ -34,6 +34,8 @@
   --color-draft-soft: #f8ecd9;
   --color-danger: #b42318;
   --color-danger-soft: #fbe9e6;
+  /* Danger text on an ink surface (the bulk bar), which flips with the theme. */
+  --color-danger-on-ink: #ff9b8f;
 
   --shadow-sheet: 0 1px 0 rgba(28, 24, 16, 0.03), 0 1px 3px rgba(28, 24, 16, 0.05);
   --shadow-lift: 0 2px 4px rgba(28, 24, 16, 0.04), 0 10px 24px -8px rgba(28, 24, 16, 0.12);
@@ -67,6 +69,9 @@
  * layered rule regardless of specificity, so a bare `a { text-decoration: none }`
  * would silently defeat `underline`, `text-muted`, and friends on links.
  */
+/* `admin-dark:` — styles for the dashboard's dark theme only. */
+@custom-variant admin-dark (&:where([data-admin-theme="dark"] *));
+
 @layer base {
   body {
     margin: 0;
@@ -101,5 +106,45 @@
 /* Toasts sit above the bulk-selection bar while it is showing. Unlayered, so
    it outranks the toast's own bottom utility. */
 body[data-bulk] .admin-toast {
-  bottom: 80px;
+  bottom: calc(136px + env(safe-area-inset-bottom));
 }
+
+@media (min-width: 64rem) {
+  body[data-bulk] .admin-toast {
+    bottom: 80px;
+  }
+}
+
+/*
+ * Dashboard dark theme. The same tokens, re-pointed: ink becomes the light
+ * text, paper the raised sheet, seamless the deep canvas. Scoped to the
+ * dashboard, so the public site never changes. The theme is resolved to an
+ * attribute on <html> before first paint (see admin-theme-script.ts).
+ */
+:root[data-admin-theme="dark"] [data-admin] {
+  color-scheme: dark;
+  --color-ink: #f0ede6;
+  --color-paper: #1d1c1a;
+  --color-muted: #8f8b83;
+  --color-subtle: #78746c;
+  --color-well: #2a2926;
+  --color-seamless: #141412;
+  --color-graphite: #a39e94;
+  --color-line: #302e2a;
+  --color-line-strong: #4a4740;
+  --color-hover: #262522;
+  --color-sink: #2c2b28;
+  --color-body: #d9d5cc;
+  --color-live: #5ccf95;
+  --color-live-soft: #17321f;
+  --color-draft: #e9a84f;
+  --color-draft-soft: #3b2b12;
+  --color-danger: #f2796b;
+  --color-danger-soft: #3d1b17;
+  --color-danger-on-ink: #b42318;
+}
+
+:root[data-admin-theme="dark"] body {
+  background: #141412;
+}
+

@@ -27,6 +27,7 @@ export type RecordAction =
   | { type: "draft/removeShot"; index: number }
   | { type: "drawer/close" }
   | { type: "draft/appendShots"; srcs: string[] }
+  | { type: "draft/reorderShots"; from: number; to: number }
   | { type: "artist/bulkLive"; ids: string[]; live: boolean }
   | { type: "artist/bulkCategory"; ids: string[]; catId: string; add: boolean }
   | { type: "artist/bulkDelete"; ids: string[] }
@@ -47,7 +48,11 @@ export type SiteAction =
   | { type: "slide/move"; delta: number }
   | { type: "slide/remove" }
   | { type: "block/toggle"; index: number }
-  | { type: "block/move"; index: number; delta: number };
+  | { type: "block/move"; index: number; delta: number }
+  /** Drag-and-drop: move one row of an ordered list to a new position. */
+  | { type: "list/reorder"; list: ReorderableList; from: number; to: number };
+
+export type ReorderableList = "cats" | "blocks" | "slides" | "contacts";
 
 /** Site-wide settings: brand, SEO, About copy, contact cards, footer links. */
 export type SettingsAction =
