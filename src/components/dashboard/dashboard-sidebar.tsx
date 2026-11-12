@@ -20,7 +20,7 @@ import { useAdmin } from "./admin-store";
 
 /**
  * The wordmark renders at the site's locked dimensions. Its file comes from
- * Site settings, so an edit to the logo previews here before it is published.
+ * Site settings, so an edit to the logo previews here as it is typed.
  */
 const WORDMARK_WIDTH = 116;
 const WORDMARK_HEIGHT = 20;
@@ -90,10 +90,10 @@ export function DashboardSidebar() {
                   <span className="flex-1">{VIEW_LABEL[view]}</span>
                   {pending > 0 && (
                     <span
-                      title={`${plural(pending, "unpublished change")}`}
+                      title={`${plural(pending, "unsaved change")}`}
                       className="h-[7px] w-[7px] rounded-full bg-draft"
                     >
-                      <span className="sr-only">{plural(pending, "unpublished change")}</span>
+                      <span className="sr-only">{plural(pending, "unsaved change")}</span>
                     </span>
                   )}
                   {count !== null && (

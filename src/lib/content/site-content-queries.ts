@@ -100,15 +100,23 @@ type SettingsRow = {
   meta_title: string;
   meta_description: string;
   copyright: string;
+  /** Absent until the visibility migration has run. */
+  hidden_parts?: string[] | null;
   logo: AssetRef;
 };
+
+/*
+ * Tables that gained visibility flags are read with `*`, so the site keeps
+ * working on a database where that migration has not run yet: the column is
+ * simply missing and everything reads as shown.
+ */
 
 export async function querySettings(
   client: SupabaseClient,
 ): Promise<{ settings: SiteSettings; revision: number } | null> {
   const row = await client
     .from("site_settings")
-    .select("revision, brand_name, logo_alt, meta_title, meta_description, copyright, logo:media_assets(url)")
+    .select("*, logo:media_assets(url)")
     .eq("id", 1)
     .maybeSingle();
   if (row.error) {
@@ -119,8 +127,8 @@ export async function querySettings(
   if (!settings) return null;
 
   const [links, paragraphs] = await Promise.all([
-    selectAll<{ label: string; url: string }>((from, to) =>
-      client.from("social_links").select("label, url").order("sort_order").range(from, to),
+    selectAll<{ label: string; url: string; is_visible?: boolean }>((from, to) =>
+      client.from("social_links").select("*").order("sort_order").range(from, to),
     ),
     selectAll<{ body: string }>((from, to) =>
       client
@@ -141,8 +149,13 @@ export async function querySettings(
       metaTitle: settings.meta_title,
       metaDescription: settings.meta_description,
       aboutParagraphs: paragraphs.map((paragraph) => paragraph.body),
-      socialLinks: links.map((link) => ({ label: link.label, href: link.url })),
+      socialLinks: links.map((link) => ({
+        label: link.label,
+        href: link.url,
+        hidden: link.is_visible === false,
+      })),
       copyright: settings.copyright,
+      hiddenParts: settings.hidden_parts ?? [],
     },
   };
 }
@@ -158,10 +171,11 @@ export async function queryContactCards(client: SupabaseClient): Promise<Contact
     link_label: string;
     link_url: string;
     contact_only: boolean;
+    is_visible?: boolean;
   }>((from, to) =>
     client
       .from("contact_cards")
-      .select("id, heading, address_lines, phone, lead, email, link_label, link_url, contact_only")
+      .select("*")
       .order("sort_order")
       .order("id")
       .range(from, to),
@@ -176,6 +190,7 @@ export async function queryContactCards(client: SupabaseClient): Promise<Contact
     linkLabel: row.link_label,
     linkHref: row.link_url,
     contactOnly: row.contact_only,
+    hidden: row.is_visible === false,
   }));
 }
 
@@ -273,11 +288,12 @@ export async function queryHeroSlides(client: SupabaseClient): Promise<Slide[]> 
     credit_line: string;
     object_position: string;
     caption_color: string;
+    is_visible?: boolean;
     image: AssetRef;
   }>((from, to) =>
     client
       .from("hero_slides")
-      .select("id, publication, credit_line, object_position, caption_color, image:media_assets(url)")
+      .select("*, image:media_assets(url)")
       .order("sort_order")
       .order("id")
       .range(from, to),
@@ -289,6 +305,7 @@ export async function queryHeroSlides(client: SupabaseClient): Promise<Slide[]> 
     src: urlOf(row.image),
     pos: row.object_position,
     ink: row.caption_color,
+    hidden: row.is_visible === false,
   }));
 }
 

@@ -54,14 +54,13 @@ export type SettingsAction =
   | { type: "social/set"; index: number; patch: Partial<SocialLink> }
   | { type: "social/remove"; index: number };
 
-/** Session furniture: the toast, the stored draft, publishing. */
+/** Session furniture: the toast, the stored draft, saving. */
 export type SessionAction =
   | { type: "toast"; message: string; tone?: ToastTone }
   | { type: "restore"; content: SiteContent; activity: Activity }
   | { type: "hydrated" }
-  /** Throw away unpublished edits and go back to the last published content. */
-  | { type: "discard" }
-  | { type: "published"; revision: number; baseline: string };
+  /** An autosave landed: this content is now what the site shows. */
+  | { type: "saved"; revision: number; baseline: string };
 
 export type AdminAction = RecordAction | SiteAction | SettingsAction | SessionAction;
 

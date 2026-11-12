@@ -11,6 +11,13 @@ import {
 import { findPublishProblem } from "@/lib/content/site-content-validation";
 import { serviceRoleClient } from "@/lib/supabase/supabase-clients";
 
+/** Whether anything is switched off with a flag the visibility migration added. */
+const usesHideFlags = (content: SiteContent) =>
+  (content.settings.hiddenParts ?? []).length > 0 ||
+  content.settings.socialLinks.some((link) => link.hidden) ||
+  content.contacts.some((card) => card.hidden) ||
+  content.slides.some((slide) => slide.hidden);
+
 /**
  * Writes the dashboard's content to Supabase in one transaction.
  *
@@ -33,6 +40,20 @@ export async function publishSiteContent(
       ok: false,
       error: "Supabase is not configured — set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY",
     };
+  }
+
+  /* Before the visibility migration, the publish function ignores the hide
+     flags: the site would keep showing what the editor switched off. Refuse
+     rather than publish something that silently differs from the dashboard. */
+  if (usesHideFlags(content)) {
+    const probe = await client.from("hero_slides").select("is_visible").limit(1);
+    if (probe.error) {
+      return {
+        ok: false,
+        error:
+          "Hiding needs the database migration 20261113003000_add_visibility_flags.sql — back up, run it, then publish again",
+      };
+    }
   }
 
   const { data, error } = await client.rpc("publish_site_content", {

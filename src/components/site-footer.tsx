@@ -1,6 +1,7 @@
 import Link from "next/link"
 
 import { getSiteSettings } from "@/lib/content/public-site-content"
+import { isPartShown, type HideablePart } from "@/lib/content/site-visibility"
 
 type FooterLink = { label: string; href: string }
 
@@ -8,9 +9,10 @@ const BOLD_LINK =
   "font-sans text-[14px] leading-[94%] font-bold tracking-[-0.5px] hover:underline"
 const SERIF_LINK = "font-serif text-[15px] leading-[100%] hover:underline"
 
-const PAGE_LINKS: FooterLink[] = [
-  { label: "About", href: "/about" },
-  { label: "Contact", href: "/contact" },
+/** Each page link leaves the footer when its page is hidden. */
+const PAGE_LINKS: (FooterLink & { part: HideablePart })[] = [
+  { label: "About", href: "/about", part: "page:about" },
+  { label: "Contact", href: "/contact", part: "page:contact" },
 ]
 
 const LEGAL_LINKS: FooterLink[] = [
@@ -64,12 +66,17 @@ function FooterColumn({
  * and the copyright line come from Site settings.
  */
 export async function SiteFooter() {
-  const { socialLinks, copyright } = await getSiteSettings()
+  const settings = await getSiteSettings()
+  const { socialLinks, copyright } = settings
+  const pageLinks = PAGE_LINKS.filter((link) => isPartShown(settings, link.part))
 
   return (
     <footer className="mt-[110px] flex flex-wrap items-start justify-between gap-10 px-5 pb-10">
-      <FooterColumn links={PAGE_LINKS} linkClassName={BOLD_LINK} />
-      <FooterColumn links={socialLinks} linkClassName={BOLD_LINK} />
+      <FooterColumn links={pageLinks} linkClassName={BOLD_LINK} />
+      <FooterColumn
+        links={isPartShown(settings, "footer:social") ? socialLinks : []}
+        linkClassName={BOLD_LINK}
+      />
       <FooterColumn links={LEGAL_LINKS} linkClassName={SERIF_LINK} />
       <FooterColumn
         links={POLICY_LINKS}

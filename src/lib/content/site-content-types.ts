@@ -6,7 +6,12 @@ import type {
   Slide,
 } from "@/lib/dashboard/admin-types";
 
-export type SocialLink = { label: string; href: string };
+export type SocialLink = {
+  label: string;
+  href: string;
+  /** Kept in the dashboard, left out of the footer. */
+  hidden: boolean;
+};
 
 /** The site-wide facts: brand, SEO, About copy and footer. */
 export type SiteSettings = {
@@ -19,6 +24,8 @@ export type SiteSettings = {
   aboutParagraphs: string[];
   socialLinks: SocialLink[];
   copyright: string;
+  /** Pages and page parts switched off; keys from `HIDEABLE_PARTS`. */
+  hiddenParts: string[];
 };
 
 /**
@@ -38,6 +45,8 @@ export type ContactCardRecord = {
   linkHref: string;
   /** About omits this card; only Contact lists it. */
   contactOnly: boolean;
+  /** Kept in the dashboard, left off both pages. */
+  hidden: boolean;
 };
 
 /** Everything the dashboard edits and publishes. */

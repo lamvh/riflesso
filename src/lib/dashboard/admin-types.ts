@@ -59,6 +59,8 @@ export type Slide = {
   pos: string;
   /** Caption colour, flipped to black over light imagery. */
   ink: string;
+  /** Kept in the dashboard, left out of the banner. */
+  hidden: boolean;
 };
 
 export const BLOCK_KINDS = ["Scroll row", "Full-bleed", "Banner"] as const;

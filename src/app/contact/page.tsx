@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 
 import { ContactGrid } from "@/components/contact-grid";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { getContactCards, getSiteSettings } from "@/lib/content/public-site-content";
+import { isPartShown } from "@/lib/content/site-visibility";
 
 export async function generateMetadata(): Promise<Metadata> {
   const [{ metaTitle }, cards] = await Promise.all([getSiteSettings(), getContactCards()]);
@@ -15,10 +17,15 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function ContactPage() {
   const [settings, cards] = await Promise.all([getSiteSettings(), getContactCards()]);
+  if (!isPartShown(settings, "page:contact")) notFound();
 
   return (
     <div className="flex min-h-svh flex-col overflow-x-hidden">
-      <SiteHeader logoUrl={settings.logoUrl} logoAlt={settings.logoAlt} />
+      <SiteHeader
+        logoUrl={settings.logoUrl}
+        logoAlt={settings.logoAlt}
+        showArtists={isPartShown(settings, "page:artists")}
+      />
 
       <main>
         {/*

@@ -5,7 +5,7 @@ import { useState } from "react";
 import type { ContactCardRecord } from "@/lib/content/site-content-types";
 import type { AdminAction } from "@/lib/dashboard/admin-reducer";
 
-import { Button, IconButton, StatusPill } from "./ui/controls";
+import { Button, IconButton, StatusPill, Switch } from "./ui/controls";
 import { LabelledField, NameInput, ProseInput, ProseTextarea } from "./ui/fields";
 import { ArrowDownIcon, ArrowUpIcon, ChevronDownIcon, CrossIcon, PlusIcon } from "./ui/icons";
 import { Panel } from "./ui/panel";
@@ -49,7 +49,7 @@ export function SettingsContactCards({
   return (
     <Panel
       title="Contact cards"
-      description="Shown on About and Contact, in this order"
+      description="Shown on About and Contact, in this order. Switch a card off to hide it without deleting it"
       action={
         <Button size="sm" onClick={() => dispatch({ type: "contact/add" })}>
           <PlusIcon />
@@ -86,7 +86,17 @@ export function SettingsContactCards({
                   </span>
                 </button>
 
-                {card.contactOnly && <StatusPill tone="neutral">Contact page only</StatusPill>}
+                {card.hidden ? (
+                  <StatusPill tone="draft">Hidden</StatusPill>
+                ) : (
+                  card.contactOnly && <StatusPill tone="neutral">Contact page only</StatusPill>
+                )}
+
+                <Switch
+                  on={!card.hidden}
+                  label={`Show ${card.heading || "this card"} on the site`}
+                  onClick={() => set({ hidden: !card.hidden })}
+                />
 
                 <div className="flex shrink-0">
                   <IconButton

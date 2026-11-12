@@ -5,6 +5,8 @@ import {
 } from "@/lib/dashboard/admin-types";
 import { isPublishableSrc } from "@/lib/media-src";
 
+import { HIDEABLE_PARTS } from "./site-visibility";
+
 /*
  * The publish action receives whatever a POST sends, so the document is
  * checked here before it reaches the database. Constraints in the schema are
@@ -13,6 +15,7 @@ import { isPublishableSrc } from "@/lib/media-src";
  */
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const HIDEABLE_KEYS = new Set<string>(HIDEABLE_PARTS.map((part) => part.key));
 const LIST_KEYS = ["contacts", "artists", "albums", "cats", "slides", "blocks"] as const;
 
 type Row = Record<string, unknown>;
@@ -50,6 +53,14 @@ export function findPublishProblem(input: unknown): string | null {
   if (!isStringList(settings.aboutParagraphs)) return "Malformed About copy";
   if (!Array.isArray(settings.socialLinks) || !settings.socialLinks.every(isRow)) {
     return "Malformed social links";
+  }
+  /* Missing is fine (a draft from before the flag); anything else must be known keys. */
+  if (
+    settings.hiddenParts !== undefined &&
+    !(isStringList(settings.hiddenParts) &&
+      (settings.hiddenParts as string[]).every((key) => HIDEABLE_KEYS.has(key)))
+  ) {
+    return "Malformed hidden pages";
   }
 
   const [contacts, artists, albums, cats, slides, blocks] = LIST_KEYS.map(

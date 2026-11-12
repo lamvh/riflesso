@@ -32,7 +32,7 @@ export function AlbumDrawer({
     });
 
   const remove = () => {
-    if (window.confirm(`Delete ${draft.title || "this album"}? It leaves the site when you publish.`)) {
+    if (window.confirm(`Delete ${draft.title || "this album"}? It leaves the site right away.`)) {
       dispatch({ type: "album/delete" });
     }
   };
@@ -40,7 +40,7 @@ export function AlbumDrawer({
   return (
     <Drawer
       title={editing ? draft.title || "Untitled album" : "New album"}
-      description={editing ? "Saved changes go live when you publish" : "A title, images and credits"}
+      description={editing ? "Saved changes go live right away" : "A title, images and credits"}
       width={540}
       onClose={close}
       footer={

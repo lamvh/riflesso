@@ -8,6 +8,7 @@ import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { buildHomeSections, toHeroSlides } from "@/lib/content/home-page-view";
 import { getHomeContent, getSiteSettings } from "@/lib/content/public-site-content";
+import { isPartShown } from "@/lib/content/site-visibility";
 
 /**
  * Display knobs the source design exposes as editable props. They reach the rail
@@ -34,18 +35,28 @@ export default async function HomePage() {
   const [settings, home] = await Promise.all([getSiteSettings(), getHomeContent()]);
   const slides = toHeroSlides(home.slides);
   const sections = buildHomeSections(home.blocks, home.albums);
+  /* Hidden banner, or every slide hidden: the page opens on paper instead. */
+  const showHero = isPartShown(settings, "home:hero") && slides.length > 0;
 
   return (
     <div
       className="flex min-h-svh flex-col overflow-x-hidden"
       style={displayVars}
     >
-      <SiteHeader overImagery logoUrl={settings.logoUrl} logoAlt={settings.logoAlt} />
+      <SiteHeader
+        overImagery={showHero}
+        logoUrl={settings.logoUrl}
+        logoAlt={settings.logoAlt}
+        showArtists={isPartShown(settings, "page:artists")}
+      />
 
       <WorkDetailProvider>
         <main>
-          {slides.length > 0 && (
+          {showHero ? (
             <HeroBanner slides={slides} autoplay={DISPLAY.bannerAutoplay} />
+          ) : (
+            /* Clears the 60px fixed masthead. */
+            <div className="h-[110px]" />
           )}
 
           <section>

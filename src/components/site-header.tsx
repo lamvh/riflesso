@@ -43,6 +43,8 @@ type SiteHeaderProps = {
   /** Wordmark from Site settings; anything unusable falls back to the built-in file. */
   logoUrl: string;
   logoAlt: string;
+  /** False when the Artists page is hidden from Site settings. */
+  showArtists?: boolean;
 };
 
 export function SiteHeader({
@@ -50,6 +52,7 @@ export function SiteHeader({
   overImagery = false,
   logoUrl,
   logoAlt,
+  showArtists = true,
 }: SiteHeaderProps) {
   const artistsActive = currentSection === "artists";
   const logo = isPublishableSrc(logoUrl) ? logoUrl : DEFAULT_LOGO_URL;
@@ -111,17 +114,22 @@ export function SiteHeader({
             : "text-ink [text-shadow:none]"
         }`}
       >
-        <Link
-          href="/artists"
-          aria-current={artistsActive ? "page" : undefined}
-          className={`font-sans text-[13px] leading-[94%] font-bold tracking-[-0.5px] sm:text-[15px] ${
-            artistsActive
-              ? "underline decoration-2 underline-offset-[3px]"
-              : "no-underline"
-          }`}
-        >
-          Artists
-        </Link>
+        {/* A hidden Artists page keeps its slot so the wordmark stays centred. */}
+        {showArtists ? (
+          <Link
+            href="/artists"
+            aria-current={artistsActive ? "page" : undefined}
+            className={`font-sans text-[13px] leading-[94%] font-bold tracking-[-0.5px] sm:text-[15px] ${
+              artistsActive
+                ? "underline decoration-2 underline-offset-[3px]"
+                : "no-underline"
+            }`}
+          >
+            Artists
+          </Link>
+        ) : (
+          <span aria-hidden="true" />
+        )}
 
         <Link
           href="/"

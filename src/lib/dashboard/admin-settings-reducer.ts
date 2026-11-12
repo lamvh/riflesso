@@ -14,6 +14,7 @@ const blankContact = (): ContactCardRecord => ({
   linkLabel: "",
   linkHref: "",
   contactOnly: false,
+  hidden: false,
 });
 
 /** Brand, SEO, About copy, contact cards and footer links. */
@@ -45,7 +46,7 @@ export function settingsReducer(state: AdminState, action: SettingsAction): Admi
     case "social/add":
       return {
         ...state,
-        settings: { ...settings, socialLinks: [...settings.socialLinks, { label: "", href: "" }] },
+        settings: { ...settings, socialLinks: [...settings.socialLinks, { label: "", href: "", hidden: false }] },
       };
 
     case "social/set":

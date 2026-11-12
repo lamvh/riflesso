@@ -1,6 +1,7 @@
 import { NotFoundPanel } from "@/components/not-found-panel";
 import { SiteHeader } from "@/components/site-header";
 import { getHeroFrames, getSiteSettings } from "@/lib/content/public-site-content";
+import { isPartShown } from "@/lib/content/site-visibility";
 
 /**
  * The panel is a fixed, full-viewport sheet under the masthead — the masthead
@@ -12,7 +13,12 @@ export default async function NotFound() {
 
   return (
     <div className="min-h-svh overflow-x-hidden">
-      <SiteHeader overImagery logoUrl={settings.logoUrl} logoAlt={settings.logoAlt} />
+      <SiteHeader
+        overImagery
+        logoUrl={settings.logoUrl}
+        logoAlt={settings.logoAlt}
+        showArtists={isPartShown(settings, "page:artists")}
+      />
       <NotFoundPanel frames={frames.filter(Boolean)} />
     </div>
   );

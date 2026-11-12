@@ -19,10 +19,11 @@ export function toPublishPayload(content: SiteContent) {
       meta_title: settings.metaTitle.trim(),
       meta_description: settings.metaDescription.trim(),
       copyright: settings.copyright.trim(),
+      hidden_parts: settings.hiddenParts,
       about_paragraphs: trimmed(settings.aboutParagraphs),
       social_links: settings.socialLinks
         .filter((link) => link.label.trim() && link.href.trim())
-        .map((link) => ({ label: link.label.trim(), url: link.href.trim() })),
+        .map((link) => ({ label: link.label.trim(), url: link.href.trim(), is_visible: !link.hidden })),
     },
 
     contacts: content.contacts.map((card) => ({
@@ -35,6 +36,7 @@ export function toPublishPayload(content: SiteContent) {
       link_label: card.linkLabel.trim(),
       link_url: card.linkHref.trim(),
       contact_only: card.contactOnly,
+      is_visible: !card.hidden,
     })),
 
     cats: content.cats.map((cat) => ({
@@ -78,6 +80,7 @@ export function toPublishPayload(content: SiteContent) {
       image_url: slide.src.trim(),
       object_position: slide.pos,
       caption_color: slide.ink,
+      is_visible: !slide.hidden,
     })),
 
     blocks: content.blocks.map((block) => ({

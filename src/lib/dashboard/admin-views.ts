@@ -95,7 +95,7 @@ export function pageTitle(
     case "media":
       return ["Media", "Every file stored in the R2 bucket, its size, and what uses it"];
     case "settings":
-      return ["Site settings", "Connections, logo, search listing, About copy, contact cards and footer"];
+      return ["Site settings", "Connections, visibility, logo, search listing, About copy, contact cards and footer"];
     case "overview":
       return ["Overview", "What visitors see on the Riflesso site right now"];
   }

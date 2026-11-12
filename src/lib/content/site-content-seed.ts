@@ -32,10 +32,11 @@ const seedSettings = (): SiteSettings => ({
     "Riflesso represents hair, makeup, styling, grooming and manicure artists across the US and UK.",
   aboutParagraphs: ABOUT_PARAGRAPHS,
   socialLinks: [
-    { label: "Instagram", href: "https://www.instagram.com/riflesso.studio" },
-    { label: "TikTok", href: "https://www.tiktok.com/@riflesso.studio" },
+    { label: "Instagram", href: "https://www.instagram.com/riflesso.studio", hidden: false },
+    { label: "TikTok", href: "https://www.tiktok.com/@riflesso.studio", hidden: false },
   ],
   copyright: "Riflesso Studio ©2026",
+  hiddenParts: [],
 });
 
 const seedContacts = (): ContactCardRecord[] =>
@@ -49,6 +50,7 @@ const seedContacts = (): ContactCardRecord[] =>
     linkLabel: card.link?.label ?? "",
     linkHref: card.link?.href ?? "",
     contactOnly: card.contactOnly ?? false,
+    hidden: false,
   }));
 
 let memo: SiteContent | null = null;

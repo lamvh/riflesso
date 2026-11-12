@@ -33,7 +33,7 @@ export function ArtistDrawer({
   const editing = index >= 0;
 
   const remove = () => {
-    if (window.confirm(`Delete ${draft.name || "this artist"}? They leave the site when you publish.`)) {
+    if (window.confirm(`Delete ${draft.name || "this artist"}? They leave the site right away.`)) {
       dispatch({ type: "artist/delete" });
     }
   };
@@ -41,7 +41,7 @@ export function ArtistDrawer({
   return (
     <Drawer
       title={editing ? draft.name || "Untitled artist" : "New artist"}
-      description={editing ? "Saved changes go live when you publish" : "Name, disciplines and a portrait"}
+      description={editing ? "Saved changes go live right away" : "Name, disciplines and a portrait"}
       width={480}
       onClose={close}
       footer={

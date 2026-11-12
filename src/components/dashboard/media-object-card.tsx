@@ -8,9 +8,9 @@ import { CoverImage } from "./cover-image";
 import { Button, StatusPill, buttonClass, type Tone } from "./ui/controls";
 
 export const USAGE_PILL: Record<MediaUsageState, [Tone, string, string]> = {
-  live: ["live", "In use", "Published and still in the draft"],
-  pending: ["draft", "Unpublished", "Only in unpublished changes; goes live on Publish"],
-  removing: ["draft", "Removed in draft", "Still on the site; leaves it on Publish"],
+  live: ["live", "In use", "Saved and on the site"],
+  pending: ["draft", "Saving", "Used by an edit that is not saved yet"],
+  removing: ["draft", "Being removed", "Still on the site until the latest edit saves"],
   unused: ["danger", "Unused", "No record points at this file"],
 };
 

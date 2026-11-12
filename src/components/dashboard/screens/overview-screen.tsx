@@ -15,7 +15,7 @@ import { Panel } from "../ui/panel";
 type AttentionItem = {
   key: string;
   count: number;
-  /** Unpublished work is amber; gaps in the content are grey. */
+  /** Edits still saving are amber; gaps in the content are grey. */
   pending: boolean;
   text: string;
   href: string;
@@ -50,7 +50,7 @@ export function OverviewScreen() {
       key: `changes-${area}`,
       count: changes[area],
       pending: true,
-      text: `${plural(changes[area], "unpublished change")} in ${CHANGE_AREA_LABEL[area]}`,
+      text: `${plural(changes[area], "unsaved change")} in ${CHANGE_AREA_LABEL[area]}`,
       href: VIEW_HREF[area],
     })),
     { key: "draft-artists", count: draftArtists, pending: false, text: `${plural(draftArtists, "artist")} in draft`, href: VIEW_HREF.artists },

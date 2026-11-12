@@ -5,7 +5,7 @@ import type { AdminAction } from "@/lib/dashboard/admin-reducer";
 import type { Slide } from "@/lib/dashboard/admin-types";
 
 import { CoverImage } from "./cover-image";
-import { Button, Segmented, buttonClass } from "./ui/controls";
+import { Button, Segmented, StatusPill, Switch, buttonClass } from "./ui/controls";
 import { LabelledField, NameInput, ProseInput } from "./ui/fields";
 import { ArrowUpIcon, PlusIcon } from "./ui/icons";
 import { UploadButton } from "./ui/upload-button";
@@ -26,9 +26,14 @@ const CROPS: { value: string; label: string }[] = [
 export function HeroEditor({
   slides,
   current,
+  bannerShown,
+  onToggleBanner,
   dispatch,
 }: {
   slides: Slide[];
+  /** Whether the whole banner shows; switched off it keeps every slide. */
+  bannerShown: boolean;
+  onToggleBanner: () => void;
   /** Index of the slide being edited, already clamped to the list. */
   current: number;
   dispatch: (action: AdminAction) => void;
@@ -45,12 +50,22 @@ export function HeroEditor({
   return (
     <Panel
       title="Hero banner"
-      description={`${plural(slides.length, "slide")} rotating at the top of the homepage`}
+      description={
+        bannerShown
+          ? `${plural(slides.filter((entry) => !entry.hidden).length, "slide")} rotating at the top of the homepage`
+          : "Hidden — the homepage opens on its first section"
+      }
       action={
-        <Button size="sm" onClick={() => dispatch({ type: "slide/add" })}>
-          <PlusIcon />
-          Add slide
-        </Button>
+        <div className="flex items-center gap-[10px]">
+          <span className="flex items-center gap-[8px] font-sans text-[13px] text-graphite">
+            Show banner
+            <Switch on={bannerShown} label="Show the hero banner" onClick={onToggleBanner} />
+          </span>
+          <Button size="sm" onClick={() => dispatch({ type: "slide/add" })}>
+            <PlusIcon />
+            Add slide
+          </Button>
+        </div>
       }
       bodyClassName="flex flex-col gap-[18px] p-[20px]"
     >
@@ -70,7 +85,12 @@ export function HeroEditor({
                   active ? "shadow-[0_0_0_2px_var(--color-ink)]" : "opacity-70 hover:opacity-100"
                 }`}
               >
-                <CoverImage src={entry.src} pos={entry.pos} />
+                <CoverImage src={entry.src} pos={entry.pos} dim={entry.hidden ? 0.35 : 1} />
+                {entry.hidden && (
+                  <span className="absolute right-[4px] bottom-[4px] rounded-[2px] bg-paper/90 px-[5px] py-[3px] font-sans text-[11px] leading-none font-bold">
+                    Hidden
+                  </span>
+                )}
                 <span className="absolute top-[4px] left-[4px] rounded-[2px] bg-paper/90 px-[5px] py-[3px] font-sans text-[11px] leading-none font-bold tabular-nums">
                   {index + 1}
                 </span>
@@ -102,6 +122,18 @@ export function HeroEditor({
           </div>
 
           <div className="flex min-w-0 flex-col gap-[16px]">
+            <div className="flex items-center justify-between gap-[12px] rounded-[2px] border border-line px-[12px] py-[10px]">
+              <span className="flex items-center gap-[8px] font-sans text-[14px] font-bold">
+                Show this slide
+                {slide.hidden && <StatusPill tone="draft">Hidden</StatusPill>}
+              </span>
+              <Switch
+                on={!slide.hidden}
+                label={`Show the ${slide.pub} slide in the banner`}
+                onClick={() => set({ hidden: !slide.hidden })}
+              />
+            </div>
+
             <LabelledField label="Publication">
               <NameInput
                 value={slide.pub}

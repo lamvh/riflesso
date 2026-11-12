@@ -8,7 +8,7 @@ import { plural } from "@/lib/dashboard/admin-changes";
 import type { AdminAction } from "@/lib/dashboard/admin-reducer";
 import { isPublishableSrc } from "@/lib/media-src";
 
-import { Button, IconButton, buttonClass } from "./ui/controls";
+import { Button, IconButton, Switch, buttonClass } from "./ui/controls";
 import { FieldLabel, LabelledField, NameInput, ProseInput, ProseTextarea } from "./ui/fields";
 import { CrossIcon, PlusIcon } from "./ui/icons";
 import { Panel } from "./ui/panel";
@@ -119,14 +119,15 @@ export function SettingsBrandPanel({
         <div className="flex flex-col gap-[16px]">
           {settings.socialLinks.length > 0 && (
             <div className="flex flex-col gap-[8px]">
-              <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)_28px] gap-[8px]">
+              <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)_36px_28px] gap-[8px]">
                 <FieldLabel>Label</FieldLabel>
                 <FieldLabel>Link</FieldLabel>
+                <FieldLabel>Shown</FieldLabel>
               </div>
               {settings.socialLinks.map((link, index) => (
                 <div
                   key={index}
-                  className="grid grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)_28px] items-center gap-[8px]"
+                  className={`grid grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)_36px_28px] items-center gap-[8px] ${link.hidden ? "opacity-60" : ""}`}
                 >
                   <NameInput
                     size={15}
@@ -138,6 +139,14 @@ export function SettingsBrandPanel({
                     value={link.href}
                     placeholder="https://…"
                     onChange={(href) => dispatch({ type: "social/set", index, patch: { href } })}
+                  />
+                  {/* Hide keeps the link here for later instead of removing it. */}
+                  <Switch
+                    on={!link.hidden}
+                    label={`Show ${link.label || "this link"} in the footer`}
+                    onClick={() =>
+                      dispatch({ type: "social/set", index, patch: { hidden: !link.hidden } })
+                    }
                   />
                   <IconButton
                     label={`Remove ${link.label || "this link"}`}

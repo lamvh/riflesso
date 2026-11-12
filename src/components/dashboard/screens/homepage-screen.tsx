@@ -1,5 +1,6 @@
 "use client";
 
+import { isPartShown, toggledParts } from "@/lib/content/site-visibility";
 import type { Block } from "@/lib/dashboard/admin-types";
 
 import { useAdmin } from "../admin-store";
@@ -27,7 +28,18 @@ export function HomepageScreen() {
   return (
     <div className="grid items-start gap-[16px] xl:grid-cols-[minmax(0,1fr)_280px]">
       <div className="flex min-w-0 flex-col gap-[16px]">
-        <HeroEditor slides={state.slides} current={current} dispatch={dispatch} />
+        <HeroEditor
+          slides={state.slides}
+          current={current}
+          bannerShown={isPartShown(state.settings, "home:hero")}
+          onToggleBanner={() =>
+            dispatch({
+              type: "settings/set",
+              patch: { hiddenParts: toggledParts(state.settings, "home:hero") },
+            })
+          }
+          dispatch={dispatch}
+        />
         <SectionList blocks={state.blocks} albums={state.albums} dispatch={dispatch} />
       </div>
 

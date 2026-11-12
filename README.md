@@ -10,7 +10,7 @@ Implement các màn hình cho Riflesso Studio bằng Next.js 16
 | `/about` | Giới thiệu — 2 đoạn copy + lưới liên hệ |
 | `/contact` | Liên hệ — lưới đầy đủ 9 card |
 | `not-found` | Trang 404 — số "404" khoét ảnh hero, cross-fade 8 slide |
-| `/dashboard/*` | Content admin — 7 màn quản trị nội dung, publish lên Supabase, xem mục riêng bên dưới |
+| `/dashboard/*` | Content admin — 7 màn quản trị nội dung, tự lưu lên Supabase, xem mục riêng bên dưới |
 
 Work detail không có route riêng: trong design nó là overlay `position:fixed`
 phủ lên trang chủ, mở khi click card của rail, và đóng bằng nút X hoặc `Esc`.
@@ -44,8 +44,12 @@ nội dung gốc trong `src/data/*`.
    - `SUPABASE_ANON_KEY` — publishable key, dùng cho đọc public
    - `SUPABASE_SERVICE_ROLE_KEY` — secret key, chỉ server dùng để đọc draft + publish.
      Không bao giờ để prefix `NEXT_PUBLIC_`.
-3. `npm run dev` → `/dashboard` → **Publish**. Lần publish đầu ghi toàn bộ nội
+3. `npm run dev` → `/dashboard` → sửa bất kỳ mục nào. Lần lưu đầu ghi toàn bộ nội
    dung gốc vào DB (revision 1). Từ đó site đọc từ DB.
+4. **Backup DB**, rồi chạy `supabase/migrations/20261113003000_add_visibility_flags.sql`
+   — cột ẩn/hiện cho trang, hero slide, contact card, social link. Chưa chạy thì
+   site vẫn đọc bình thường (mọi thứ coi là đang hiện), nhưng lần lưu nào có mục
+   bị ẩn sẽ bị từ chối kèm lời nhắn chạy migration.
 
 > **Chưa có auth.** Server action publish mở cho bất kỳ ai gọi được tới nó. Phải
 > thêm đăng nhập vào `src/lib/dashboard/publish-site-content.ts` + `/dashboard`
@@ -105,20 +109,20 @@ upload báo lỗi rõ ràng, phần còn lại của dashboard vẫn chạy bìn
 - Video (mp4/webm/mov) giữ nguyên, không nén. Giới hạn 50MB mỗi file.
 - Key dạng `uploads/2026/09/<tên-file>-<8 ký tự>.webp` — mỗi lần upload là một
   object mới, nên cache `immutable` một năm.
-- Route trả về URL công khai, dashboard điền vào ô địa chỉ; ảnh chỉ thật sự lên
-  site sau khi bấm **Publish**.
+- Route trả về URL công khai, dashboard điền vào ô địa chỉ, và ảnh lên site ở lần
+  autosave tiếp theo.
 
 **Màn Media** (`src/lib/dashboard/list-media-library.ts`, `media-usage.ts`) list
 toàn bộ bucket (tối đa 20.000 object) rồi so key với URL trong cả nội dung đã
-publish lẫn draft đang sửa: **In use**, **Unpublished** (chỉ có trong draft),
-**Removed in draft** (vẫn trên site tới khi Publish), **Unused**. So theo hậu tố
+lưu lẫn bản đang sửa: **In use**, **Saving** (chỉ có trong thay đổi chưa lưu),
+**Being removed** (vẫn trên site tới khi lần lưu tới xong), **Unused**. So theo hậu tố
 path nên URL lưu với `NEXT_PUBLIC_MEDIA_BASE_URL` cũ vẫn được nhận ra.
 
 **Xoá file** (`src/lib/dashboard/delete-media-objects.ts`) chỉ hiện với file
 **Unused**, có hỏi xác nhận. Vì chưa có auth, server không tin client: chỉ nhận
 key trong `uploads/`, đọc lại DB (cả record draft) và giữ lại mọi file còn record
-trỏ tới; DB không trả lời thì không xoá gì. Draft chưa publish nằm ở trình duyệt
-người khác thì server không thấy — hai người cùng sửa thì Refresh trước khi xoá.
+trỏ tới; DB không trả lời thì không xoá gì. Thay đổi chưa kịp lưu trong trình
+duyệt người khác thì server không thấy — hai người cùng sửa thì Refresh trước khi xoá.
 
 > **Chưa có auth.** `/api/media/upload` mở cho bất kỳ ai gọi tới. Thêm đăng nhập
 > trước khi deploy public, nếu không bucket có thể bị lạm dụng.
@@ -129,7 +133,7 @@ Cấu hình nằm trong repo: `wrangler.jsonc`, `open-next.config.ts`. Workers B
 dùng đúng file này, không tự sinh config nữa.
 
 1. Không dùng incremental cache / tag cache (không cần R2 cache bucket hay D1):
-   mỗi lượt xem trang public render lại và đọc thẳng Supabase, nên **Publish**
+   mỗi lượt xem trang public render lại và đọc thẳng Supabase, nên mỗi lần lưu
    hiện ngay. Traffic tăng thì thêm `r2IncrementalCache` + `d1NextTagCache` vào
    `open-next.config.ts` (xem https://opennext.js.org/cloudflare/caching).
 2. Biến không bí mật nằm ở `vars` trong `wrangler.jsonc`. Key bí mật đặt dạng
@@ -146,7 +150,7 @@ dùng đúng file này, không tự sinh config nữa.
 **Kết nối hỏng không làm sập app.** Env sai định dạng (`SUPABASE_URL`,
 `R2_ENDPOINT`) được coi là chưa cấu hình; đọc public lỗi thì trang render nội
 dung gốc (fallback nằm ngoài cache, request sau thử lại DB); dashboard đọc lỗi
-thì mở ở chế độ offline và chặn Publish; upload / list R2 lỗi trả thông báo,
+thì mở ở chế độ offline và tắt tự lưu; upload / list R2 lỗi trả thông báo,
 không throw.
 
 ## Cấu trúc
@@ -224,7 +228,7 @@ src/
     │   ├── home-page-view.ts          # album/section/slide → props trang chủ
     │   └── directory-view.ts          # artist/category → danh bạ public
     └── dashboard/
-        ├── publish-site-content.ts    # server action publish
+        ├── publish-site-content.ts    # server action lưu (autosave gọi sau mỗi thay đổi)
         ├── admin-settings-reducer.ts  # settings / contact card / social link
         ├── admin-types.ts             # Album / AdminArtist / Slide / Block
         ├── admin-seed.ts              # dựng seed từ data thật của site
@@ -325,16 +329,36 @@ giữa các request):
 - **Page sections** là 7 section thật của trang chủ, đúng thứ tự trong
   `src/app/page.tsx`.
 
-**Sửa trong trình duyệt, lên site khi Publish.** Mọi thao tác đổi state cục bộ;
-header hiện "Unpublished changes", nút **Discard** trả về bản đã publish, nút
-**Publish** gọi server action ghi toàn bộ vào Supabase trong một transaction.
-Draft lưu ở `sessionStorage` kèm revision — chỉ khôi phục khi DB vẫn ở đúng
-revision đó, để draft cũ không âm thầm đè publish mới hơn. Đóng tab khi còn thay
-đổi chưa publish sẽ bị hỏi lại.
+**Tự lưu, không có bước Publish** (`src/components/dashboard/use-autosave.ts`).
+Mỗi thay đổi lên site thật sau ~0,8 giây yên lặng — gõ chữ là một lần lưu, không
+phải mỗi phím. Lưu vẫn đi qua `publish_site_content` (một transaction, chống ghi
+đè theo revision). Header báo **Saving… / All changes saved / Not saved — lý do**
+kèm **Retry**. Bản không hợp lệ (vd. Brand name trống) bị chặn ở client và không
+gửi lại cho tới khi sửa; một lần lưu chạy tại một thời điểm, sửa trong lúc đang
+lưu được gom vào lần sau. Hệ quả: không còn "nháp" để xem trước hay **Discard** —
+muốn giấu thứ đang sửa dở thì tắt nó (xem "Tạm ẩn" bên dưới). Thay đổi chưa lưu
+vẫn nằm ở `sessionStorage` kèm revision, nên reload không mất; đóng tab khi còn
+thay đổi chưa lưu sẽ bị hỏi lại.
+
+**Tạm ẩn thay vì xoá.** Mọi trang và phần nội dung đều tắt được mà không mất
+dữ liệu (`src/lib/content/site-visibility.ts`):
+
+| Ẩn gì | Ở đâu trên dashboard |
+| --- | --- |
+| Trang Artists / About / Contact (trả 404, rời menu và footer) | Site settings → Visibility |
+| Hero banner, copy About, contact grid trên About, cột social link | Site settings → Visibility (hero cũng có công tắc ở Homepage) |
+| Từng hero slide | Homepage → Hero banner → "Show this slide" |
+| Từng contact card / social link | Site settings → Contact cards / Footer |
+| Artist, album, category, homepage section | Công tắc sẵn có ở từng màn |
+
+Mục ẩn bị lọc một lần trong `public-site-content.ts`, nên mọi trang public đều
+không thấy, còn dashboard vẫn thấy đủ. Cờ luôn mang nghĩa "hidden": dữ liệu cũ
+không có cờ thì coi là đang hiện. Ảnh của mục đang ẩn vẫn tính là **In use** ở
+màn Media, nên không bị xoá nhầm.
 
 **Ảnh upload thẳng lên R2.** Mọi ô ảnh có input URL (`/assets/…` hoặc
 `https://…`) kèm nút **Upload a file**: file đi qua `/api/media/upload`, được
-nén rồi lưu vào R2, và địa chỉ trả về được điền sẵn vào ô. Publish từ chối
+nén rồi lưu vào R2, và địa chỉ trả về được điền sẵn vào ô. Lưu từ chối
 `blob:`. Ảnh ngoài các host khai báo trong `next.config.ts` render `unoptimized`.
 
 **Khác design ở ba điểm, đều có lý do:**

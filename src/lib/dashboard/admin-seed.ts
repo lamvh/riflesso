@@ -126,6 +126,7 @@ export const seedSlides = (): Slide[] =>
     src: slide.src,
     pos: slide.position,
     ink: slide.captionColor,
+    hidden: false,
   }));
 
 /** The homepage, top to bottom, exactly as it rendered before the database. */

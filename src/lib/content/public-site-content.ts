@@ -17,7 +17,8 @@ import {
   querySettings,
 } from "./site-content-queries";
 import { seedSiteContent } from "./site-content-seed";
-import { SITE_CONTENT_TAG, type SiteContent } from "./site-content-types";
+import { shownOnly } from "./site-visibility";
+import { SITE_CONTENT_TAG, type SiteContent, type SiteSettings } from "./site-content-types";
 
 /*
  * Public reads, scoped per page so the directory never loads albums and the
@@ -59,14 +60,28 @@ function publicQuery<T>(
   });
 }
 
+/*
+ * Hidden rows are dropped here, once, so no public page can render them. The
+ * dashboard reads through its own loader and still sees everything.
+ */
+
+const visibleSettings = (settings: SiteSettings): SiteSettings => ({
+  ...settings,
+  socialLinks: shownOnly(settings.socialLinks),
+});
+
 export const getSiteSettings = publicQuery(
   "settings",
   async (client) =>
-    (await querySettings(client))?.settings ?? seedSiteContent().settings,
-  (seed) => seed.settings,
+    visibleSettings((await querySettings(client))?.settings ?? seedSiteContent().settings),
+  (seed) => visibleSettings(seed.settings),
 );
 
-export const getContactCards = publicQuery("contacts", queryContactCards, (seed) => seed.contacts);
+export const getContactCards = publicQuery(
+  "contacts",
+  async (client) => shownOnly(await queryContactCards(client)),
+  (seed) => shownOnly(seed.contacts),
+);
 
 export const getDirectoryContent = publicQuery(
   "directory",
@@ -85,14 +100,14 @@ export const getHomeContent = publicQuery(
       queryHomeSections(client),
       queryAlbums(client, { homeOnly: true }),
     ]);
-    return { slides, blocks, albums };
+    return { slides: shownOnly(slides), blocks, albums };
   },
-  (seed) => ({ slides: seed.slides, blocks: seed.blocks, albums: seed.albums }),
+  (seed) => ({ slides: shownOnly(seed.slides), blocks: seed.blocks, albums: seed.albums }),
 );
 
 /** The 404 numeral only needs frame URLs. */
 export const getHeroFrames = publicQuery(
   "hero-frames",
-  async (client) => (await queryHeroSlides(client)).map((slide) => slide.src),
-  (seed) => seed.slides.map((slide) => slide.src),
+  async (client) => shownOnly(await queryHeroSlides(client)).map((slide) => slide.src),
+  (seed) => shownOnly(seed.slides).map((slide) => slide.src),
 );

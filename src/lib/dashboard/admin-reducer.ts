@@ -1,7 +1,5 @@
-import {
-  pickSiteContent,
-  type SiteContent,
-} from "@/lib/content/site-content-types";
+import { pickSiteContent } from "@/lib/content/site-content-types";
+import { withVisibilityDefaults } from "@/lib/content/site-visibility";
 
 import { isRecordAction, isSettingsAction, type AdminAction } from "./admin-actions";
 import { dropAt, note, patchAt, swap } from "./admin-helpers";
@@ -81,6 +79,7 @@ export function adminReducer(state: AdminState, action: AdminAction): AdminState
               src: "",
               pos: "50% 18%",
               ink: "#fff",
+              hidden: false,
             },
           ],
           slide: state.slides.length,
@@ -128,7 +127,8 @@ export function adminReducer(state: AdminState, action: AdminAction): AdminState
     case "restore":
       return {
         ...state,
-        ...pickSiteContent(action.content),
+        /* A draft stored before the visibility flags existed lacks them. */
+        ...pickSiteContent(withVisibilityDefaults(action.content)),
         activity: action.activity,
         hydrated: true,
       };
@@ -136,26 +136,14 @@ export function adminReducer(state: AdminState, action: AdminAction): AdminState
     case "hydrated":
       return { ...state, hydrated: true };
 
-    case "discard":
-      return note(
-        {
-          ...state,
-          ...(JSON.parse(state.baseline) as SiteContent),
-          drawer: null,
-          slide: 0,
-        },
-        "Unpublished changes discarded",
-      );
-
-    case "published":
-      return note(
-        {
-          ...state,
-          revision: action.revision,
-          baseline: action.baseline,
-          source: "database",
-        },
-        "Published to the live site",
-      );
+    /* Silent: saves happen after every edit, so the activity feed records the
+       edits themselves, not each save. */
+    case "saved":
+      return {
+        ...state,
+        revision: action.revision,
+        baseline: action.baseline,
+        source: "database",
+      };
   }
 }

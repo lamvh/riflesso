@@ -11,7 +11,7 @@ import {
 } from "@/lib/dashboard/admin-views";
 
 import { useAdmin } from "./admin-store";
-import { PublishTray } from "./publish-tray";
+import { SaveStatusIndicator } from "./save-status";
 import { Button, buttonClass } from "./ui/controls";
 import { PlusIcon } from "./ui/icons";
 
@@ -63,7 +63,7 @@ export function DashboardHeader() {
               {add[0]}
             </Button>
           )}
-          <PublishTray />
+          <SaveStatusIndicator />
         </div>
       </div>
     </header>
