@@ -69,7 +69,7 @@ export function AlbumsScreen() {
       </div>
 
       {cards.length === 0 ? (
-        <div className="flex flex-col items-start gap-[12px] rounded-[2px] border border-line bg-paper px-[20px] py-[28px]">
+        <div className="flex flex-col items-start gap-[12px] rounded-[10px] border border-line bg-paper shadow-sheet px-[20px] py-[28px]">
           <p className="font-sans text-[15px] font-medium">No albums match these filters.</p>
           <Button size="sm" onClick={clearFilters}>
             Clear filters
@@ -81,7 +81,7 @@ export function AlbumsScreen() {
             <button
               type="button"
               onClick={() => dispatch({ type: "album/open", index: -1 })}
-              className="flex min-h-[300px] cursor-pointer flex-col items-center justify-center gap-[8px] rounded-[2px] border border-dashed border-[#b5b5b2] text-graphite transition-colors hover:border-ink hover:bg-paper hover:text-ink"
+              className="flex min-h-[300px] cursor-pointer flex-col items-center justify-center gap-[8px] rounded-[10px] border border-dashed border-line-strong text-graphite transition-colors hover:border-ink hover:bg-paper hover:text-ink"
             >
               <PlusIcon size={20} />
               <span className="font-sans text-[14px] font-bold text-ink">New album</span>
@@ -92,7 +92,7 @@ export function AlbumsScreen() {
           {cards.map(({ album, index }) => (
             <article
               key={album.id}
-              className="relative flex min-w-0 flex-col overflow-hidden rounded-[2px] border border-line bg-paper transition-colors hover:border-[#b5b5b2]"
+              className="relative flex min-w-0 flex-col overflow-hidden rounded-[10px] border border-line bg-paper shadow-sheet transition-[border-color,box-shadow] hover:border-line-strong hover:shadow-lift"
             >
               <div className="relative aspect-4/5 overflow-hidden bg-well">
                 <CoverImage src={album.cover} pos={album.pos} video={album.video} />

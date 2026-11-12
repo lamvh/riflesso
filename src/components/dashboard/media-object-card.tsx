@@ -42,7 +42,7 @@ export function MediaObjectCard({
   const extra = usage.places.length - PLACE_LIMIT;
 
   return (
-    <article className="flex min-w-0 flex-col overflow-hidden rounded-[2px] border border-line bg-paper">
+    <article className="flex min-w-0 flex-col overflow-hidden rounded-[10px] border border-line bg-paper shadow-sheet">
       <div className="relative aspect-4/3 overflow-hidden bg-well">
         <CoverImage src={object.url} pos="50% 50%" video={isVideoSrc(object.url)} />
         <span className="absolute top-[8px] left-[8px]" title={hint}>

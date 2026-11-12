@@ -10,7 +10,7 @@ Implement các màn hình cho Riflesso Studio bằng Next.js 16
 | `/about` | Giới thiệu — 2 đoạn copy + lưới liên hệ |
 | `/contact` | Liên hệ — lưới đầy đủ 9 card |
 | `not-found` | Trang 404 — số "404" khoét ảnh hero, cross-fade 8 slide |
-| `/dashboard/*` | Content admin — 7 màn quản trị nội dung, tự lưu lên Supabase, xem mục riêng bên dưới |
+| `/dashboard/*` | Content admin — 8 màn quản trị nội dung, tự lưu lên Supabase, xem mục riêng bên dưới |
 
 Work detail không có route riêng: trong design nó là overlay `position:fixed`
 phủ lên trang chủ, mở khi click card của rail, và đóng bằng nút X hoặc `Esc`.
@@ -143,7 +143,7 @@ dùng đúng file này, không tự sinh config nữa.
 3. Workers Builds → **Build variables**: `NEXT_PUBLIC_MEDIA_BASE_URL` (được nhúng
    vào bundle lúc build).
 4. `npm run deploy`, hoặc push để Workers Builds tự build. Mở
-   `/dashboard/settings` → **Connections** để xem từng kết nối.
+   `/dashboard/status` để xem từng kết nối.
 
 `npm run preview` chạy bản build Workers ở máy (env lấy từ `.dev.vars`).
 
@@ -312,7 +312,8 @@ một route, dùng chung sidebar 236px + header dính (sticky):
 | `/dashboard/categories` | Danh mục — đổi tên tại chỗ, ẩn/hiện, đổi thứ tự |
 | `/dashboard/media` | Mọi file trong bucket R2 — dung lượng, ngày upload, record nào đang dùng; lọc file **Unused** và xoá (từng file hoặc cả loạt) |
 | `/dashboard/homepage` | Hero banner + Page sections + khung preview dính |
-| `/dashboard/settings` | Site settings — trạng thái kết nối (Supabase service role + anon, R2 bucket, media URL; check lúc mở màn + nút "Check again"), logo, SEO, copy About, footer, contact card (địa chỉ, phone, email) |
+| `/dashboard/settings` | Site settings — ẩn/hiện, logo, SEO, copy About, footer, contact card (địa chỉ, phone, email) |
+| `/dashboard/status` | Status — trạng thái kết nối (Supabase service role + anon, R2 bucket, media URL; check lúc mở màn + nút "Check again") |
 
 **Dữ liệu là dữ liệu thật của site, không phải demo.** Dashboard đọc từ Supabase;
 trước lần publish đầu nó dùng nội dung gốc dựng trong

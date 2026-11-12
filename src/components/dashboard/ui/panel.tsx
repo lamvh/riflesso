@@ -17,11 +17,11 @@ export function Panel({
   bodyClassName?: string;
 }) {
   return (
-    <section className={`min-w-0 rounded-[2px] border border-line bg-paper ${className}`}>
+    <section className={`min-w-0 overflow-hidden rounded-[10px] border border-line bg-paper shadow-sheet ${className}`}>
       {title && (
-        <header className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b border-line px-[20px] py-[14px]">
+        <header className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b border-line px-[20px] py-[15px]">
           <div className="min-w-0">
-            <h2 className="font-sans text-[17px] leading-[120%] font-bold tracking-[-0.4px]">
+            <h2 className="font-sans text-[16px] leading-[120%] font-bold tracking-[-0.3px]">
               {title}
             </h2>
             {description && (

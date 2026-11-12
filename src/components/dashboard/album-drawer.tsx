@@ -76,13 +76,13 @@ export function AlbumDrawer({
       <LabelledField label="Images" hint="The first image is the cover">
         <div className="grid grid-cols-4 gap-[8px]">
           {draft.shots.map((shot, position) => (
-            <div key={position} className="relative aspect-3/4 overflow-hidden rounded-[2px] bg-well">
+            <div key={position} className="relative aspect-3/4 overflow-hidden rounded-[6px] bg-well">
               <CoverImage src={shot.src} pos={shot.pos} video={position === 0 && draft.video} />
               <button
                 type="button"
                 aria-label={`Remove image ${position + 1}`}
                 onClick={() => dispatch({ type: "draft/removeShot", index: position })}
-                className="absolute top-[4px] right-[4px] flex h-[22px] w-[22px] cursor-pointer items-center justify-center rounded-[2px] bg-paper/90 text-ink transition-colors hover:bg-paper"
+                className="absolute top-[4px] right-[4px] flex h-[22px] w-[22px] cursor-pointer items-center justify-center rounded-[4px] bg-paper/90 text-ink transition-colors hover:bg-paper"
               >
                 <CrossIcon size={12} />
               </button>
@@ -96,7 +96,7 @@ export function AlbumDrawer({
                 </UploadButton>
               )}
               {position === 0 && shot.src && (
-                <span className="absolute bottom-[4px] left-[4px] rounded-[2px] bg-ink px-[6px] py-[3px] font-sans text-[11px] leading-none font-medium text-paper">
+                <span className="absolute bottom-[4px] left-[4px] rounded-[4px] bg-ink px-[6px] py-[3px] font-sans text-[11px] leading-none font-medium text-paper">
                   Cover
                 </span>
               )}
@@ -107,7 +107,7 @@ export function AlbumDrawer({
             type="button"
             aria-label="Add an image"
             onClick={() => dispatch({ type: "draft/addShot" })}
-            className="flex aspect-3/4 cursor-pointer items-center justify-center rounded-[2px] border border-dashed border-[#b5b5b2] text-graphite transition-colors hover:border-ink hover:text-ink"
+            className="flex aspect-3/4 cursor-pointer items-center justify-center rounded-[6px] border border-dashed border-line-strong text-graphite transition-colors hover:border-ink hover:text-ink"
           >
             <PlusIcon size={18} />
           </button>

@@ -76,7 +76,7 @@ export function CategoriesScreen() {
                   onChange={(event) =>
                     dispatch({ type: "cat/rename", index, name: event.target.value })
                   }
-                  className={`min-w-0 flex-1 rounded-[2px] border border-transparent bg-transparent px-[8px] py-[7px] font-sans text-[15px] font-bold tracking-[-0.3px] transition-colors hover:border-line focus:border-ink focus:bg-paper focus:outline-none ${
+                  className={`min-w-0 flex-1 rounded-[6px] border border-transparent bg-transparent px-[8px] py-[7px] font-sans text-[15px] font-bold tracking-[-0.3px] transition-colors hover:border-line focus:border-ink focus:bg-paper focus:outline-none ${
                     cat.visible ? "text-ink" : "text-graphite"
                   }`}
                 />

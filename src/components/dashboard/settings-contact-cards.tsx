@@ -124,7 +124,7 @@ export function SettingsContactCards({
               </div>
 
               {open && (
-                <div className="grid gap-[14px] border-t border-line bg-[#fafaf9] px-[16px] py-[16px] sm:grid-cols-2">
+                <div className="grid gap-[14px] border-t border-line bg-hover px-[16px] py-[16px] sm:grid-cols-2">
                   <div className="sm:col-span-2">
                     <LabelledField label="Heading">
                       <NameInput

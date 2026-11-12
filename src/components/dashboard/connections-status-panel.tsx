@@ -27,7 +27,7 @@ const timeOf = (iso: string) =>
  * and the public media address. Probed when the screen opens and on demand;
  * results are never cached, so "Check again" always hits the services.
  */
-export function SettingsConnectionsPanel() {
+export function ConnectionsStatusPanel() {
   const [report, setReport] = useState<ConnectionReport | null>(null);
   const [failure, setFailure] = useState<string | null>(null);
   const [checking, startChecking] = useTransition();
@@ -55,7 +55,6 @@ export function SettingsConnectionsPanel() {
     <Panel
       title="Connections"
       description={description}
-      className="xl:col-span-2"
       bodyClassName=""
       action={
         <Button size="sm" onClick={check} disabled={checking}>
@@ -102,7 +101,7 @@ function ConnectionRow({ connection, dimmed }: { connection: ConnectionStatus; d
             {connection.missingEnv.map((name, index) => (
               <span key={name}>
                 {index > 0 && ", "}
-                <code className="rounded-[2px] bg-hover px-[4px] py-[1px] font-mono text-[12px]">
+                <code className="rounded-[4px] bg-hover px-[4px] py-[1px] font-mono text-[12px]">
                   {name}
                 </code>
               </span>

@@ -37,7 +37,7 @@ export function SettingsBrandPanel({
     <div className="flex min-w-0 flex-col gap-[16px]">
       <Panel title="Brand" description="The wordmark in the site masthead and this sidebar">
         <div className="flex flex-col gap-[16px]">
-          <div className="flex h-[88px] items-center justify-center rounded-[2px] bg-hover px-[20px]">
+          <div className="flex h-[88px] items-center justify-center rounded-[6px] bg-hover px-[20px]">
             <img src={logo} alt={settings.logoAlt} className="block h-[24px] w-auto max-w-full" />
           </div>
           <LabelledField

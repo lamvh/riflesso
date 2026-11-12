@@ -3,21 +3,21 @@
 import type { ReactNode } from "react";
 
 /*
- * Buttons, chips and segments are square-cornered like the rest of the house.
- * Only things that report state — status pills and switches — are round.
+ * Buttons, chips and segments carry a small, even radius; only things that
+ * report state — status pills and switches — are fully round.
  */
 
 type Variant = "primary" | "secondary" | "ghost" | "danger";
 type Size = "sm" | "md";
 
 const BUTTON_BASE =
-  "inline-flex shrink-0 cursor-pointer items-center justify-center gap-[6px] rounded-[2px] border font-sans leading-none font-medium whitespace-nowrap transition-colors disabled:cursor-default";
+  "inline-flex shrink-0 cursor-pointer items-center justify-center gap-[6px] rounded-[6px] border font-sans leading-none font-medium whitespace-nowrap transition-[background-color,border-color,color,box-shadow] duration-150 active:translate-y-px disabled:cursor-default disabled:active:translate-y-0";
 
 const VARIANT: Record<Variant, string> = {
   primary:
-    "border-ink bg-ink text-paper hover:bg-[#2b2b2a] disabled:border-line disabled:bg-hover disabled:text-subtle",
+    "border-ink bg-ink text-paper shadow-[0_1px_2px_rgba(28,24,16,0.18)] hover:bg-[#2c2a26] disabled:border-line disabled:bg-hover disabled:text-subtle disabled:shadow-none",
   secondary:
-    "border-line bg-paper text-ink hover:border-ink disabled:text-subtle disabled:hover:border-line",
+    "border-line bg-paper text-ink shadow-sheet hover:border-line-strong hover:bg-hover disabled:text-subtle disabled:hover:border-line disabled:hover:bg-paper",
   ghost: "border-transparent bg-transparent text-graphite hover:bg-hover hover:text-ink",
   danger: "border-transparent bg-transparent text-danger hover:bg-danger-soft",
 };
@@ -84,7 +84,7 @@ export function IconButton({
       title={label}
       onClick={onClick}
       disabled={disabled}
-      className={`relative z-[1] flex h-[28px] w-[28px] shrink-0 cursor-pointer items-center justify-center rounded-[2px] text-graphite transition-colors disabled:cursor-default disabled:opacity-30 ${
+      className={`relative z-[1] flex h-[28px] w-[28px] shrink-0 cursor-pointer items-center justify-center rounded-[6px] text-graphite transition-colors disabled:cursor-default disabled:opacity-30 ${
         tone === "danger"
           ? "hover:bg-danger-soft hover:text-danger disabled:hover:bg-transparent"
           : "hover:bg-hover hover:text-ink disabled:hover:bg-transparent"
@@ -110,8 +110,10 @@ export function Chip({
       type="button"
       aria-pressed={active}
       onClick={onClick}
-      className={`h-[30px] cursor-pointer rounded-[2px] border px-[11px] font-sans text-[13px] leading-none font-medium transition-colors ${
-        active ? "border-ink bg-ink text-paper" : "border-line bg-paper text-ink hover:border-ink"
+      className={`h-[30px] cursor-pointer rounded-[6px] border px-[11px] font-sans text-[13px] leading-none font-medium transition-colors ${
+        active
+          ? "border-ink bg-ink text-paper"
+          : "border-line bg-paper text-body hover:border-line-strong hover:text-ink"
       }`}
     >
       {label}
@@ -135,7 +137,7 @@ export function Segmented<T extends string>({
     <div
       role="radiogroup"
       aria-label={label}
-      className="inline-flex max-w-full overflow-x-auto rounded-[2px] border border-line bg-paper p-[2px] [scrollbar-width:none]"
+      className="inline-flex max-w-full gap-[2px] overflow-x-auto rounded-[8px] bg-sink p-[3px] [scrollbar-width:none]"
     >
       {options.map((option) => {
         const active = option.value === value;
@@ -146,8 +148,10 @@ export function Segmented<T extends string>({
             role="radio"
             aria-checked={active}
             onClick={() => onChange(option.value)}
-            className={`h-[28px] shrink-0 cursor-pointer rounded-[1px] px-[10px] font-sans text-[13px] leading-none font-medium whitespace-nowrap transition-colors ${
-              active ? "bg-ink text-paper" : "text-graphite hover:text-ink"
+            className={`h-[28px] shrink-0 cursor-pointer rounded-[6px] px-[11px] font-sans text-[13px] leading-none font-medium whitespace-nowrap transition-colors ${
+              active
+                ? "bg-paper text-ink shadow-[0_1px_2px_rgba(28,24,16,0.1),0_0_0_1px_rgba(28,24,16,0.04)]"
+                : "text-graphite hover:text-ink"
             }`}
           >
             {option.label}
@@ -175,7 +179,7 @@ export function Switch({
       aria-label={label}
       onClick={onClick}
       className={`relative z-[1] inline-flex h-[20px] w-[36px] shrink-0 cursor-pointer items-center rounded-full transition-colors duration-150 ${
-        on ? "bg-ink" : "bg-line"
+        on ? "bg-ink" : "bg-line-strong"
       }`}
     >
       <span

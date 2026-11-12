@@ -140,9 +140,9 @@ export function MediaScreen() {
     <div className="flex flex-col gap-[14px]">
       <div className="grid grid-cols-2 gap-[14px] lg:grid-cols-4">
         {stats.map((stat) => (
-          <div key={stat.label} className="rounded-[2px] border border-line bg-paper px-[16px] py-[14px] font-sans">
+          <div key={stat.label} className="rounded-[10px] border border-line bg-paper shadow-sheet px-[16px] py-[14px] font-sans">
             <p className="text-[13px] leading-none text-graphite">{stat.label}</p>
-            <p className="mt-[10px] text-[26px] leading-none font-bold tracking-[-0.8px] tabular-nums">{stat.value}</p>
+            <p className="mt-[10px] font-serif text-[30px] leading-none tracking-[-0.5px] tabular-nums">{stat.value}</p>
             <p className="mt-[8px] truncate text-[12px] leading-none text-graphite">{stat.note}</p>
           </div>
         ))}
@@ -179,7 +179,7 @@ export function MediaScreen() {
       </div>
 
       {report?.state === "error" && (
-        <p role="alert" className="rounded-[2px] border border-line bg-paper px-[20px] py-[14px] font-sans text-[13px] text-danger">
+        <p role="alert" className="rounded-[10px] border border-line bg-paper shadow-sheet px-[20px] py-[14px] font-sans text-[13px] text-danger">
           {report.message}
         </p>
       )}
@@ -192,7 +192,7 @@ export function MediaScreen() {
       {!report ? (
         <p className="font-sans text-[14px] text-graphite">Listing the bucket…</p>
       ) : report.state === "ok" && visible.length === 0 ? (
-        <div className="rounded-[2px] border border-line bg-paper px-[20px] py-[28px] font-sans text-[15px] font-medium">
+        <div className="rounded-[10px] border border-line bg-paper shadow-sheet px-[20px] py-[28px] font-sans text-[15px] font-medium">
           {rows.length === 0 ? "The bucket is empty." : "No files match these filters."}
         </div>
       ) : (

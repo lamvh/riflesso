@@ -73,7 +73,7 @@ export function SectionList({
           <li
             key={block.id}
             className={`flex items-center gap-[14px] border-b border-line px-[16px] py-[12px] last:border-b-0 ${
-              block.on ? "" : "bg-[#fafaf9]"
+              block.on ? "" : "bg-hover"
             }`}
           >
             <Switch
@@ -97,7 +97,7 @@ export function SectionList({
 
             <div className="hidden shrink-0 gap-[4px] sm:flex">
               {thumbsFor(block, albums).map((thumb) => (
-                <div key={thumb.id} className="h-[44px] w-[34px] overflow-hidden rounded-[1px] bg-well">
+                <div key={thumb.id} className="h-[44px] w-[34px] overflow-hidden rounded-[4px] bg-well">
                   <CoverImage src={thumb.src} pos={thumb.pos} video={thumb.video} dim={block.on ? 1 : 0.4} />
                 </div>
               ))}

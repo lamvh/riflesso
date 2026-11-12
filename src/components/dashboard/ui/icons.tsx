@@ -65,3 +65,71 @@ export const EyeOffIcon = (props: IconProps) => (
     <path d="M2 2l12 12" />
   </Svg>
 );
+
+/* Sidebar marks, one per screen, drawn on the same grid as the action icons. */
+
+export const OverviewIcon = (props: IconProps) => (
+  <Svg {...props}>
+    <rect x="2.5" y="2.5" width="4.5" height="4.5" rx="1" />
+    <rect x="9" y="2.5" width="4.5" height="4.5" rx="1" />
+    <rect x="2.5" y="9" width="4.5" height="4.5" rx="1" />
+    <rect x="9" y="9" width="4.5" height="4.5" rx="1" />
+  </Svg>
+);
+
+export const PersonIcon = (props: IconProps) => (
+  <Svg {...props}>
+    <circle cx="8" cy="5.5" r="2.6" />
+    <path d="M2.8 13.5c.8-2.5 2.8-3.8 5.2-3.8s4.4 1.3 5.2 3.8" />
+  </Svg>
+);
+
+export const AlbumIcon = (props: IconProps) => (
+  <Svg {...props}>
+    <rect x="2.5" y="3.5" width="11" height="9" rx="1.2" />
+    <path d="M2.5 10.5l3-2.8 2.6 2.3 2-1.6 3.4 2.8" />
+    <circle cx="10.5" cy="6.3" r="0.9" />
+  </Svg>
+);
+
+export const TagIcon = (props: IconProps) => (
+  <Svg {...props}>
+    <path d="M2.5 8.2V3.3a.8.8 0 0 1 .8-.8h4.9l5.3 5.3a.8.8 0 0 1 0 1.1l-4.4 4.4a.8.8 0 0 1-1.1 0Z" />
+    <circle cx="5.5" cy="5.5" r="0.9" />
+  </Svg>
+);
+
+export const StackIcon = (props: IconProps) => (
+  <Svg {...props}>
+    <path d="M8 2.5l5.5 2.8L8 8.1 2.5 5.3Z" />
+    <path d="M2.5 8l5.5 2.8L13.5 8" />
+    <path d="M2.5 10.7l5.5 2.8 5.5-2.8" />
+  </Svg>
+);
+
+export const HomeIcon = (props: IconProps) => (
+  <Svg {...props}>
+    <path d="M2.5 7.2L8 2.8l5.5 4.4" />
+    <path d="M4 6.2v7.3h8V6.2" />
+    <path d="M6.6 13.5v-3.5h2.8v3.5" />
+  </Svg>
+);
+
+export const GearIcon = (props: IconProps) => (
+  <Svg {...props}>
+    <circle cx="8" cy="8" r="2.2" />
+    <path d="M8 1.8v1.6M8 12.6v1.6M14.2 8h-1.6M3.4 8H1.8M12.4 3.6l-1.1 1.1M4.7 11.3l-1.1 1.1M12.4 12.4l-1.1-1.1M4.7 4.7 3.6 3.6" />
+  </Svg>
+);
+
+export const ExternalIcon = (props: IconProps) => (
+  <Svg {...props}>
+    <path d="M9.5 2.5h4v4M13.5 2.5 7.5 8.5M12 9.5v3a1 1 0 0 1-1 1H3.5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h3" />
+  </Svg>
+);
+
+export const PulseIcon = (props: IconProps) => (
+  <Svg {...props}>
+    <path d="M1.5 8.5h3l1.8-4.5 3.2 8 1.8-3.5h3.2" />
+  </Svg>
+);

@@ -68,12 +68,18 @@ export function OverviewScreen() {
           <Link
             key={stat.label}
             href={stat.href}
-            className="flex flex-col gap-[10px] bg-paper px-[20px] py-[18px] transition-colors hover:bg-hover"
+            className="group flex flex-col gap-[12px] bg-paper px-[22px] pt-[20px] pb-[18px] transition-colors hover:bg-hover"
           >
-            <span className="font-sans text-[13px] leading-none font-medium text-graphite">
+            <span className="flex items-center justify-between font-sans text-[11px] leading-none font-bold tracking-[0.12em] text-graphite uppercase">
               {stat.label}
+              <span
+                aria-hidden="true"
+                className="text-[14px] tracking-normal opacity-0 transition-opacity group-hover:opacity-100"
+              >
+                →
+              </span>
             </span>
-            <span className="font-sans text-[36px] leading-none font-bold tracking-[-1.5px] tabular-nums">
+            <span className="font-serif text-[46px] leading-[0.9] tracking-[-1px] tabular-nums">
               {stat.value}
             </span>
             <span className="font-sans text-[13px] leading-none text-graphite">{stat.note}</span>
@@ -97,10 +103,10 @@ export function OverviewScreen() {
                   >
                     <span
                       aria-hidden="true"
-                      className={`h-[7px] w-[7px] shrink-0 rounded-full ${item.pending ? "bg-draft" : "bg-graphite"}`}
+                      className={`h-[8px] w-[8px] shrink-0 rounded-full ${item.pending ? "bg-draft shadow-[0_0_0_3px_var(--color-draft-soft)]" : "bg-line-strong"}`}
                     />
                     <span className="flex-1 font-sans text-[14px] leading-[140%]">{item.text}</span>
-                    <span className="font-sans text-[13px] font-medium text-graphite">Review</span>
+                    <span className="font-sans text-[13px] font-medium text-graphite">Review →</span>
                   </Link>
                 </li>
               ))}

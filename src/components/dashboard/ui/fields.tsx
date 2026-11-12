@@ -12,11 +12,11 @@ import { ChevronDownIcon } from "./icons";
  */
 
 const BOX =
-  "w-full rounded-[2px] border border-line bg-paper px-[11px] text-ink transition-colors hover:border-[#b5b5b2] focus:border-ink focus:shadow-[0_0_0_1px_var(--color-ink)] focus:outline-none";
+  "w-full rounded-[10px] border border-line bg-paper shadow-sheet px-[11px] text-ink transition-colors shadow-[inset_0_1px_1px_rgba(28,24,16,0.03)] hover:border-line-strong focus:border-ink focus:shadow-[0_0_0_3px_rgba(28,24,16,0.08)] focus:outline-none";
 
 export function FieldLabel({ children }: { children: ReactNode }) {
   return (
-    <span className="font-sans text-[13px] leading-none font-medium text-[#3d3d3b]">
+    <span className="font-sans text-[13px] leading-none font-medium text-body">
       {children}
     </span>
   );

@@ -119,7 +119,7 @@ export function ArtistsScreen() {
               key={artist.id}
               className={`${GRID} relative border-b border-line px-[16px] py-[10px] transition-colors last:border-b-0 hover:bg-hover`}
             >
-              <div className="h-[56px] w-[44px] overflow-hidden rounded-[2px] bg-well">
+              <div className="h-[56px] w-[44px] overflow-hidden rounded-[6px] bg-well">
                 <CoverImage src={artist.image} pos={artist.pos} />
               </div>
 

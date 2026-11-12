@@ -35,7 +35,7 @@ export function SaveStatusIndicator() {
         : "";
 
   return (
-    <div className="flex max-w-full items-center gap-[4px] rounded-[2px] border border-line bg-paper py-[3px] pr-[3px] pl-[12px]">
+    <div className="flex max-w-full items-center gap-[4px] rounded-[8px] border border-line bg-paper shadow-sheet py-[3px] pr-[3px] pl-[12px]">
       <p
         role="status"
         aria-live="polite"

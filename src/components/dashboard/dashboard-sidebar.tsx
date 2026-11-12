@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -23,7 +24,18 @@ import {
 } from "@/lib/content/site-visibility";
 
 import { useAdmin } from "./admin-store";
-import { EyeIcon, EyeOffIcon } from "./ui/icons";
+import {
+  AlbumIcon,
+  EyeIcon,
+  EyeOffIcon,
+  GearIcon,
+  HomeIcon,
+  OverviewIcon,
+  PersonIcon,
+  PulseIcon,
+  StackIcon,
+  TagIcon,
+} from "./ui/icons";
 
 /**
  * The wordmark renders at the site's locked dimensions. Its file comes from
@@ -37,6 +49,7 @@ const GROUPS: { label?: string; views: View[] }[] = [
   { views: ["overview"] },
   { label: "Library", views: ["artists", "albums", "cats", "media"] },
   { label: "Site", views: ["home", "settings"] },
+  { label: "System", views: ["status"] },
 ];
 
 /**
@@ -45,6 +58,17 @@ const GROUPS: { label?: string; views: View[] }[] = [
  */
 const QUICK_HIDE: Partial<Record<View, HideablePart>> = {
   artists: "page:artists",
+};
+
+const VIEW_ICON: Record<View, (props: { size?: number }) => ReactNode> = {
+  overview: OverviewIcon,
+  artists: PersonIcon,
+  albums: AlbumIcon,
+  cats: TagIcon,
+  media: StackIcon,
+  home: HomeIcon,
+  settings: GearIcon,
+  status: PulseIcon,
 };
 
 export function DashboardSidebar() {
@@ -68,8 +92,8 @@ export function DashboardSidebar() {
   const logo = isPublishableSrc(typed) ? typed : DEFAULT_LOGO_URL;
 
   return (
-    <aside className="border-b border-line bg-seamless lg:fixed lg:inset-y-0 lg:left-0 lg:z-20 lg:flex lg:w-[232px] lg:flex-col lg:border-r lg:border-b-0">
-      <div className="flex items-center justify-between gap-4 px-[20px] pt-[18px] pb-[12px] lg:block lg:pt-[24px] lg:pb-[24px]">
+    <aside className="border-b border-line bg-paper lg:fixed lg:inset-y-0 lg:left-0 lg:z-20 lg:flex lg:w-[232px] lg:flex-col lg:border-r lg:border-b-0">
+      <div className="flex items-center justify-between gap-4 px-[20px] pt-[18px] pb-[12px] lg:block lg:border-b lg:border-line lg:pt-[26px] lg:pb-[22px]">
         <Link href="/dashboard" className="flex w-fit">
           <Image
             src={logo}
@@ -81,19 +105,19 @@ export function DashboardSidebar() {
             className="h-[20px] w-auto"
           />
         </Link>
-        <p className="font-sans text-[13px] leading-none text-graphite lg:mt-[10px]">
+        <p className="font-serif text-[14px] leading-none text-graphite italic lg:mt-[12px]">
           Content admin
         </p>
       </div>
 
       <nav
         aria-label="Dashboard"
-        className="flex gap-[2px] overflow-x-auto px-[12px] pb-[12px] [scrollbar-width:none] lg:flex-1 lg:flex-col lg:gap-[20px] lg:overflow-y-auto lg:pb-[20px]"
+        className="flex gap-[2px] overflow-x-auto px-[12px] pb-[12px] [scrollbar-width:none] lg:flex-1 lg:flex-col lg:gap-[22px] lg:overflow-y-auto lg:pt-[18px] lg:pb-[20px]"
       >
         {GROUPS.map((group) => (
           <div key={group.label ?? "top"} className="flex gap-[2px] lg:flex-col">
             {group.label && (
-              <p className="hidden px-[10px] pb-[6px] font-sans text-[12px] leading-none font-medium text-graphite lg:block">
+              <p className="hidden px-[10px] pb-[8px] font-sans text-[11px] leading-none font-bold tracking-[0.12em] text-graphite uppercase lg:block">
                 {group.label}
               </p>
             )}
@@ -106,19 +130,34 @@ export function DashboardSidebar() {
                 : 0;
               const quickPart = QUICK_HIDE[view];
               const pageShown = !quickPart || isPartShown(state.settings, quickPart);
+              const Icon = VIEW_ICON[view];
               return (
                 <div key={view} className="relative flex shrink-0">
                   <Link
                     href={VIEW_HREF[view]}
                     aria-current={active ? "page" : undefined}
-                    className={`flex h-[34px] flex-1 items-center gap-[10px] rounded-[2px] px-[10px] font-sans text-[14px] leading-none whitespace-nowrap transition-colors ${
+                    className={`group/nav relative flex h-[36px] flex-1 items-center gap-[10px] rounded-[8px] px-[10px] font-sans text-[14px] leading-none whitespace-nowrap transition-colors ${
                       quickPart ? "pr-[40px]" : ""
                     } ${
                       active
-                        ? "bg-paper font-bold text-ink shadow-[inset_0_0_0_1px_var(--color-line)]"
-                        : "font-medium text-[#3d3d3b] hover:bg-[#dcdcd9]"
+                        ? "bg-seamless font-bold text-ink"
+                        : "font-medium text-body hover:bg-hover hover:text-ink"
                     }`}
                   >
+                    {/* The active screen is marked by a short ink rule at the
+                        sidebar edge, like a ribbon in a book. */}
+                    {active && (
+                      <span
+                        aria-hidden="true"
+                        className="absolute top-[9px] bottom-[9px] -left-[12px] hidden w-[3px] rounded-r-full bg-ink lg:block"
+                      />
+                    )}
+                    <span
+                      aria-hidden="true"
+                      className={active ? "text-ink" : "text-graphite group-hover/nav:text-ink"}
+                    >
+                      <Icon size={16} />
+                    </span>
                     <span
                       className={`flex-1 ${pageShown ? "" : "text-graphite line-through decoration-1"}`}
                     >
@@ -133,7 +172,11 @@ export function DashboardSidebar() {
                       </span>
                     )}
                     {count !== null && (
-                      <span className="font-sans text-[12px] font-medium text-graphite tabular-nums">
+                      <span
+                        className={`min-w-[22px] rounded-full px-[6px] py-[3px] text-center font-sans text-[11px] font-bold tabular-nums ${
+                          active ? "bg-paper text-ink" : "bg-seamless text-graphite"
+                        }`}
+                      >
                         {count}
                       </span>
                     )}
@@ -154,7 +197,7 @@ export function DashboardSidebar() {
                           : "Hidden from visitors — click to show"
                       }
                       onClick={() => togglePart(quickPart)}
-                      className={`absolute top-1/2 right-[5px] flex h-[26px] w-[26px] -translate-y-1/2 cursor-pointer items-center justify-center rounded-[2px] transition-colors hover:bg-hover ${
+                      className={`absolute top-1/2 right-[5px] flex h-[26px] w-[26px] -translate-y-1/2 cursor-pointer items-center justify-center rounded-[6px] transition-colors hover:bg-paper ${
                         pageShown ? "text-graphite hover:text-ink" : "text-draft"
                       }`}
                     >
@@ -168,11 +211,19 @@ export function DashboardSidebar() {
         ))}
       </nav>
 
-      <div className="hidden border-t border-line px-[20px] py-[16px] lg:block">
-        <p className="font-sans text-[13px] leading-none font-bold">Diego Nguyen</p>
-        <p className="mt-[6px] font-sans text-[12px] leading-none text-graphite">
-          Editor, Ho Chi Minh City
-        </p>
+      <div className="hidden items-center gap-[10px] border-t border-line px-[20px] py-[16px] lg:flex">
+        <span
+          aria-hidden="true"
+          className="flex h-[32px] w-[32px] shrink-0 items-center justify-center rounded-full bg-ink font-serif text-[14px] text-paper"
+        >
+          DN
+        </span>
+        <div className="min-w-0">
+          <p className="font-sans text-[13px] leading-none font-bold">Diego Nguyen</p>
+          <p className="mt-[5px] truncate font-sans text-[12px] leading-none text-graphite">
+            Editor, Ho Chi Minh City
+          </p>
+        </div>
       </div>
     </aside>
   );

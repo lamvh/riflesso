@@ -55,7 +55,7 @@ export function HomepageScreen() {
           }
           bodyClassName="flex flex-col gap-[10px] bg-hover p-[12px]"
         >
-          <div className="relative h-[100px] overflow-hidden rounded-[2px] bg-well">
+          <div className="relative h-[100px] overflow-hidden rounded-[6px] bg-well">
             {hero && <CoverImage src={hero.src} pos={hero.pos} />}
             <span
               className="absolute inset-x-0 bottom-[6px] text-center font-serif text-[10px] leading-none italic"
@@ -72,7 +72,7 @@ export function HomepageScreen() {
                 {Array.from({ length: bandCells(block.kind) }, (_, cell) => (
                   <span
                     key={cell}
-                    className="flex-1 rounded-[1px] bg-[#d9d9d6]"
+                    className="flex-1 rounded-[4px] bg-sink"
                     style={{ height: BAND_HEIGHT[block.kind] }}
                   />
                 ))}

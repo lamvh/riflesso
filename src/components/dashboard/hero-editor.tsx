@@ -81,17 +81,17 @@ export function HeroEditor({
               className="flex w-[120px] shrink-0 cursor-pointer flex-col gap-[6px] text-left"
             >
               <span
-                className={`relative block h-[76px] overflow-hidden rounded-[2px] bg-well transition-opacity ${
+                className={`relative block h-[76px] overflow-hidden rounded-[6px] bg-well transition-opacity ${
                   active ? "shadow-[0_0_0_2px_var(--color-ink)]" : "opacity-70 hover:opacity-100"
                 }`}
               >
                 <CoverImage src={entry.src} pos={entry.pos} dim={entry.hidden ? 0.35 : 1} />
                 {entry.hidden && (
-                  <span className="absolute right-[4px] bottom-[4px] rounded-[2px] bg-paper/90 px-[5px] py-[3px] font-sans text-[11px] leading-none font-bold">
+                  <span className="absolute right-[4px] bottom-[4px] rounded-[4px] bg-paper/90 px-[5px] py-[3px] font-sans text-[11px] leading-none font-bold">
                     Hidden
                   </span>
                 )}
-                <span className="absolute top-[4px] left-[4px] rounded-[2px] bg-paper/90 px-[5px] py-[3px] font-sans text-[11px] leading-none font-bold tabular-nums">
+                <span className="absolute top-[4px] left-[4px] rounded-[4px] bg-paper/90 px-[5px] py-[3px] font-sans text-[11px] leading-none font-bold tabular-nums">
                   {index + 1}
                 </span>
               </span>
@@ -109,7 +109,7 @@ export function HeroEditor({
 
       {slide ? (
         <div className="grid items-start gap-[20px] lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
-          <div className="relative aspect-16/10 overflow-hidden rounded-[2px] bg-well">
+          <div className="relative aspect-16/10 overflow-hidden rounded-[6px] bg-well">
             <CoverImage src={slide.src} pos={slide.pos} />
             <div className="absolute inset-x-0 bottom-0 flex justify-center bg-linear-to-t from-black/45 to-transparent px-[16px] pt-[40px] pb-[14px]">
               <p
@@ -122,7 +122,7 @@ export function HeroEditor({
           </div>
 
           <div className="flex min-w-0 flex-col gap-[16px]">
-            <div className="flex items-center justify-between gap-[12px] rounded-[2px] border border-line px-[12px] py-[10px]">
+            <div className="flex items-center justify-between gap-[12px] rounded-[6px] border border-line px-[12px] py-[10px]">
               <span className="flex items-center gap-[8px] font-sans text-[14px] font-bold">
                 Show this slide
                 {slide.hidden && <StatusPill tone="draft">Hidden</StatusPill>}

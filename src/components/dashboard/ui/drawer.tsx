@@ -51,7 +51,7 @@ export function Drawer({
         aria-label="Close"
         tabIndex={-1}
         onClick={onClose}
-        className="absolute inset-0 h-full w-full cursor-default bg-black/30 motion-safe:animate-scrim-in"
+        className="absolute inset-0 h-full w-full cursor-default bg-[#1c1810]/35 backdrop-blur-[2px] motion-safe:animate-scrim-in"
       />
 
       <div
@@ -61,11 +61,11 @@ export function Drawer({
         aria-label={title}
         tabIndex={-1}
         style={{ width: `${width}px` }}
-        className="relative flex h-full max-w-full flex-col bg-paper shadow-[-16px_0_48px_rgba(0,0,0,0.14)] outline-none motion-safe:animate-drawer-in"
+        className="relative flex h-full max-w-full flex-col overflow-hidden bg-paper shadow-[-16px_0_48px_rgba(28,24,16,0.18)] outline-none motion-safe:animate-drawer-in sm:my-[8px] sm:mr-[8px] sm:h-[calc(100%-16px)] sm:max-w-[calc(100%-16px)] sm:rounded-[12px]"
       >
         <header className="flex items-start justify-between gap-4 border-b border-line px-[24px] py-[18px]">
           <div className="min-w-0">
-            <h2 className="truncate font-sans text-[20px] leading-[120%] font-bold tracking-[-0.6px]">
+            <h2 className="truncate font-serif text-[24px] leading-[115%] tracking-[-0.3px]">
               {title}
             </h2>
             {description && (
@@ -83,7 +83,7 @@ export function Drawer({
           <div className="flex flex-col gap-[24px]">{children}</div>
         </div>
 
-        <footer className="flex items-center gap-[8px] border-t border-line px-[24px] py-[14px]">
+        <footer className="flex items-center gap-[8px] border-t border-line bg-hover px-[24px] py-[14px]">
           {footer}
         </footer>
       </div>

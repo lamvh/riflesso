@@ -92,7 +92,7 @@ export function ArtistDrawer({
 
       <LabelledField label="Portrait" hint="A path under /assets or an https:// link">
         <div className="flex items-start gap-[14px]">
-          <div className="h-[124px] w-[96px] shrink-0 overflow-hidden rounded-[2px] bg-well">
+          <div className="h-[124px] w-[96px] shrink-0 overflow-hidden rounded-[6px] bg-well">
             <CoverImage src={draft.image} pos="50% 22%" />
           </div>
           <div className="flex min-w-0 flex-1 flex-col gap-[8px]">

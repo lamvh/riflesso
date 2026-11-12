@@ -1,7 +1,7 @@
 import type { AdminState } from "./admin-state";
 
 /** The screens the dashboard is made of, in sidebar order. */
-export const VIEWS = ["overview", "artists", "albums", "cats", "media", "home", "settings"] as const;
+export const VIEWS = ["overview", "artists", "albums", "cats", "media", "home", "settings", "status"] as const;
 export type View = (typeof VIEWS)[number];
 
 export const VIEW_HREF: Record<View, string> = {
@@ -12,6 +12,7 @@ export const VIEW_HREF: Record<View, string> = {
   media: "/dashboard/media",
   home: "/dashboard/homepage",
   settings: "/dashboard/settings",
+  status: "/dashboard/status",
 };
 
 export const VIEW_LABEL: Record<View, string> = {
@@ -22,6 +23,7 @@ export const VIEW_LABEL: Record<View, string> = {
   media: "Media",
   home: "Homepage",
   settings: "Site settings",
+  status: "Status",
 };
 
 export const viewFromPath = (pathname: string): View =>
@@ -95,7 +97,9 @@ export function pageTitle(
     case "media":
       return ["Media", "Every file stored in the R2 bucket, its size, and what uses it"];
     case "settings":
-      return ["Site settings", "Connections, visibility, logo, search listing, About copy, contact cards and footer"];
+      return ["Site settings", "Visibility, logo, search listing, About copy, contact cards and footer"];
+    case "status":
+      return ["Status", "Live health of Supabase, the R2 bucket and the public media address"];
     case "overview":
       return ["Overview", "What visitors see on the Riflesso site right now"];
   }
