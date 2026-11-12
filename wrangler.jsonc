@@ -1,0 +1,41 @@
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"main": ".open-next/worker.js",
+	"name": "riflesso",
+	"compatibility_date": "2026-11-12",
+	"compatibility_flags": [
+		"nodejs_compat",
+		"global_fetch_strictly_public"
+	],
+	"assets": {
+		"directory": ".open-next/assets",
+		"binding": "ASSETS"
+	},
+	"services": [
+		{
+			// Self-reference service binding, the service name must match the worker name
+			// see https://opennext.js.org/cloudflare/caching
+			"binding": "WORKER_SELF_REFERENCE",
+			"service": "riflesso"
+		}
+	],
+	"images": {
+		// Enable image optimization
+		// see https://opennext.js.org/cloudflare/howtos/image
+		"binding": "IMAGES"
+	},
+	"observability": {
+		"enabled": true
+	},
+	// Non-secret runtime config. Keys go in as secrets, never here:
+	//   npx wrangler secret put SUPABASE_SERVICE_ROLE_KEY   (and SUPABASE_ANON_KEY,
+	//   R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY)
+	// NEXT_PUBLIC_MEDIA_BASE_URL is inlined at build time, so it must also be a
+	// build variable in Workers Builds.
+	"vars": {
+		"SUPABASE_URL": "https://ipewjyxbobiqjtrqciiq.supabase.co",
+		"R2_ENDPOINT": "https://54c2649e02de2813914a39aa13e82334.r2.cloudflarestorage.com",
+		"R2_BUCKET": "riflesso",
+		"NEXT_PUBLIC_MEDIA_BASE_URL": "https://pub-98a0467d056f45a197c0d3711ce3f884.r2.dev"
+	}
+}

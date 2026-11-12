@@ -95,6 +95,9 @@ upload báo lỗi rõ ràng, phần còn lại của dashboard vẫn chạy bìn
   không phải lúc nào cũng nhỏ hơn, ảnh nhiều hạt đã nén sẵn có khi còn phình ra.
   Ảnh gốc đã nhẹ hơn cả hai và không cần resize thì giữ nguyên (trường hợp duy
   nhất metadata không bị xoá). Ảnh máy ảnh 8MB thường còn 300–600KB.
+  Trên Cloudflare Workers `sharp` không chạy được, nên cùng các bước đó đi qua
+  binding **Cloudflare Images** (`IMAGES`); GIF trên Workers giữ nguyên để
+  không mất animation. Chọn encoder ở `src/lib/media/optimize-image.ts`.
 - Video (mp4/webm/mov) giữ nguyên, không nén. Giới hạn 50MB mỗi file.
 - Key dạng `uploads/2026/09/<tên-file>-<8 ký tự>.webp` — mỗi lần upload là một
   object mới, nên cache `immutable` một năm.
@@ -103,6 +106,26 @@ upload báo lỗi rõ ràng, phần còn lại của dashboard vẫn chạy bìn
 
 > **Chưa có auth.** `/api/media/upload` mở cho bất kỳ ai gọi tới. Thêm đăng nhập
 > trước khi deploy public, nếu không bucket có thể bị lạm dụng.
+
+### Deploy: Cloudflare Workers (OpenNext)
+
+Cấu hình nằm trong repo: `wrangler.jsonc`, `open-next.config.ts`. Workers Builds
+dùng đúng file này, không tự sinh config nữa.
+
+1. Không dùng incremental cache / tag cache (không cần R2 cache bucket hay D1):
+   mỗi lượt xem trang public render lại và đọc thẳng Supabase, nên **Publish**
+   hiện ngay. Traffic tăng thì thêm `r2IncrementalCache` + `d1NextTagCache` vào
+   `open-next.config.ts` (xem https://opennext.js.org/cloudflare/caching).
+2. Biến không bí mật nằm ở `vars` trong `wrangler.jsonc`. Key bí mật đặt dạng
+   **Secret** (không bị deploy xoá): `npx wrangler secret put` cho
+   `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_ANON_KEY`, `R2_ACCESS_KEY_ID`,
+   `R2_SECRET_ACCESS_KEY`.
+3. Workers Builds → **Build variables**: `NEXT_PUBLIC_MEDIA_BASE_URL` (được nhúng
+   vào bundle lúc build).
+4. `npm run deploy`, hoặc push để Workers Builds tự build. Mở
+   `/dashboard/settings` → **Connections** để xem từng kết nối.
+
+`npm run preview` chạy bản build Workers ở máy (env lấy từ `.dev.vars`).
 
 ## Cấu trúc
 
