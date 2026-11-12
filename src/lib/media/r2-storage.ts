@@ -1,6 +1,6 @@
 import "server-only";
 
-import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { ListObjectsV2Command, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 
 /*
  * Cloudflare R2 through its S3 API. Uploads are written by the dashboard's
@@ -51,6 +51,17 @@ function r2Client(config: R2Config): S3Client {
     },
   });
   return client;
+}
+
+/**
+ * Lists at most one object — the cheapest call that proves the credentials
+ * can read the bucket. Throws on network, auth or missing-bucket failures.
+ */
+export async function probeBucket(config: R2Config, signal: AbortSignal): Promise<void> {
+  await r2Client(config).send(
+    new ListObjectsV2Command({ Bucket: config.bucket, MaxKeys: 1 }),
+    { abortSignal: signal },
+  );
 }
 
 /** Objects are immutable: every upload gets its own key, so it can cache forever. */

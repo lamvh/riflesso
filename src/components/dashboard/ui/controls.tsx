@@ -187,18 +187,20 @@ export function Switch({
   );
 }
 
-export type Tone = "live" | "draft" | "neutral";
+export type Tone = "live" | "draft" | "neutral" | "danger";
 
 const PILL_TONE: Record<Tone, string> = {
   live: "bg-live-soft text-live",
   draft: "bg-draft-soft text-draft",
   neutral: "bg-hover text-graphite",
+  danger: "bg-danger-soft text-danger",
 };
 
 const DOT_TONE: Record<Tone, string> = {
   live: "bg-live",
   draft: "bg-draft",
   neutral: "bg-graphite",
+  danger: "bg-danger",
 };
 
 export const liveTone = (live: boolean): Tone => (live ? "live" : "draft");
