@@ -8,6 +8,7 @@ import { DEFAULT_LOGO_URL } from "@/lib/content/site-content-types";
 import { canOptimizeImage, isPublishableSrc } from "@/lib/media-src";
 
 import { SearchIcon } from "./search-icon";
+import { SiteSearch } from "./site-search";
 
 /**
  * Layout box for the wordmark at its largest rendered size, matching the
@@ -57,6 +58,20 @@ export function SiteHeader({
   const artistsActive = currentSection === "artists";
   const logo = isPublishableSrc(logoUrl) ? logoUrl : DEFAULT_LOGO_URL;
   const [scrolled, setScrolled] = useState(false);
+  const [searching, setSearching] = useState(false);
+
+  /* ⌘K / Ctrl+K anywhere, or "/" when not typing, opens Search. */
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      const typing = (event.target as HTMLElement | null)?.closest("input, textarea, [contenteditable]");
+      if (((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") || (event.key === "/" && !typing)) {
+        event.preventDefault();
+        setSearching(true);
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, []);
 
   /* The masthead floats over the hero at rest and only earns its paper backdrop
      once content starts sliding underneath it. */
@@ -160,12 +175,17 @@ export function SiteHeader({
 
         <button
           type="button"
-          className="flex items-center gap-[7px] font-sans text-[13px] leading-[94%] font-bold tracking-[-0.5px] sm:text-[15px]"
+          aria-haspopup="dialog"
+          aria-expanded={searching}
+          onClick={() => setSearching(true)}
+          className="flex cursor-pointer items-center gap-[7px] font-sans text-[13px] leading-[94%] font-bold tracking-[-0.5px] sm:text-[15px]"
         >
           <span>Search</span>
           <SearchIcon size={17} />
         </button>
       </div>
+
+      {searching && <SiteSearch onClose={() => setSearching(false)} />}
     </header>
   );
 }

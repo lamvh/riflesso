@@ -1,8 +1,9 @@
-import type { CSSProperties } from "react";
+import { Suspense, type CSSProperties } from "react";
 
 import { FeatureAnniversary, FeatureEditorial } from "@/components/home/feature-blocks";
 import { HeroBanner } from "@/components/home/hero-banner";
 import { MediaRail } from "@/components/home/media-rail";
+import { WorkDeepLink, type DeepLinkWork } from "@/components/home/work-deep-link";
 import { WorkDetailProvider } from "@/components/home/work-detail-context";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
@@ -51,6 +52,9 @@ export default async function HomePage() {
       />
 
       <WorkDetailProvider>
+        <Suspense fallback={null}>
+          <WorkDeepLink works={deepLinkWorks(sections)} />
+        </Suspense>
         <main>
           {showHero ? (
             <HeroBanner slides={slides} autoplay={DISPLAY.bannerAutoplay} />
@@ -99,3 +103,21 @@ export default async function HomePage() {
     </div>
   );
 }
+
+/** Every album a section shows, with the section it opens in, for `/?work=`. */
+function deepLinkWorks(sections: ReturnType<typeof buildHomeSections>): DeepLinkWork[] {
+  const works = new Map<string, DeepLinkWork>();
+  for (const view of sections) {
+    /* A rail with no gallery label (New Signs) sends cards to the directory instead. */
+    if (view.layout === "rail" && view.category) {
+      const section = { heading: view.heading, category: view.category, items: view.items };
+      for (const item of view.items) {
+        if (item.albumId && !works.has(item.albumId)) works.set(item.albumId, { id: item.albumId, item, section });
+      }
+    } else if (view.layout === "feature" && view.item.albumId && !works.has(view.item.albumId)) {
+      works.set(view.item.albumId, { id: view.item.albumId, item: view.item, section: view.section });
+    }
+  }
+  return [...works.values()];
+}
+

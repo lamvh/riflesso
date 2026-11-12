@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { trackContentView } from "@/lib/analytics/track-content-view";
 
 import type { Artist, Territory } from "@/data/artists";
 import { filterArtists } from "@/lib/filter-artists";
 
+import { ArtistDeepLink } from "./artist-deep-link";
 import { ArtistPreviewImage } from "./artist-preview-image";
 import { ArtistsFilterSidebar } from "./artists-filter-sidebar";
 import { ArtistsList } from "./artists-list";
@@ -54,6 +55,22 @@ export function ArtistsDirectory({
     if (name) viewTimer.current = setTimeout(() => trackContentView("artist", name), 800);
   };
 
+  /* From Search: switch to the artist's territory and first listed
+     discipline, and narrow the list to their name. */
+  const showArtist = useCallback(
+    (name: string) => {
+      const artist = roster.find((entry) => entry.name === name);
+      if (!artist) return;
+      const discipline =
+        artist.category.split(", ").find((entry) => categories.includes(entry)) ?? category;
+      setTerritory(artist.territory);
+      setCategory(discipline);
+      setQuery(artist.name);
+      setActiveIndex(0);
+    },
+    [roster, categories, category],
+  );
+
   const resetTo = (apply: () => void) => {
     apply();
     setActiveIndex(0);
@@ -61,6 +78,9 @@ export function ArtistsDirectory({
 
   return (
     <div className="flex flex-col items-start gap-10 px-5 pt-[100px] lg:flex-row lg:gap-[43px] lg:pt-0">
+      <Suspense fallback={null}>
+        <ArtistDeepLink onArtist={showArtist} />
+      </Suspense>
       <ArtistsFilterSidebar
         territory={territory}
         onTerritoryChange={(next) => resetTo(() => setTerritory(next))}

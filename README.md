@@ -12,6 +12,12 @@ Implement các màn hình cho Riflesso Studio bằng Next.js 16
 | `not-found` | Trang 404 — số "404" khoét ảnh hero, cross-fade 8 slide |
 | `/dashboard/*` | Content admin — 9 màn quản trị nội dung, tự lưu lên Supabase, xem mục riêng bên dưới |
 
+**Search** (nút ở masthead, hoặc ⌘K / `/`) tìm trên artist đang hiện, album đang có
+trên trang chủ, và các trang. Index lấy từ `/api/search-index` (cùng nguồn đọc
+public, nên artist ẩn / album draft không bao giờ lộ ra). Chọn artist →
+`/artists?artist=<tên>` (danh bạ tự chuyển territory + discipline và lọc theo tên);
+chọn album → `/?work=<album id>` (mở gallery như khi bấm card).
+
 Work detail không có route riêng: trong design nó là overlay `position:fixed`
 phủ lên trang chủ, mở khi click card của rail, và đóng bằng nút X hoặc `Esc`.
 

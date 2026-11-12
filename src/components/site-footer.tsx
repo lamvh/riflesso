@@ -39,8 +39,8 @@ function FooterColumn({
 }) {
   return (
     <ul
-      className={`m-0 flex list-none flex-col gap-[9px] p-0 ${
-        align === "right" ? "text-right" : ""
+      className={`m-0 flex list-none flex-col gap-[12px] p-0 sm:gap-[9px] ${
+        align === "right" ? "sm:text-right" : ""
       }`}
     >
       {links.map((link) => (
@@ -64,6 +64,11 @@ function FooterColumn({
 /**
  * One margin for every screen, as the merged design specifies. Social links
  * and the copyright line come from Site settings.
+ *
+ * From `sm` up the four columns spread across one row, the copyright closing
+ * the right-hand one. On a phone they settle into two even columns — pages
+ * beside social, legal beside policy — and the copyright takes its own line
+ * under a hairline, rather than four columns wrapping wherever they fall.
  */
 export async function SiteFooter() {
   const settings = await getSiteSettings()
@@ -71,7 +76,7 @@ export async function SiteFooter() {
   const pageLinks = PAGE_LINKS.filter((link) => isPartShown(settings, link.part))
 
   return (
-    <footer className="mt-[110px] flex flex-wrap items-start justify-between gap-10 px-5 pb-10">
+    <footer className="mt-[110px] grid grid-cols-2 items-start gap-x-6 gap-y-9 px-5 pb-[calc(40px+env(safe-area-inset-bottom))] sm:flex sm:flex-wrap sm:justify-between sm:gap-10 sm:pb-10">
       <FooterColumn links={pageLinks} linkClassName={BOLD_LINK} />
       <FooterColumn
         links={isPartShown(settings, "footer:social") ? socialLinks : []}
@@ -84,11 +89,16 @@ export async function SiteFooter() {
         align="right"
       >
         {copyright && (
-          <li>
+          <li className="hidden sm:list-item">
             <p className="font-serif text-[15px] leading-[100%]">{copyright}</p>
           </li>
         )}
       </FooterColumn>
+      {copyright && (
+        <p className="col-span-2 border-t border-black/10 pt-5 font-serif text-[15px] leading-[100%] sm:hidden">
+          {copyright}
+        </p>
+      )}
     </footer>
   )
 }
