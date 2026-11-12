@@ -15,8 +15,11 @@ import { PublishTray } from "./publish-tray";
 import { Button, buttonClass } from "./ui/controls";
 import { PlusIcon } from "./ui/icons";
 
-/** The add action each screen offers from its header. */
-function addActionFor(view: View): [string, AdminAction] {
+/**
+ * The add action each screen offers from its header. Media has none: a file
+ * uploaded there would belong to no record, which is the waste it exists to find.
+ */
+function addActionFor(view: View): [string, AdminAction] | null {
   switch (view) {
     case "artists":
       return ["New artist", { type: "artist/open", index: -1 }];
@@ -26,6 +29,8 @@ function addActionFor(view: View): [string, AdminAction] {
       return ["Add slide", { type: "slide/add" }];
     case "settings":
       return ["Add contact card", { type: "contact/add" }];
+    case "media":
+      return null;
     case "albums":
     case "overview":
       return ["New album", { type: "album/open", index: -1 }];
@@ -36,7 +41,7 @@ export function DashboardHeader() {
   const { state, dispatch } = useAdmin();
   const view = viewFromPath(usePathname());
   const [title, note] = pageTitle(view, adminTotals(state));
-  const [label, action] = addActionFor(view);
+  const add = addActionFor(view);
 
   return (
     <header className="sticky top-0 z-10 border-b border-line bg-seamless/95 backdrop-blur-sm">
@@ -52,10 +57,12 @@ export function DashboardHeader() {
           <a href="/" target="_blank" rel="noreferrer" className={buttonClass("ghost")}>
             View site
           </a>
-          <Button onClick={() => dispatch(action)}>
-            <PlusIcon />
-            {label}
-          </Button>
+          {add && (
+            <Button onClick={() => dispatch(add[1])}>
+              <PlusIcon />
+              {add[0]}
+            </Button>
+          )}
           <PublishTray />
         </div>
       </div>

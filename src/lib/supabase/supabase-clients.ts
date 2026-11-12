@@ -11,7 +11,14 @@ const OPTIONS = { auth: { persistSession: false, autoRefreshToken: false } };
 function build(key: string | undefined): SupabaseClient | null {
   const url = process.env.SUPABASE_URL;
   if (!url || !key) return null;
-  return createClient(url, key, OPTIONS);
+  try {
+    return createClient(url, key, OPTIONS);
+  } catch (error) {
+    /* A malformed SUPABASE_URL makes createClient throw; treat it as not
+       configured so every caller falls back to the built-in content. */
+    console.warn(`Supabase client not created: ${error instanceof Error ? error.message : error}`);
+    return null;
+  }
 }
 
 /** Anon key: RLS limits it to published content. Null when env is missing. */

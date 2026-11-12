@@ -33,8 +33,15 @@ export async function loadDashboardContent(): Promise<LoadedSiteContent> {
   try {
     return await readDatabaseContent(client);
   } catch (error) {
-    if (!(error instanceof DatabaseUnreachableError)) throw error;
-    console.warn(`${error.message} — is the Supabase project paused? Showing built-in content.`);
+    /* Any failed read opens the dashboard offline rather than crashing it.
+       "unreachable" blocks publishing, so the defaults can never overwrite
+       the real content. */
+    const hint =
+      error instanceof DatabaseUnreachableError
+        ? "is the Supabase project paused?"
+        : "have the migrations been run?";
+    const reason = error instanceof Error ? error.message : String(error);
+    console.warn(`${reason} — ${hint} Showing built-in content.`);
     return { content: seedSiteContent(), revision: 0, source: "unreachable" };
   }
 }

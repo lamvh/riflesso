@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import { DEFAULT_LOGO_URL } from "@/lib/content/site-content-types";
-import { plural, type ChangeArea } from "@/lib/dashboard/admin-changes";
+import { CHANGE_AREAS, plural, type ChangeArea } from "@/lib/dashboard/admin-changes";
 import {
   VIEW_HREF,
   VIEW_LABEL,
@@ -28,7 +28,7 @@ const WORDMARK_HEIGHT = 20;
 /** Library holds the records; Site holds how they are arranged and framed. */
 const GROUPS: { label?: string; views: View[] }[] = [
   { views: ["overview"] },
-  { label: "Library", views: ["artists", "albums", "cats"] },
+  { label: "Library", views: ["artists", "albums", "cats", "media"] },
   { label: "Site", views: ["home", "settings"] },
 ];
 
@@ -72,7 +72,10 @@ export function DashboardSidebar() {
             {group.views.map((view) => {
               const active = view === current;
               const count = navCount(view, totals);
-              const pending = view === "overview" ? 0 : changes[view as ChangeArea];
+              /* Overview and Media hold nothing publishable of their own. */
+              const pending = CHANGE_AREAS.includes(view as ChangeArea)
+                ? changes[view as ChangeArea]
+                : 0;
               return (
                 <Link
                   key={view}

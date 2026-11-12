@@ -10,7 +10,7 @@ Implement các màn hình cho Riflesso Studio bằng Next.js 16
 | `/about` | Giới thiệu — 2 đoạn copy + lưới liên hệ |
 | `/contact` | Liên hệ — lưới đầy đủ 9 card |
 | `not-found` | Trang 404 — số "404" khoét ảnh hero, cross-fade 8 slide |
-| `/dashboard/*` | Content admin — 6 màn quản trị nội dung, publish lên Supabase, xem mục riêng bên dưới |
+| `/dashboard/*` | Content admin — 7 màn quản trị nội dung, publish lên Supabase, xem mục riêng bên dưới |
 
 Work detail không có route riêng: trong design nó là overlay `position:fixed`
 phủ lên trang chủ, mở khi click card của rail, và đóng bằng nút X hoặc `Esc`.
@@ -108,6 +108,18 @@ upload báo lỗi rõ ràng, phần còn lại của dashboard vẫn chạy bìn
 - Route trả về URL công khai, dashboard điền vào ô địa chỉ; ảnh chỉ thật sự lên
   site sau khi bấm **Publish**.
 
+**Màn Media** (`src/lib/dashboard/list-media-library.ts`, `media-usage.ts`) list
+toàn bộ bucket (tối đa 20.000 object) rồi so key với URL trong cả nội dung đã
+publish lẫn draft đang sửa: **In use**, **Unpublished** (chỉ có trong draft),
+**Removed in draft** (vẫn trên site tới khi Publish), **Unused**. So theo hậu tố
+path nên URL lưu với `NEXT_PUBLIC_MEDIA_BASE_URL` cũ vẫn được nhận ra.
+
+**Xoá file** (`src/lib/dashboard/delete-media-objects.ts`) chỉ hiện với file
+**Unused**, có hỏi xác nhận. Vì chưa có auth, server không tin client: chỉ nhận
+key trong `uploads/`, đọc lại DB (cả record draft) và giữ lại mọi file còn record
+trỏ tới; DB không trả lời thì không xoá gì. Draft chưa publish nằm ở trình duyệt
+người khác thì server không thấy — hai người cùng sửa thì Refresh trước khi xoá.
+
 > **Chưa có auth.** `/api/media/upload` mở cho bất kỳ ai gọi tới. Thêm đăng nhập
 > trước khi deploy public, nếu không bucket có thể bị lạm dụng.
 
@@ -130,6 +142,12 @@ dùng đúng file này, không tự sinh config nữa.
    `/dashboard/settings` → **Connections** để xem từng kết nối.
 
 `npm run preview` chạy bản build Workers ở máy (env lấy từ `.dev.vars`).
+
+**Kết nối hỏng không làm sập app.** Env sai định dạng (`SUPABASE_URL`,
+`R2_ENDPOINT`) được coi là chưa cấu hình; đọc public lỗi thì trang render nội
+dung gốc (fallback nằm ngoài cache, request sau thử lại DB); dashboard đọc lỗi
+thì mở ở chế độ offline và chặn Publish; upload / list R2 lỗi trả thông báo,
+không throw.
 
 ## Cấu trúc
 
@@ -279,7 +297,7 @@ src/
 
 ## Dashboard (`/dashboard`)
 
-Trang quản trị nội dung, dựng theo design `Dashboard.dc.html`. Sáu màn, mỗi màn
+Trang quản trị nội dung, dựng theo design `Dashboard.dc.html`. Bảy màn, mỗi màn
 một route, dùng chung sidebar 236px + header dính (sticky):
 
 | Route | Màn |
@@ -288,6 +306,7 @@ một route, dùng chung sidebar 236px + header dính (sticky):
 | `/dashboard/artists` | Bảng nghệ sĩ — lọc, đổi Live/Draft, mở drawer sửa |
 | `/dashboard/albums` | Lưới album 4 cột — lọc theo loại, gắn/bỏ khỏi trang chủ |
 | `/dashboard/categories` | Danh mục — đổi tên tại chỗ, ẩn/hiện, đổi thứ tự |
+| `/dashboard/media` | Mọi file trong bucket R2 — dung lượng, ngày upload, record nào đang dùng; lọc file **Unused** và xoá (từng file hoặc cả loạt) |
 | `/dashboard/homepage` | Hero banner + Page sections + khung preview dính |
 | `/dashboard/settings` | Site settings — trạng thái kết nối (Supabase service role + anon, R2 bucket, media URL; check lúc mở màn + nút "Check again"), logo, SEO, copy About, footer, contact card (địa chỉ, phone, email) |
 

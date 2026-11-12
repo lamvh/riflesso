@@ -32,19 +32,31 @@ function publicQuery<T>(
   fromDatabase: (client: SupabaseClient) => Promise<T>,
   fromSeed: (seed: SiteContent) => T,
 ) {
-  return cache(
-    unstable_cache(
-      async (): Promise<T> => {
-        const client = publicReadClient();
-        if (!client || (await queryRevision(client)) === null) {
-          return fromSeed(seedSiteContent());
-        }
-        return fromDatabase(client);
-      },
-      ["site-content", key],
-      { tags: [SITE_CONTENT_TAG] },
-    ),
+  const cached = unstable_cache(
+    async (): Promise<T> => {
+      const client = publicReadClient();
+      if (!client || (await queryRevision(client)) === null) {
+        return fromSeed(seedSiteContent());
+      }
+      return fromDatabase(client);
+    },
+    ["site-content", key],
+    { tags: [SITE_CONTENT_TAG] },
   );
+
+  /* A failed read (paused project, missing schema, network) never takes a
+     public page down: it renders the built-in content. The fallback sits
+     outside the cache so it is not stored — the next request tries again. */
+  return cache(async (): Promise<T> => {
+    try {
+      return await cached();
+    } catch (error) {
+      console.warn(
+        `Public read "${key}" failed, showing built-in content: ${error instanceof Error ? error.message : error}`,
+      );
+      return fromSeed(seedSiteContent());
+    }
+  });
 }
 
 export const getSiteSettings = publicQuery(

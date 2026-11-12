@@ -109,19 +109,23 @@ async function probeStorage(): Promise<ConnectionStatus> {
   };
   const config = r2Config();
   if (!config) {
+    const unset = missing([
+      "R2_ENDPOINT",
+      "R2_BUCKET",
+      "R2_ACCESS_KEY_ID",
+      "R2_SECRET_ACCESS_KEY",
+      "NEXT_PUBLIC_MEDIA_BASE_URL",
+    ]);
     return {
       ...base,
       state: "unconfigured",
-      detail: "Not configured — uploads are off",
+      /* Every variable set but still no config: R2_ENDPOINT is malformed. */
+      detail: unset.length
+        ? "Not configured — uploads are off"
+        : "R2_ENDPOINT is not a valid URL — uploads are off",
       target: hostOf(process.env.R2_ENDPOINT),
       latencyMs: null,
-      missingEnv: missing([
-        "R2_ENDPOINT",
-        "R2_BUCKET",
-        "R2_ACCESS_KEY_ID",
-        "R2_SECRET_ACCESS_KEY",
-        "NEXT_PUBLIC_MEDIA_BASE_URL",
-      ]),
+      missingEnv: unset,
     };
   }
 

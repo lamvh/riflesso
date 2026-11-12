@@ -1,7 +1,7 @@
 import type { AdminState } from "./admin-state";
 
 /** The screens the dashboard is made of, in sidebar order. */
-export const VIEWS = ["overview", "artists", "albums", "cats", "home", "settings"] as const;
+export const VIEWS = ["overview", "artists", "albums", "cats", "media", "home", "settings"] as const;
 export type View = (typeof VIEWS)[number];
 
 export const VIEW_HREF: Record<View, string> = {
@@ -9,6 +9,7 @@ export const VIEW_HREF: Record<View, string> = {
   artists: "/dashboard/artists",
   albums: "/dashboard/albums",
   cats: "/dashboard/categories",
+  media: "/dashboard/media",
   home: "/dashboard/homepage",
   settings: "/dashboard/settings",
 };
@@ -18,6 +19,7 @@ export const VIEW_LABEL: Record<View, string> = {
   artists: "Artists",
   albums: "Albums",
   cats: "Categories",
+  media: "Media",
   home: "Homepage",
   settings: "Site settings",
 };
@@ -90,6 +92,8 @@ export function pageTitle(
         "Homepage",
         `${totals.slides} hero slides and ${totals.liveBlocks} of ${totals.blocks} sections showing`,
       ];
+    case "media":
+      return ["Media", "Every file stored in the R2 bucket, its size, and what uses it"];
     case "settings":
       return ["Site settings", "Connections, logo, search listing, About copy, contact cards and footer"];
     case "overview":

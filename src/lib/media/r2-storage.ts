@@ -1,6 +1,11 @@
 import "server-only";
 
-import { ListObjectsV2Command, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import {
+  DeleteObjectsCommand,
+  ListObjectsV2Command,
+  PutObjectCommand,
+  S3Client,
+} from "@aws-sdk/client-s3";
 
 /*
  * Cloudflare R2 through its S3 API. Uploads are written by the dashboard's
@@ -27,9 +32,18 @@ export function r2Config(): R2Config | null {
 
   if (!endpoint || !bucket || !accessKeyId || !secretAccessKey || !publicBaseUrl) return null;
 
+  let origin: string;
+  try {
+    origin = new URL(endpoint).origin;
+  } catch {
+    /* A malformed endpoint would throw in every caller; report storage as off. */
+    console.warn("R2_ENDPOINT is not a valid URL; storage is treated as not configured.");
+    return null;
+  }
+
   return {
     /* The S3 endpoint is the account origin; the bucket goes in the path. */
-    endpoint: new URL(endpoint).origin,
+    endpoint: origin,
     bucket,
     accessKeyId,
     secretAccessKey,
@@ -62,6 +76,78 @@ export async function probeBucket(config: R2Config, signal: AbortSignal): Promis
     new ListObjectsV2Command({ Bucket: config.bucket, MaxKeys: 1 }),
     { abortSignal: signal },
   );
+}
+
+export type StoredObject = {
+  key: string;
+  /** Bytes as stored in the bucket. */
+  size: number;
+  /** ISO timestamp of the upload, or null when R2 does not report one. */
+  lastModified: string | null;
+};
+
+/** ListObjectsV2 pages hold 1000 keys; this caps a listing at 20,000 objects. */
+const LIST_PAGE_LIMIT = 20;
+
+/**
+ * Every object in the bucket, following continuation tokens. `truncated` is
+ * true when the cap stopped the walk before the bucket ran out.
+ */
+export async function listObjects(
+  config: R2Config,
+  signal: AbortSignal,
+): Promise<{ objects: StoredObject[]; truncated: boolean }> {
+  const objects: StoredObject[] = [];
+  let token: string | undefined;
+
+  for (let page = 0; page < LIST_PAGE_LIMIT; page += 1) {
+    const response = await r2Client(config).send(
+      new ListObjectsV2Command({ Bucket: config.bucket, ContinuationToken: token }),
+      { abortSignal: signal },
+    );
+    for (const item of response.Contents ?? []) {
+      if (!item.Key) continue;
+      objects.push({
+        key: item.Key,
+        size: item.Size ?? 0,
+        lastModified: item.LastModified?.toISOString() ?? null,
+      });
+    }
+    if (!response.IsTruncated || !response.NextContinuationToken) {
+      return { objects, truncated: false };
+    }
+    token = response.NextContinuationToken;
+  }
+
+  return { objects, truncated: true };
+}
+
+/** DeleteObjects takes at most 1000 keys per request. */
+export const DELETE_BATCH_LIMIT = 1000;
+
+/**
+ * Deletes up to 1000 keys in one request. Returns the keys R2 confirmed and
+ * the ones it refused, with its reason. Throws on network or auth failures.
+ */
+export async function deleteObjects(
+  config: R2Config,
+  keys: string[],
+  signal: AbortSignal,
+): Promise<{ deleted: string[]; failed: { key: string; reason: string }[] }> {
+  const response = await r2Client(config).send(
+    new DeleteObjectsCommand({
+      Bucket: config.bucket,
+      Delete: { Objects: keys.map((key) => ({ Key: key })) },
+    }),
+    { abortSignal: signal },
+  );
+  return {
+    deleted: (response.Deleted ?? []).flatMap((item) => (item.Key ? [item.Key] : [])),
+    failed: (response.Errors ?? []).map((item) => ({
+      key: item.Key ?? "",
+      reason: item.Message ?? item.Code ?? "Refused by the bucket",
+    })),
+  };
 }
 
 /** Objects are immutable: every upload gets its own key, so it can cache forever. */

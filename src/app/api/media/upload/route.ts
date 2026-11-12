@@ -41,7 +41,12 @@ export async function POST(request: Request) {
     );
   }
 
-  const form = await request.formData();
+  let form: FormData;
+  try {
+    form = await request.formData();
+  } catch {
+    return NextResponse.json({ error: "The upload did not arrive as a form." }, { status: 400 });
+  }
   const file = form.get("file");
   if (!(file instanceof File) || file.size === 0) {
     return NextResponse.json({ error: "Choose a file to upload." }, { status: 400 });
