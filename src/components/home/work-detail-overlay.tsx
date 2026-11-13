@@ -123,7 +123,7 @@ export function WorkDetailOverlay({ work, onClose }: WorkDetailOverlayProps) {
     <div
       role="dialog"
       aria-modal="true"
-      aria-label={work.title}
+      aria-label={work.title || "Gallery"}
       className="fixed inset-0 z-40 overflow-x-hidden overflow-y-auto overscroll-contain bg-paper"
     >
       <button
@@ -161,9 +161,11 @@ export function WorkDetailOverlay({ work, onClose }: WorkDetailOverlayProps) {
       </div>
 
       <div className="flex flex-col items-start gap-[11px] px-5 pt-[30px] pb-[44px]">
-        <p className="font-serif text-[27px] leading-[100%] italic">
-          {work.title}
-        </p>
+        {work.title && (
+          <p className="font-serif text-[27px] leading-[100%] italic">
+            {work.title}
+          </p>
+        )}
 
         <div className="flex flex-col gap-[5px]">
           {work.credits.map((credit, creditIndex) => (

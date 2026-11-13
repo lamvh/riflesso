@@ -52,10 +52,12 @@ export async function buildSiteSearchIndex(): Promise<SiteSearchIndex> {
       if (!item.albumId || seen.has(item.albumId)) continue;
       seen.add(item.albumId);
       const album = home.albums.find((entry) => entry.id === item.albumId);
+      const credits = item.credits.map((credit) => credit.name).join(", ");
       works.push({
         id: item.albumId,
-        title: album?.title ?? item.title ?? section.heading,
-        credits: item.credits.map((credit) => credit.name).join(", "),
+        /* An untitled album is listed by who made it; the section is the last resort. */
+        title: album?.title.trim() || item.title || credits || section.heading,
+        credits,
         label: section.heading,
         image: item.kind === "image" ? item.src : "",
       });

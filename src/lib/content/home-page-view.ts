@@ -20,7 +20,9 @@ const GALLERY_LABEL: Record<AlbumKind, string | undefined> = {
 export function albumToMediaItem(album: Album): MediaItem {
   const credits = album.credits.map((credit) => ({ name: credit.name, roles: credit.role }));
   /* New Signs cards print the credit alone; the album title is dashboard-only. */
-  const title = album.kind === "New Signing" ? undefined : album.title;
+  /* An untitled album shows no title anywhere: "" (not undefined) also keeps
+     the gallery from borrowing the section heading. */
+  const title = album.kind === "New Signing" ? undefined : album.title.trim();
   const item: MediaItem = {
     src: album.cover,
     kind: album.video ? "video" : "image",

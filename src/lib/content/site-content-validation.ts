@@ -94,11 +94,11 @@ export function findPublishProblem(input: unknown): string | null {
   }
 
   for (const album of albums) {
-    if (!text(album.title)) return "Every album needs a title";
-    if (!oneOf(ALBUM_KINDS, album.kind)) return `${text(album.title)}: unknown album type`;
-    if (!isStringList(album.frames)) return `${text(album.title)}: malformed images`;
+    if (typeof album.title !== "string") return "An album title is malformed";
+    if (!oneOf(ALBUM_KINDS, album.kind)) return `${text(album.title) || "Untitled album"}: unknown album type`;
+    if (!isStringList(album.frames)) return `${text(album.title) || "Untitled album"}: malformed images`;
     if (!Array.isArray(album.credits) || !album.credits.every(isRow)) {
-      return `${text(album.title)}: malformed credits`;
+      return `${text(album.title) || "Untitled album"}: malformed credits`;
     }
   }
 

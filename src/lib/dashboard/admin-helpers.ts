@@ -73,3 +73,6 @@ export function withDraft(
   const draft = { ...state.drawer.draft, ...mutate(state.drawer.draft as never) };
   return { ...state, drawer: { ...state.drawer, draft } as AdminState["drawer"] };
 }
+
+/** How the dashboard names an album; a title is optional. */
+export const albumLabel = (album: { title: string }) => album.title.trim() || "Untitled album";

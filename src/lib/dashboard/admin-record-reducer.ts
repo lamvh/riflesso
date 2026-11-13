@@ -10,7 +10,7 @@ import {
   type Shot,
 } from "./admin-state";
 import { plural } from "./admin-changes";
-import { dropAt, fromDraft, moveItem, note, patchAt, withDraft } from "./admin-helpers";
+import { albumLabel, dropAt, fromDraft, moveItem, note, patchAt, withDraft } from "./admin-helpers";
 import type { AdminArtist } from "./admin-types";
 import { isVideoSrc } from "@/lib/media-src";
 
@@ -86,8 +86,8 @@ export function recordReducer(state: AdminState, action: RecordAction): AdminSta
       return note(
         { ...state, albums },
         album.home
-          ? `${album.title} removed from the homepage`
-          : `${album.title} featured on the homepage`,
+          ? `${albumLabel(album)} removed from the homepage`
+          : `${albumLabel(album)} featured on the homepage`,
       );
     }
 
@@ -99,28 +99,29 @@ export function recordReducer(state: AdminState, action: RecordAction): AdminSta
       const frames = album.frames.length ? [action.src, ...album.frames.slice(1)] : [action.src];
       return note(
         { ...state, albums: patchAt(state.albums, index, { cover: action.src, frames, video: isVideoSrc(action.src) }) },
-        `${album.title || "Album"} cover replaced`,
+        `${albumLabel(album)} cover replaced`,
       );
     }
 
     case "album/save": {
       if (state.drawer?.kind !== "album") return state;
       const { draft, index } = state.drawer;
-      if (!draft.title.trim()) {
-        return { ...state, toast: "Add an album title to save", toastTone: "error" };
+      /* A title is optional, but an album needs something to show. */
+      if (!draft.title.trim() && !draft.shots.some((shot) => shot.src.trim())) {
+        return { ...state, toast: "Add a title or an image to save", toastTone: "error" };
       }
       const record = fromDraft(draft);
       const albums =
         index >= 0 ? patchAt(state.albums, index, record) : [record, ...state.albums];
-      return note({ ...state, albums, drawer: null }, `Saved ${record.title}`);
+      return note({ ...state, albums, drawer: null }, `Saved ${albumLabel(record)}`);
     }
 
     case "album/delete": {
       if (state.drawer?.kind !== "album" || state.drawer.index < 0) return state;
-      const { title } = state.albums[state.drawer.index];
+      const deleted = state.albums[state.drawer.index];
       return note(
         { ...state, albums: dropAt(state.albums, state.drawer.index), drawer: null },
-        `Deleted ${title}`,
+        `Deleted ${albumLabel(deleted)}`,
       );
     }
 

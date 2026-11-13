@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 
 import type { ContentViewReport, ViewCount } from "@/lib/analytics/content-view-types";
 import { readContentViews } from "@/lib/analytics/read-content-views";
+import { albumLabel } from "@/lib/dashboard/admin-helpers";
 
 import { useAdmin } from "./admin-store";
 import { Panel } from "./ui/panel";
@@ -39,7 +40,7 @@ export function VisitorStatsPanel() {
     };
   }, []);
 
-  const albumTitle = new Map(state.albums.map((album) => [album.id, album.title]));
+  const albumTitle = new Map(state.albums.map((album) => [album.id, albumLabel(album)]));
 
   return (
     <Panel title="Visitors" description="Last 30 days" bodyClassName="">

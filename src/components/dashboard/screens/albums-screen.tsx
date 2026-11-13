@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import { plural } from "@/lib/dashboard/admin-changes";
+import { albumLabel } from "@/lib/dashboard/admin-helpers";
 import { creditsLine } from "@/lib/dashboard/admin-state";
 import { ALBUM_KINDS } from "@/lib/dashboard/admin-types";
 
@@ -144,7 +145,7 @@ export function AlbumsScreen() {
                 }`}
               >
                 <SelectBox
-                  label={`Select ${album.title}`}
+                  label={`Select ${albumLabel(album)}`}
                   checked={selected.has(album.id)}
                   onChange={(on) => setSelected((previous) => toggleId(previous, album.id, on))}
                 />
@@ -163,7 +164,7 @@ export function AlbumsScreen() {
                   onClick={() => dispatch({ type: "album/open", index })}
                   className="cursor-pointer truncate text-left font-sans text-[15px] leading-[125%] font-bold tracking-[-0.3px] after:absolute after:inset-0 after:content-['']"
                 >
-                  {album.title}
+                  {albumLabel(album)}
                 </button>
                 <p className="font-sans text-[13px] leading-none text-graphite">
                   {album.kind}, {plural(album.frames.length, "image")}
@@ -176,7 +177,7 @@ export function AlbumsScreen() {
                   <span className="font-sans text-[13px] text-graphite">On homepage</span>
                   <Switch
                     on={album.home}
-                    label={`Show ${album.title} on the homepage`}
+                    label={`Show ${albumLabel(album)} on the homepage`}
                     onClick={() => dispatch({ type: "album/toggleHome", index })}
                   />
                 </div>
