@@ -42,6 +42,8 @@ export type ContactCardRecord = {
   /** Postal address, one entry per line. */
   address: string[];
   tel: string;
+  /** WhatsApp number as written, e.g. "+84 90 123 4567"; linked to wa.me. */
+  whatsapp: string;
   /** Sentence that runs into the email address. */
   lead: string;
   email: string;

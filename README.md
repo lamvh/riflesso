@@ -69,6 +69,9 @@ nội dung gốc trong `src/data/*`.
    — bảng `media_library_labels` giữ folder + tag của file trong màn Media. Chưa
    chạy thì màn Media vẫn list, lọc theo album/artist bình thường; chỉ phần
    folder/tag tắt kèm lời nhắn chạy migration.
+8. **Backup DB**, rồi chạy `supabase/migrations/20261113050000_add_contact_whatsapp.sql`
+   — thêm cột `whatsapp` cho contact card (hiện trên About + Contact, link wa.me).
+   Chưa chạy thì site vẫn bình thường; số WhatsApp nhập trong dashboard chỉ chưa được lưu khi Publish.
 
 > **Chưa có auth.** Server action publish (và đọc History, tạo Preview) mở cho bất kỳ ai gọi được tới nó. Phải
 > thêm đăng nhập vào `src/lib/dashboard/publish-site-content.ts` + `/dashboard`

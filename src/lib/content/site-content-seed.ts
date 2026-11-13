@@ -48,6 +48,7 @@ const seedContacts = (): ContactCardRecord[] =>
     heading: card.heading,
     address: card.address ?? [],
     tel: card.tel ?? "",
+    whatsapp: card.whatsapp ?? "",
     lead: card.lead ?? "",
     email: card.email ?? "",
     linkLabel: card.link?.label ?? "",

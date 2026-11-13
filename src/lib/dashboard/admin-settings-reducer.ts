@@ -9,6 +9,7 @@ const blankContact = (): ContactCardRecord => ({
   heading: "",
   address: [],
   tel: "",
+  whatsapp: "",
   lead: "",
   email: "",
   linkLabel: "",

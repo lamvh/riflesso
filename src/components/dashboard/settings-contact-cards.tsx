@@ -154,6 +154,13 @@ export function SettingsContactCards({
                     <LabelledField label="Phone">
                       <ProseInput value={card.tel} placeholder="Tel +84 …" onChange={(tel) => set({ tel })} />
                     </LabelledField>
+                    <LabelledField label="WhatsApp" hint="Number with country code">
+                      <ProseInput
+                        value={card.whatsapp}
+                        placeholder="+84 90 123 4567"
+                        onChange={(whatsapp) => set({ whatsapp })}
+                      />
+                    </LabelledField>
                     <LabelledField label="Email">
                       <ProseInput
                         value={card.email}

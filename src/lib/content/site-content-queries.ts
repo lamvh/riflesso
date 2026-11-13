@@ -171,6 +171,8 @@ export async function queryContactCards(client: SupabaseClient): Promise<Contact
     heading: string;
     address_lines: string[];
     phone: string;
+    /* Absent until the WhatsApp migration runs. */
+    whatsapp?: string | null;
     lead: string;
     email: string;
     link_label: string;
@@ -190,6 +192,7 @@ export async function queryContactCards(client: SupabaseClient): Promise<Contact
     heading: row.heading,
     address: row.address_lines,
     tel: row.phone,
+    whatsapp: row.whatsapp ?? "",
     lead: row.lead,
     email: row.email,
     linkLabel: row.link_label,

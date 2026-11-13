@@ -12,6 +12,8 @@ export type ContactCard = {
   address?: string[];
   /** Phone number, set above the email. */
   tel?: string;
+  /** WhatsApp number, set under the phone. */
+  whatsapp?: string;
   /** Sentence that runs into the email address. */
   lead?: string;
   email?: string;

@@ -33,6 +33,7 @@ export function toPublishPayload(content: SiteContent) {
       heading: card.heading.trim(),
       address_lines: trimmed(card.address),
       phone: card.tel.trim(),
+      whatsapp: card.whatsapp.trim(),
       lead: card.lead.trim(),
       email: card.email.trim(),
       link_label: card.linkLabel.trim(),

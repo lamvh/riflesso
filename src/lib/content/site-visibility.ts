@@ -50,7 +50,8 @@ export function withVisibilityDefaults(content: SiteContent): SiteContent {
       seo: withSeoDefaults(content.settings.seo),
       socialLinks: content.settings.socialLinks.map((link) => ({ ...link, hidden: link.hidden ?? false })),
     },
-    contacts: content.contacts.map((card) => ({ ...card, hidden: card.hidden ?? false })),
+    /* Older drafts and history entries predate the WhatsApp field. */
+    contacts: content.contacts.map((card) => ({ ...card, whatsapp: card.whatsapp ?? "", hidden: card.hidden ?? false })),
     slides: content.slides.map((slide) => ({ ...slide, hidden: slide.hidden ?? false })),
   };
 }
