@@ -5,15 +5,18 @@ import type { AlbumDraft } from "@/lib/dashboard/admin-state";
 import { ALBUM_KINDS } from "@/lib/dashboard/admin-types";
 
 import { CoverImage } from "./cover-image";
-import { Button, Chip, IconButton } from "./ui/controls";
+import { Button, buttonClass, Chip, IconButton } from "./ui/controls";
 import { Drawer } from "./ui/drawer";
 import { LabelledField, NameInput, ProseInput, ProseTextarea } from "./ui/fields";
-import { CrossIcon, PlusIcon } from "./ui/icons";
+import { CrossIcon, PlusIcon, UploadIcon } from "./ui/icons";
 import { MediaDropZone } from "./ui/media-drop-zone";
 import { SortableItem, SortableList } from "./ui/sortable-list";
 import { UploadButton } from "./ui/upload-button";
 import { MediaLibraryButton } from "./ui/media-library-picker";
 import { SwitchRow } from "./ui/switch-row";
+
+/** What an album frame can hold. */
+const SHOT_TYPES = "image/*,video/mp4,video/webm";
 
 export function AlbumDrawer({
   draft,
@@ -33,6 +36,11 @@ export function AlbumDrawer({
     set({
       shots: draft.shots.map((shot, i) => (i === position ? { ...shot, src } : shot)),
     });
+
+  /* Each file joins the album as soon as it is stored, filling empty frames first. */
+  const appendShots = (srcs: string[]) => {
+    if (srcs.length) dispatch({ type: "draft/appendShots", srcs });
+  };
 
   const remove = () => {
     if (window.confirm(`Delete ${draft.title || "this album"}? It leaves the site right away.`)) {
@@ -77,11 +85,25 @@ export function AlbumDrawer({
       </LabelledField>
 
       <LabelledField label="Images" hint="The first image is the cover. Drag to reorder, drop files here to add them.">
+        <div className="flex flex-wrap gap-[8px]">
+          <UploadButton
+            multiple
+            accept={SHOT_TYPES}
+            onUploaded={(src) => appendShots([src])}
+            className={buttonClass("secondary", "sm")}
+          >
+            <UploadIcon size={14} />
+            Upload images
+          </UploadButton>
+          <MediaLibraryButton videos onPickMany={appendShots} className={buttonClass("ghost", "sm")}>
+            Add from library
+          </MediaLibraryButton>
+        </div>
         <MediaDropZone
           multiple
-          accept="image/*,video/mp4,video/webm"
+          accept={SHOT_TYPES}
           label="Drop to add images"
-          onUploaded={(srcs) => dispatch({ type: "draft/appendShots", srcs })}
+          onEach={(src) => appendShots([src])}
           className="rounded-[8px]"
         >
         <SortableList
@@ -112,7 +134,7 @@ export function AlbumDrawer({
                 <div className="absolute inset-x-0 bottom-0 flex divide-x divide-line bg-paper/90 font-sans text-[11px] leading-none font-medium">
                   <UploadButton
                     onUploaded={(src) => setShot(position, src)}
-                    accept="image/*,video/mp4,video/webm"
+                    accept={SHOT_TYPES}
                     className="flex flex-1 justify-center py-[6px]"
                   >
                     Upload

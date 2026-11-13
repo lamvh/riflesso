@@ -140,6 +140,14 @@ lưu lẫn bản đang sửa: **In use**, **Saving** (chỉ có trong thay đổ
 **Being removed** (vẫn trên site tới khi lần lưu tới xong), **Unused**. So theo hậu tố
 path nên URL lưu với `NEXT_PUBLIC_MEDIA_BASE_URL` cũ vẫn được nhận ra.
 
+**Upload nhiều file / kéo thả** — màn Media có nút **Upload** (chọn nhiều file) và
+nhận kéo thả cả vùng danh sách; đang mở folder nào thì file mới vào luôn folder đó
+và được chọn sẵn để gắn tag. Album có **Upload images** (nhiều file, mỗi file vào
+album ngay khi up xong) và **Add from library** (tick nhiều ảnh, thêm theo thứ tự
+tick). Hộp "Choose from library" ở mọi chỗ cũng nhận kéo thả / Upload; ở album
+file vừa up được tick sẵn, ở ô một ảnh thì up 1 file là chọn luôn. File mới up
+tính là Unused cho tới khi được gắn vào đâu đó.
+
 **Folder + tag** (`src/lib/media/media-label-store.ts`, `media-label-types.ts`,
 `src/lib/dashboard/media-groups.ts`, `media-library-filters.ts`) — hai kiểu phân loại:
 

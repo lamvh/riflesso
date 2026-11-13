@@ -26,13 +26,20 @@ import { MediaObjectCard } from "../media-object-card";
 import { useDeleteMediaFiles } from "../use-delete-media-files";
 import { useMediaGroups } from "../use-media-groups";
 import { useMediaLabels } from "../use-media-labels";
-import { Button, Segmented } from "../ui/controls";
+import { Button, buttonClass, Segmented } from "../ui/controls";
 import { SearchField, SelectField } from "../ui/fields";
+import { UploadIcon } from "../ui/icons";
+import { MediaDropZone } from "../ui/media-drop-zone";
 import { Panel } from "../ui/panel";
 import { SelectBox, toggleId } from "../ui/selection-controls";
 import { TextPromptDialog } from "../ui/text-prompt-dialog";
+import { UploadButton } from "../ui/upload-button";
+import type { UploadedFile } from "../ui/use-media-upload";
 
 type UsageFilter = "all" | "used" | "unused";
+
+/** Anything an album frame, portrait or slide can hold. */
+const LIBRARY_TYPES = "image/*,video/mp4,video/webm";
 
 const USAGE_OPTIONS = [
   { value: "all", label: "All" },
@@ -137,6 +144,22 @@ export function MediaScreen() {
       if (sort === "name") return a.object.key.localeCompare(b.object.key);
       return (b.object.lastModified ?? "").localeCompare(a.object.lastModified ?? "");
     });
+
+  /*
+   * Fresh uploads: list them, clear filters that would hide them (they are
+   * unused until picked somewhere), file them into the open folder and leave
+   * them selected so they can be tagged or moved straight away.
+   */
+  const afterUpload = (files: UploadedFile[]) => {
+    load();
+    setQuery("");
+    setTagFilter("");
+    if (filter === "used") setFilter("all");
+    const keys = files.map((file) => file.key).filter(Boolean);
+    if (!labels.ready || keys.length === 0) return;
+    setSelected(new Set(keys));
+    if (folderPath) labels.update(keys, { folder: folderPath }, `Filed in ${folderPath}`);
+  };
 
   const copy = async (url: string) => {
     try {
@@ -245,7 +268,13 @@ export function MediaScreen() {
           />
         </aside>
 
-        <div className="flex min-w-0 flex-col gap-[14px]">
+        <MediaDropZone
+          multiple
+          accept={LIBRARY_TYPES}
+          label={folderPath ? `Drop to upload into ${folderPath}` : "Drop to upload to the library"}
+          onUploaded={(_, files) => afterUpload(files)}
+          className="flex min-w-0 flex-col gap-[14px] rounded-[10px]"
+        >
           <div className="flex flex-wrap items-center gap-[10px]">
             <SearchField label="Search files" value={query} onChange={setQuery} placeholder="Search names, tags and records" />
             <div className="lg:hidden">
@@ -283,6 +312,12 @@ export function MediaScreen() {
             <Button size="sm" onClick={refresh} disabled={loading || deleting}>
               {loading ? "Listing…" : "Refresh"}
             </Button>
+            {report?.state === "ok" && (
+              <UploadButton multiple accept={LIBRARY_TYPES} onUploadedAll={afterUpload} className={buttonClass("primary", "sm")}>
+                <UploadIcon size={14} />
+                {folderPath ? "Upload here" : "Upload"}
+              </UploadButton>
+            )}
           </div>
 
           {report?.state === "error" && (
@@ -321,7 +356,7 @@ export function MediaScreen() {
               ))}
             </div>
           )}
-        </div>
+        </MediaDropZone>
       </div>
 
       {pickedKeys.length > 0 && (

@@ -3,30 +3,33 @@
 import { useRef, useState, type DragEvent, type ReactNode } from "react";
 
 import { UploadIcon } from "./icons";
-import { acceptedFiles, useMediaUpload } from "./use-media-upload";
+import { acceptedFiles, uploadingLabel, useMediaUpload, type UploadedFile } from "./use-media-upload";
 
 /**
  * Drop files from the desktop onto whatever this wraps. While a file is held
  * over it, an outline and a label say what letting go will do; while it
  * uploads, the area dims. `multiple` passes every accepted file, otherwise the
- * first.
+ * first. `onEach` hears about each file as it is stored; `onUploaded` gets the
+ * whole batch at the end.
  */
 export function MediaDropZone({
   onUploaded,
+  onEach,
   accept = "image/*",
   multiple = false,
   label = "Drop to upload",
   className = "",
   children,
 }: {
-  onUploaded: (urls: string[]) => void;
+  onUploaded?: (urls: string[], files: UploadedFile[]) => void;
+  onEach?: (url: string) => void;
   accept?: string;
   multiple?: boolean;
   label?: string;
   className?: string;
   children: ReactNode;
 }) {
-  const { upload, busy } = useMediaUpload();
+  const { upload, busy, progress } = useMediaUpload();
   const [over, setOver] = useState(false);
   /* dragenter/leave fire for every child; count them to know when we left. */
   const depth = useRef(0);
@@ -59,8 +62,8 @@ export function MediaDropZone({
         setOver(false);
         const files = acceptedFiles(event.dataTransfer.files, accept);
         if (files.length === 0 || busy) return;
-        const urls = await upload(multiple ? files : files.slice(0, 1));
-        if (urls.length) onUploaded(urls);
+        const stored = await upload(multiple ? files : files.slice(0, 1), (file) => onEach?.(file.url));
+        if (stored.length) onUploaded?.(stored.map((file) => file.url), stored);
       }}
     >
       {children}
@@ -74,7 +77,7 @@ export function MediaDropZone({
         >
           <span className="flex items-center gap-[6px]">
             {!busy && <UploadIcon size={14} />}
-            {busy ? "Uploading…" : label}
+            {busy ? uploadingLabel(progress) : label}
           </span>
         </div>
       )}

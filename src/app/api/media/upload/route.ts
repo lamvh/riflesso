@@ -74,15 +74,17 @@ export async function POST(request: Request) {
       ? await optimizeImage(input, { animated: file.type === "image/gif" })
       : { body: input, contentType: file.type, extension: videoExtension, width: 0, height: 0 };
 
+    const key = mediaKey(file.name, stored.extension);
     const url = await putObject({
       config,
-      key: mediaKey(file.name, stored.extension),
+      key,
       body: stored.body,
       contentType: stored.contentType,
     });
 
     return NextResponse.json({
       url,
+      key,
       bytes: stored.body.length,
       originalBytes: file.size,
       width: stored.width,
