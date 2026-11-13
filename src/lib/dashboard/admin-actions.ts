@@ -48,6 +48,7 @@ export type SiteAction =
   | { type: "slide/move"; delta: number }
   | { type: "slide/remove" }
   | { type: "block/toggle"; index: number }
+  | { type: "block/setImage"; index: number; image: string }
   | { type: "block/move"; index: number; delta: number }
   /** Drag-and-drop: move one row of an ordered list to a new position. */
   | { type: "list/reorder"; list: ReorderableList; from: number; to: number };

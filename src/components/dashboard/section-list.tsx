@@ -8,14 +8,20 @@ import type { Album, Block } from "@/lib/dashboard/admin-types";
 import { CoverImage } from "./cover-image";
 import { IconButton, Switch, buttonClass } from "./ui/controls";
 import { ArrowDownIcon, ArrowUpIcon } from "./ui/icons";
+import { MediaDropZone } from "./ui/media-drop-zone";
+import { MediaLibraryButton } from "./ui/media-library-picker";
 import { Panel } from "./ui/panel";
 import { DragHandle, SortableItem, SortableList } from "./ui/sortable-list";
+import { UploadButton } from "./ui/upload-button";
+
+/** Small text buttons under a banner's name. */
+const IMAGE_ACTION = "cursor-pointer font-sans text-[12px] font-medium text-graphite underline-offset-2 hover:text-ink hover:underline";
 
 type Thumb = { id: string; src: string; pos: string; video?: boolean };
 
 /**
- * What a section would show: its banner image, the album a feature fronts, or
- * the first four albums of a row's kind.
+ * What an album-fed section would show: the album a feature fronts, or the
+ * first four albums of a row's kind. Banners show their own image instead.
  */
 function thumbsFor(block: Block, albums: Album[]): Thumb[] {
   const toThumb = (album: Album): Thumb => ({
@@ -25,9 +31,6 @@ function thumbsFor(block: Block, albums: Album[]): Thumb[] {
     video: album.video,
   });
 
-  if (block.kind === "Banner") {
-    return block.image ? [{ id: "banner", src: block.image, pos: "50% 50%" }] : [];
-  }
   const matching = albums.filter((album) => album.kind === block.source);
   if (block.kind === "Full-bleed") {
     const featured = albums.find((album) => album.id === block.albumId) ?? matching[0];
@@ -57,6 +60,7 @@ export function SectionList({
   dispatch: (action: AdminAction) => void;
 }) {
   const live = blocks.filter((block) => block.on).length;
+  const setImage = (index: number, image: string) => dispatch({ type: "block/setImage", index, image });
 
   return (
     <Panel
@@ -101,16 +105,43 @@ export function SectionList({
               </p>
               <p className="mt-[3px] truncate font-sans text-[13px] leading-[130%] text-graphite">
                 {block.on ? describe(block) : "Hidden from the homepage"}
+                {block.kind === "Banner" && !block.image && " · no image yet, so it is left off the page"}
               </p>
+              {block.kind === "Banner" && (
+                <div className="mt-[6px] flex flex-wrap gap-x-[12px] gap-y-[4px]">
+                  <UploadButton onUploaded={(image) => setImage(index, image)} className={IMAGE_ACTION}>
+                    {block.image ? "Replace image" : "Upload image"}
+                  </UploadButton>
+                  <MediaLibraryButton onPick={(image) => setImage(index, image)} className={IMAGE_ACTION}>
+                    Choose from library
+                  </MediaLibraryButton>
+                  {block.image && (
+                    <button type="button" className={IMAGE_ACTION} onClick={() => setImage(index, "")}>
+                      Remove
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
 
-            <div className="hidden shrink-0 gap-[4px] sm:flex">
-              {thumbsFor(block, albums).map((thumb) => (
-                <div key={thumb.id} className="h-[44px] w-[34px] overflow-hidden rounded-[4px] bg-well">
-                  <CoverImage src={thumb.src} pos={thumb.pos} video={thumb.video} dim={block.on ? 1 : 0.4} />
-                </div>
-              ))}
-            </div>
+            {block.kind === "Banner" ? (
+              /* The banner's picture doubles as a drop target for a new one. */
+              <MediaDropZone
+                label="Drop"
+                onUploaded={([image]) => setImage(index, image)}
+                className="h-[44px] w-[78px] shrink-0 overflow-hidden rounded-[4px] bg-well"
+              >
+                {block.image && <CoverImage src={block.image} pos="50% 50%" dim={block.on ? 1 : 0.4} />}
+              </MediaDropZone>
+            ) : (
+              <div className="hidden shrink-0 gap-[4px] sm:flex">
+                {thumbsFor(block, albums).map((thumb) => (
+                  <div key={thumb.id} className="h-[44px] w-[34px] overflow-hidden rounded-[4px] bg-well">
+                    <CoverImage src={thumb.src} pos={thumb.pos} video={thumb.video} dim={block.on ? 1 : 0.4} />
+                  </div>
+                ))}
+              </div>
+            )}
 
             <div className="flex shrink-0">
               <IconButton

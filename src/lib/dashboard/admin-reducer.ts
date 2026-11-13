@@ -109,6 +109,14 @@ export function adminReducer(state: AdminState, action: AdminAction): AdminState
         "Slide removed from the banner",
       );
 
+    case "block/setImage": {
+      const block: Block = state.blocks[action.index];
+      return note(
+        { ...state, blocks: patchAt(state.blocks, action.index, { image: action.image }) },
+        `${block.label} ${action.image ? "image replaced" : "image removed"}`,
+      );
+    }
+
     case "block/toggle": {
       const block: Block = state.blocks[action.index];
       const blocks = patchAt(state.blocks, action.index, { on: !block.on });

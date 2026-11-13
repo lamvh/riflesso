@@ -20,7 +20,7 @@ import {
 import { seedSiteContent } from "./site-content-seed";
 import { withSeoDefaults } from "./site-seo";
 import { shownOnly } from "./site-visibility";
-import { SITE_CONTENT_TAG, type SiteContent, type SiteSettings } from "./site-content-types";
+import { SITE_CONTENT_TAG, type ContactCardRecord, type SiteContent, type SiteSettings } from "./site-content-types";
 
 /*
  * Public reads, scoped per page so the directory never loads albums and the
@@ -93,10 +93,16 @@ export const getSiteSettings = cache(async (): Promise<SiteSettings> => {
   return { ...settings, hiddenParts: settings.hiddenParts ?? [], seo: withSeoDefaults(settings.seo) };
 });
 
-export const getContactCards = publicQuery(
+const cachedContactCards = publicQuery(
   "contacts",
   async (client) => shownOnly(await queryContactCards(client)),
   (seed) => shownOnly(seed.contacts),
+);
+
+/* Normalised outside the cache for the same reason as settings: cards cached
+   (or held in a preview) before the WhatsApp field existed have none. */
+export const getContactCards = cache(async (): Promise<ContactCardRecord[]> =>
+  (await cachedContactCards()).map((card) => ({ ...card, whatsapp: card.whatsapp ?? "" })),
 );
 
 export const getDirectoryContent = publicQuery(
