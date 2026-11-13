@@ -65,6 +65,10 @@ nội dung gốc trong `src/data/*`.
    số đếm theo ngày cho (trang | album mở gallery | artist dừng chuột ~0.8s),
    không lưu IP, cookie hay user agent. Bỏ qua bot, trình duyệt bật GPC/DNT, và
    editor đang Preview. Chưa chạy thì site vẫn bình thường, panel báo cần migration.
+7. **Backup DB**, rồi chạy `supabase/migrations/20261113040000_add_media_library_labels.sql`
+   — bảng `media_library_labels` giữ folder + tag của file trong màn Media. Chưa
+   chạy thì màn Media vẫn list, lọc theo album/artist bình thường; chỉ phần
+   folder/tag tắt kèm lời nhắn chạy migration.
 
 > **Chưa có auth.** Server action publish (và đọc History, tạo Preview) mở cho bất kỳ ai gọi được tới nó. Phải
 > thêm đăng nhập vào `src/lib/dashboard/publish-site-content.ts` + `/dashboard`
@@ -132,6 +136,26 @@ toàn bộ bucket (tối đa 20.000 object) rồi so key với URL trong cả n�
 lưu lẫn bản đang sửa: **In use**, **Saving** (chỉ có trong thay đổi chưa lưu),
 **Being removed** (vẫn trên site tới khi lần lưu tới xong), **Unused**. So theo hậu tố
 path nên URL lưu với `NEXT_PUBLIC_MEDIA_BASE_URL` cũ vẫn được nhận ra.
+
+**Folder + tag** (`src/lib/media/media-label-store.ts`, `media-label-types.ts`,
+`src/lib/dashboard/media-groups.ts`, `media-library-filters.ts`) — hai kiểu phân loại:
+
+- **Folder và tag tự đặt**, lưu ở bảng `media_library_labels` theo object key.
+  Folder chỉ là nhãn, **không đổi key trên R2**, nên chuyển folder không làm hỏng
+  URL ảnh đã lưu. Folder lồng nhau viết dạng path (`Albums/Vogue Italia`, tối đa 4
+  cấp); một folder tồn tại khi còn file trong đó. Chọn file (checkbox trên card,
+  hoặc "Select shown") → thanh dưới: **Move to folder…** (gõ tên mới hoặc chọn
+  có sẵn, để trống = unfiled), **Add tag…** (nhiều tag cách nhau dấu phẩy),
+  **Remove tag**, **Delete** (chỉ file Unused). Sidebar folder có **Rename**
+  (folder con đi theo) và **Remove folder** (file thành unfiled, không xoá file).
+- **Nhóm tự động theo album (bộ ảnh) và artist**, tính từ nội dung đang sửa,
+  không cần lưu: file thuộc album nào, portrait của artist nào, và frame của album
+  cũng được gắn cho artist trong roster có tên ở credit của album đó.
+
+Lọc theo folder, album, artist, tag có ở cả màn Media lẫn hộp "Choose from
+library"; ô search tìm cả tên file, folder, tag, album/artist và record đang dùng
+file. Bấm chip tag/album/artist trên card để lọc nhanh. Xoá file thì xoá luôn
+dòng nhãn của nó.
 
 **Xoá file** (`src/lib/dashboard/delete-media-objects.ts`) chỉ hiện với file
 **Unused**, có hỏi xác nhận. Vì chưa có auth, server không tin client: chỉ nhận

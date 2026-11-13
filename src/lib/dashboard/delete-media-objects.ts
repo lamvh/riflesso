@@ -1,6 +1,7 @@
 "use server";
 
 import { loadDashboardContent } from "@/lib/content/load-dashboard-content";
+import { forgetMediaLabels } from "@/lib/media/media-label-store";
 import { DELETE_BATCH_LIMIT, deleteObjects, r2Config } from "@/lib/media/r2-storage";
 import type { MediaDeleteReport } from "@/lib/media/media-library-types";
 
@@ -59,6 +60,8 @@ export async function deleteMediaObjects(keys: string[]): Promise<MediaDeleteRep
     if (deletable.length === 0) return { state: "ok", deleted: [], skipped };
 
     const result = await deleteObjects(config, deletable, AbortSignal.timeout(TIMEOUT_MS));
+    /* The files are gone; their folder and tags go with them. */
+    await forgetMediaLabels(result.deleted);
     return { state: "ok", deleted: result.deleted, skipped: [...skipped, ...result.failed] };
   } catch (error) {
     const timedOut =

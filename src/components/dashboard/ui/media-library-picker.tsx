@@ -3,19 +3,29 @@
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 
 import { listMediaLibrary } from "@/lib/dashboard/list-media-library";
+import {
+  folderOptions,
+  groupAndTagOptions,
+  inMediaScope,
+  matchesMediaSearch,
+  mediaCatalogue,
+} from "@/lib/dashboard/media-library-filters";
 import { formatBytes, type MediaLibraryReport, type MediaObject } from "@/lib/media/media-library-types";
 import { isVideoSrc } from "@/lib/media-src";
 
+import { useAdmin } from "../admin-store";
 import { CoverImage } from "../cover-image";
+import { useMediaGroups } from "../use-media-groups";
+import { useMediaLabels } from "../use-media-labels";
 import { Button, IconButton } from "./controls";
-import { SearchField } from "./fields";
+import { SearchField, SelectField } from "./fields";
 import { CrossIcon } from "./icons";
 
 /*
  * "Choose from library": reuse a file already stored on R2 instead of
  * uploading it again. Opens a dialog listing the bucket (same listing as the
- * Media screen); clicking a file hands its public URL to `onPick`, exactly as
- * an upload would.
+ * Media screen), narrowed by folder, album, artist or tag; clicking a file
+ * hands its public URL to `onPick`, exactly as an upload would.
  */
 
 const IMAGE_EXT = /\.(avif|gif|jpe?g|png|svg|webp)$/i;
@@ -70,7 +80,12 @@ function MediaLibraryDialog({
   const [report, setReport] = useState<MediaLibraryReport | null>(null);
   const [loading, startLoading] = useTransition();
   const [query, setQuery] = useState("");
+  /** "" = everything; "folder:…", "album:…", "artist:…" or "tag:…". */
+  const [scope, setScope] = useState("");
   const panelRef = useRef<HTMLDivElement>(null);
+
+  const { labelOf } = useMediaLabels(useAdmin().dispatch);
+  const groupsOf = useMediaGroups();
 
   useEffect(() => {
     startLoading(async () => {
@@ -102,14 +117,29 @@ function MediaLibraryDialog({
   }, [onClose]);
 
   const needle = query.trim().toLowerCase();
-  const files = useMemo(
+  /* Files this field can take, joined with their folder, tags and groups. */
+  const usable = useMemo(
     () =>
       report?.state === "ok"
         ? report.objects
-            .filter((object) => fits(object, videos) && (!needle || object.key.toLowerCase().includes(needle)))
-            .sort((a, b) => (b.lastModified ?? "").localeCompare(a.lastModified ?? ""))
+            .filter((object) => fits(object, videos))
+            .map((object) => ({ key: object.key, object, label: labelOf(object.key), groups: groupsOf(object.key) }))
         : [],
-    [report, videos, needle],
+    [report, videos, labelOf, groupsOf],
+  );
+
+  const scopeOptions = useMemo(() => {
+    const catalogue = mediaCatalogue(usable);
+    return [{ value: "", label: "All files" }, ...folderOptions(catalogue), ...groupAndTagOptions(catalogue)];
+  }, [usable]);
+
+  const files = useMemo(
+    () =>
+      usable
+        .filter((file) => inMediaScope(file, scope) && matchesMediaSearch(file, needle))
+        .map((file) => file.object)
+        .sort((a, b) => (b.lastModified ?? "").localeCompare(a.lastModified ?? "")),
+    [usable, scope, needle],
   );
 
   let body: React.ReactNode;
@@ -123,7 +153,11 @@ function MediaLibraryDialog({
       </p>
     );
   else if (files.length === 0)
-    body = <p className="text-graphite">{needle ? "No files match this search." : "The library has no pictures yet."}</p>;
+    body = (
+      <p className="text-graphite">
+        {needle || scope ? "No files match this search." : "The library has no pictures yet."}
+      </p>
+    );
   else
     body = (
       <ul className="grid grid-cols-[repeat(auto-fill,minmax(140px,1fr))] gap-[10px]">
@@ -167,7 +201,10 @@ function MediaLibraryDialog({
       >
         <header className="flex flex-wrap items-center gap-[10px] border-b border-line px-[20px] py-[14px]">
           <h2 className="mr-auto font-serif text-[22px] leading-[115%] tracking-[-0.3px]">Choose from library</h2>
-          <SearchField label="Search files" value={query} onChange={setQuery} placeholder="Search file names" />
+          {scopeOptions.length > 1 && (
+            <SelectField label="Folder, album, artist or tag" value={scope} onChange={setScope} options={scopeOptions} />
+          )}
+          <SearchField label="Search files" value={query} onChange={setQuery} placeholder="Search names and tags" />
           <IconButton label="Close" onClick={onClose}>
             <CrossIcon size={16} />
           </IconButton>

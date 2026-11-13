@@ -44,7 +44,7 @@ function contentReferences(content: SiteContent): [string, MediaPlace][] {
  * object recognised when the media base URL (domain or path prefix) changed
  * after the record was saved. Site-local `/assets/…` paths are not in R2.
  */
-function pathSuffixes(src: string): string[] {
+export function pathSuffixes(src: string): string[] {
   let pathname: string;
   try {
     const url = new URL(src);
