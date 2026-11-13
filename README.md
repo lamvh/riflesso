@@ -156,7 +156,9 @@ dùng đúng file này, không tự sinh config nữa.
    `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_ANON_KEY`, `R2_ACCESS_KEY_ID`,
    `R2_SECRET_ACCESS_KEY`.
 3. Workers Builds → **Build variables**: `NEXT_PUBLIC_MEDIA_BASE_URL` (được nhúng
-   vào bundle lúc build).
+   vào bundle lúc build). Domain public mặc định `https://riflesso.vn` được
+   hard-code ở `src/lib/seo/site-url.ts` (canonical, ảnh share, sitemap,
+   robots); chỉ đặt `NEXT_PUBLIC_SITE_URL` khi build cho domain khác (staging).
 4. `npm run deploy`, hoặc push để Workers Builds tự build. Mở
    `/dashboard/status` để xem từng kết nối.
 

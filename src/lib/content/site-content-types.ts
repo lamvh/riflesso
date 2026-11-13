@@ -6,6 +6,8 @@ import type {
   Slide,
 } from "@/lib/dashboard/admin-types";
 
+import type { SiteSeo } from "./site-seo";
+
 export type SocialLink = {
   label: string;
   href: string;
@@ -26,6 +28,8 @@ export type SiteSettings = {
   copyright: string;
   /** Pages and page parts switched off; keys from `HIDEABLE_PARTS`. */
   hiddenParts: string[];
+  /** Search and link-preview settings; see site-seo.ts. */
+  seo: SiteSeo;
 };
 
 /**

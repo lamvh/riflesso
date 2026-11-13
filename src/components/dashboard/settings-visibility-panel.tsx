@@ -34,11 +34,10 @@ export function SettingsVisibilityPanel({
           ? `${plural(hidden, "part")} hidden from visitors — nothing is deleted`
           : "Switch a page or section off to hide it without deleting it"
       }
-      className="xl:col-span-2"
-      bodyClassName="grid gap-[18px] p-[20px] md:grid-cols-2"
+      bodyClassName="gap-[18px] p-[20px] md:columns-2"
     >
       {GROUPS.map((group) => (
-        <div key={group} className="flex flex-col gap-[8px]">
+        <div key={group} className="mb-[18px] flex break-inside-avoid flex-col gap-[8px] last:mb-0">
           <p className="font-sans text-[12px] leading-none font-medium text-graphite">{group}</p>
           {HIDEABLE_PARTS.filter((part) => part.group === group).map((part) => {
             const shown = isPartShown(settings, part.key);

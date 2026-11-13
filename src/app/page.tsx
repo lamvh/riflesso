@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { Suspense, type CSSProperties } from "react";
 
 import { FeatureAnniversary, FeatureEditorial } from "@/components/home/feature-blocks";
@@ -10,6 +11,8 @@ import { SiteHeader } from "@/components/site-header";
 import { buildHomeSections, toHeroSlides } from "@/lib/content/home-page-view";
 import { getHomeContent, getSiteSettings } from "@/lib/content/public-site-content";
 import { isPartShown } from "@/lib/content/site-visibility";
+import { pageMetadata } from "@/lib/seo/share-metadata";
+import { StructuredData } from "@/components/structured-data";
 
 /**
  * Display knobs the source design exposes as editable props. They reach the rail
@@ -30,6 +33,10 @@ const displayVars = {
   "--rfl-rail-zoom": DISPLAY.hoverZoom ? "1.04" : "1",
   "--rfl-gallery-height": `${DISPLAY.galleryHeight}vh`,
 } as CSSProperties;
+
+export function generateMetadata(): Promise<Metadata> {
+  return pageMetadata("home");
+}
 
 /** Hero slides and sections, in the order and state set on the dashboard. */
 export default async function HomePage() {
@@ -100,6 +107,7 @@ export default async function HomePage() {
       </WorkDetailProvider>
 
       <SiteFooter />
+      <StructuredData />
     </div>
   );
 }

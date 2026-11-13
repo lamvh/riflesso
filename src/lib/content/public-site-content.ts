@@ -18,6 +18,7 @@ import {
   querySettings,
 } from "./site-content-queries";
 import { seedSiteContent } from "./site-content-seed";
+import { withSeoDefaults } from "./site-seo";
 import { shownOnly } from "./site-visibility";
 import { SITE_CONTENT_TAG, type SiteContent, type SiteSettings } from "./site-content-types";
 
@@ -73,14 +74,24 @@ function publicQuery<T>(
 const visibleSettings = (settings: SiteSettings): SiteSettings => ({
   ...settings,
   socialLinks: shownOnly(settings.socialLinks),
+  /* Cached reads can outlive a deploy that added fields; fill them in here. */
+  hiddenParts: settings.hiddenParts ?? [],
+  seo: withSeoDefaults(settings.seo),
 });
 
-export const getSiteSettings = publicQuery(
+const cachedSiteSettings = publicQuery(
   "settings",
   async (client) =>
     visibleSettings((await querySettings(client))?.settings ?? seedSiteContent().settings),
   (seed) => visibleSettings(seed.settings),
 );
+
+/* Normalised outside the cache too: an entry stored by an older build lacks
+   newer fields, and the cache outlives deploys. */
+export const getSiteSettings = cache(async (): Promise<SiteSettings> => {
+  const settings = await cachedSiteSettings();
+  return { ...settings, hiddenParts: settings.hiddenParts ?? [], seo: withSeoDefaults(settings.seo) };
+});
 
 export const getContactCards = publicQuery(
   "contacts",

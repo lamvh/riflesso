@@ -1,5 +1,7 @@
 import "server-only";
 
+import { withSeoDefaults } from "./site-seo";
+
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import type {
@@ -102,6 +104,8 @@ type SettingsRow = {
   copyright: string;
   /** Absent until the visibility migration has run. */
   hidden_parts?: string[] | null;
+  /** Absent until the SEO migration has run. */
+  seo?: unknown;
   logo: AssetRef;
 };
 
@@ -156,6 +160,7 @@ export async function querySettings(
       })),
       copyright: settings.copyright,
       hiddenParts: settings.hidden_parts ?? [],
+      seo: withSeoDefaults(settings.seo),
     },
   };
 }

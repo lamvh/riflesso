@@ -1,0 +1,189 @@
+"use client";
+
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
+
+import { listMediaLibrary } from "@/lib/dashboard/list-media-library";
+import { formatBytes, type MediaLibraryReport, type MediaObject } from "@/lib/media/media-library-types";
+import { isVideoSrc } from "@/lib/media-src";
+
+import { CoverImage } from "../cover-image";
+import { Button, IconButton } from "./controls";
+import { SearchField } from "./fields";
+import { CrossIcon } from "./icons";
+
+/*
+ * "Choose from library": reuse a file already stored on R2 instead of
+ * uploading it again. Opens a dialog listing the bucket (same listing as the
+ * Media screen); clicking a file hands its public URL to `onPick`, exactly as
+ * an upload would.
+ */
+
+const IMAGE_EXT = /\.(avif|gif|jpe?g|png|svg|webp)$/i;
+
+/** Whether a stored file suits the field: images always, videos only when the field takes them. */
+const fits = (object: MediaObject, videos: boolean) =>
+  IMAGE_EXT.test(object.key) || (videos && isVideoSrc(object.url));
+
+const nameOf = (key: string) => key.slice(key.lastIndexOf("/") + 1);
+
+export function MediaLibraryButton({
+  onPick,
+  className,
+  children = "Choose from library",
+  videos = false,
+}: {
+  onPick: (url: string) => void;
+  className: string;
+  children?: React.ReactNode;
+  /** Also list mp4/webm files (album shots). */
+  videos?: boolean;
+}) {
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      <button type="button" className={`${className} cursor-pointer`} onClick={() => setOpen(true)}>
+        {children}
+      </button>
+      {open && (
+        <MediaLibraryDialog
+          videos={videos}
+          onClose={() => setOpen(false)}
+          onPick={(url) => {
+            setOpen(false);
+            onPick(url);
+          }}
+        />
+      )}
+    </>
+  );
+}
+
+function MediaLibraryDialog({
+  onPick,
+  onClose,
+  videos,
+}: {
+  onPick: (url: string) => void;
+  onClose: () => void;
+  videos: boolean;
+}) {
+  const [report, setReport] = useState<MediaLibraryReport | null>(null);
+  const [loading, startLoading] = useTransition();
+  const [query, setQuery] = useState("");
+  const panelRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    startLoading(async () => {
+      try {
+        setReport(await listMediaLibrary());
+      } catch (error) {
+        setReport({ state: "error", message: error instanceof Error ? error.message : "The listing could not run" });
+      }
+    });
+  }, []);
+
+  /* Escape closes; focus moves in; the page behind stays put. */
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.stopPropagation();
+        onClose();
+      }
+    };
+    /* Capture phase, so Escape closes this dialog and not a drawer underneath. */
+    window.addEventListener("keydown", onKeyDown, true);
+    panelRef.current?.focus();
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      window.removeEventListener("keydown", onKeyDown, true);
+      document.body.style.overflow = previous;
+    };
+  }, [onClose]);
+
+  const needle = query.trim().toLowerCase();
+  const files = useMemo(
+    () =>
+      report?.state === "ok"
+        ? report.objects
+            .filter((object) => fits(object, videos) && (!needle || object.key.toLowerCase().includes(needle)))
+            .sort((a, b) => (b.lastModified ?? "").localeCompare(a.lastModified ?? ""))
+        : [],
+    [report, videos, needle],
+  );
+
+  let body: React.ReactNode;
+  if (!report) body = <p className="text-graphite">Listing the library…</p>;
+  else if (report.state === "unconfigured")
+    body = <p className="text-graphite">Storage is not configured, so there is no library to choose from.</p>;
+  else if (report.state === "error")
+    body = (
+      <p role="alert" className="text-danger">
+        {report.message}
+      </p>
+    );
+  else if (files.length === 0)
+    body = <p className="text-graphite">{needle ? "No files match this search." : "The library has no pictures yet."}</p>;
+  else
+    body = (
+      <ul className="grid grid-cols-[repeat(auto-fill,minmax(140px,1fr))] gap-[10px]">
+        {files.map((object) => (
+          <li key={object.key}>
+            <button
+              type="button"
+              onClick={() => onPick(object.url)}
+              title={object.key}
+              className="group flex w-full cursor-pointer flex-col overflow-hidden rounded-[8px] border border-line bg-paper text-left transition-colors hover:border-ink focus-visible:border-ink"
+            >
+              <span className="relative block aspect-4/3 overflow-hidden bg-well">
+                <CoverImage src={object.url} pos="50% 50%" video={isVideoSrc(object.url)} />
+              </span>
+              <span className="block truncate px-[8px] pt-[6px] text-[12px] font-bold">{nameOf(object.key)}</span>
+              <span className="block px-[8px] pb-[7px] text-[11px] text-graphite tabular-nums">
+                {formatBytes(object.size)}
+              </span>
+            </button>
+          </li>
+        ))}
+      </ul>
+    );
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-[16px]">
+      <button
+        type="button"
+        aria-label="Close"
+        tabIndex={-1}
+        onClick={onClose}
+        className="absolute inset-0 h-full w-full cursor-default bg-[#1c1810]/35 backdrop-blur-[2px] motion-safe:animate-scrim-in"
+      />
+      <div
+        ref={panelRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Choose from library"
+        tabIndex={-1}
+        className="relative flex max-h-full w-[760px] max-w-full flex-col overflow-hidden rounded-[12px] bg-paper font-sans shadow-[0_16px_48px_rgba(28,24,16,0.22)] outline-none"
+      >
+        <header className="flex flex-wrap items-center gap-[10px] border-b border-line px-[20px] py-[14px]">
+          <h2 className="mr-auto font-serif text-[22px] leading-[115%] tracking-[-0.3px]">Choose from library</h2>
+          <SearchField label="Search files" value={query} onChange={setQuery} placeholder="Search file names" />
+          <IconButton label="Close" onClick={onClose}>
+            <CrossIcon size={16} />
+          </IconButton>
+        </header>
+        <div className={`flex-1 overflow-y-auto px-[20px] py-[16px] text-[14px] ${loading ? "opacity-60" : ""}`}>
+          {body}
+        </div>
+        {report?.state === "ok" && report.truncated && (
+          <footer className="flex items-center border-t border-line bg-hover px-[20px] py-[10px] text-[12px] text-draft">
+            The bucket holds more files than one listing returns; only the first ones are shown.
+            <Button size="sm" variant="ghost" onClick={onClose} className="ml-auto">
+              Cancel
+            </Button>
+          </footer>
+        )}
+      </div>
+    </div>
+  );
+}

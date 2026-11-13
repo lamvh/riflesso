@@ -10,6 +10,7 @@ import { Drawer } from "./ui/drawer";
 import { LabelledField, NameInput, ProseInput, ProseTextarea } from "./ui/fields";
 import { MediaDropZone } from "./ui/media-drop-zone";
 import { UploadButton } from "./ui/upload-button";
+import { MediaLibraryButton } from "./ui/media-library-picker";
 import { SwitchRow } from "./ui/switch-row";
 
 const TERRITORY_OPTIONS: { value: Territory; label: string }[] = [
@@ -106,12 +107,12 @@ export function ArtistDrawer({
               onChange={(image) => set({ image })}
               placeholder="https://…"
             />
-            <UploadButton
-              onUploaded={(image) => set({ image })}
-              className={`${buttonClass("secondary", "sm")} self-start`}
-            >
-              Upload a file
-            </UploadButton>
+            <div className="flex flex-wrap gap-[6px]">
+              <UploadButton onUploaded={(image) => set({ image })} className={buttonClass("secondary", "sm")}>
+                Upload a file
+              </UploadButton>
+              <MediaLibraryButton onPick={(image) => set({ image })} className={buttonClass("ghost", "sm")} />
+            </div>
             <p className="font-sans text-[12px] leading-[140%] text-graphite">
               Or drop a file on the picture. Uploads are resized to 2400px, re-compressed and stored on R2.
             </p>

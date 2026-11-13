@@ -11,6 +11,8 @@ import {
 import { findPublishProblem } from "@/lib/content/site-content-validation";
 import { serviceRoleClient } from "@/lib/supabase/supabase-clients";
 
+import { seoIsUsed, withSeoDefaults } from "@/lib/content/site-seo";
+
 import type { SaveLog } from "./content-history-types";
 import { recordSave, snapshotBeforeSave } from "./record-content-revision";
 
@@ -55,6 +57,18 @@ export async function publishSiteContent(
       ok: false,
       error: "Supabase is not configured — set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY",
     };
+  }
+
+  /* Before the SEO migration the publish function drops the SEO settings. */
+  if (seoIsUsed(withSeoDefaults(content.settings.seo))) {
+    const probe = await client.from("site_settings").select("seo").limit(1);
+    if (probe.error) {
+      return {
+        ok: false,
+        error:
+          "SEO settings need the database migration 20261113030000_add_seo_settings.sql — back up, run it, then save again",
+      };
+    }
   }
 
   /* Before the visibility migration, the publish function ignores the hide

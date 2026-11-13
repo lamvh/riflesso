@@ -13,6 +13,7 @@ import { FieldLabel, LabelledField, NameInput, ProseInput, ProseTextarea } from 
 import { CrossIcon, PlusIcon } from "./ui/icons";
 import { Panel } from "./ui/panel";
 import { UploadButton } from "./ui/upload-button";
+import { MediaLibraryButton } from "./ui/media-library-picker";
 
 /** About copy is edited as one block of text; a blank line starts a paragraph. */
 const PARAGRAPH_BREAK = /\n\s*\n/;
@@ -30,11 +31,10 @@ export function SettingsBrandPanel({
   const set = (patch: Partial<SiteSettings>) => dispatch({ type: "settings/set", patch });
   const typed = settings.logoUrl.trim();
   const logo = isPublishableSrc(typed) ? typed : DEFAULT_LOGO_URL;
-  const paragraphs = settings.aboutParagraphs.filter((paragraph) => paragraph.trim()).length;
   const descriptionLength = settings.metaDescription.trim().length;
 
   return (
-    <div className="flex min-w-0 flex-col gap-[16px]">
+    <>
       <Panel title="Brand" description="The wordmark in the site masthead and this sidebar">
         <div className="flex flex-col gap-[16px]">
           <div className="flex h-[88px] items-center justify-center rounded-[6px] bg-hover px-[20px]">
@@ -45,12 +45,12 @@ export function SettingsBrandPanel({
             hint="A file under /public, like /riflesso.png, or an uploaded file"
           >
             <ProseInput value={settings.logoUrl} onChange={(logoUrl) => set({ logoUrl })} />
-            <UploadButton
-              onUploaded={(logoUrl) => set({ logoUrl })}
-              className={`${buttonClass("secondary", "sm")} self-start`}
-            >
-              Upload a file
-            </UploadButton>
+            <div className="flex flex-wrap gap-[6px]">
+              <UploadButton onUploaded={(logoUrl) => set({ logoUrl })} className={buttonClass("secondary", "sm")}>
+                Upload a file
+              </UploadButton>
+              <MediaLibraryButton onPick={(logoUrl) => set({ logoUrl })} className={buttonClass("ghost", "sm")} />
+            </div>
           </LabelledField>
           <div className="grid gap-[16px] sm:grid-cols-2">
             <LabelledField label="Brand name">
@@ -90,19 +90,6 @@ export function SettingsBrandPanel({
               onChange={(metaDescription) => set({ metaDescription })}
             />
           </LabelledField>
-        </div>
-      </Panel>
-
-      <Panel
-        title="About page"
-        description={`${plural(paragraphs, "paragraph")}. Leave a blank line to start a new one.`}
-      >
-        <div className="flex flex-col">
-          <ProseTextarea
-            rows={12}
-            value={settings.aboutParagraphs.join("\n\n")}
-            onChange={(text) => set({ aboutParagraphs: text.split(PARAGRAPH_BREAK) })}
-          />
         </div>
       </Panel>
 
@@ -168,6 +155,33 @@ export function SettingsBrandPanel({
           </LabelledField>
         </div>
       </Panel>
-    </div>
+    </>
+  );
+}
+
+/** The About page copy, edited as one block; a blank line starts a paragraph. */
+export function SettingsAboutPanel({
+  settings,
+  dispatch,
+}: {
+  settings: SiteSettings;
+  dispatch: (action: AdminAction) => void;
+}) {
+  const set = (patch: Partial<SiteSettings>) => dispatch({ type: "settings/set", patch });
+  const paragraphs = settings.aboutParagraphs.filter((paragraph) => paragraph.trim()).length;
+
+  return (
+      <Panel
+        title="About page"
+        description={`${plural(paragraphs, "paragraph")}. Leave a blank line to start a new one.`}
+      >
+        <div className="flex flex-col">
+          <ProseTextarea
+            rows={12}
+            value={settings.aboutParagraphs.join("\n\n")}
+            onChange={(text) => set({ aboutParagraphs: text.split(PARAGRAPH_BREAK) })}
+          />
+        </div>
+      </Panel>
   );
 }

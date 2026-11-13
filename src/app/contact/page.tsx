@@ -6,13 +6,10 @@ import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { getContactCards, getSiteSettings } from "@/lib/content/public-site-content";
 import { isPartShown } from "@/lib/content/site-visibility";
+import { pageMetadata } from "@/lib/seo/share-metadata";
 
-export async function generateMetadata(): Promise<Metadata> {
-  const [{ metaTitle }, cards] = await Promise.all([getSiteSettings(), getContactCards()]);
-  return {
-    title: `${metaTitle} — Contact`,
-    description: `Offices and enquiries: ${cards.map((card) => card.heading).join(", ")}.`,
-  };
+export function generateMetadata(): Promise<Metadata> {
+  return pageMetadata("contact");
 }
 
 export default async function ContactPage() {

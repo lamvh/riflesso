@@ -7,10 +7,10 @@ import { SiteHeader } from "@/components/site-header";
 import { toDirectory } from "@/lib/content/directory-view";
 import { getDirectoryContent, getSiteSettings } from "@/lib/content/public-site-content";
 import { isPartShown } from "@/lib/content/site-visibility";
+import { pageMetadata } from "@/lib/seo/share-metadata";
 
-export async function generateMetadata(): Promise<Metadata> {
-  const { metaTitle, metaDescription } = await getSiteSettings();
-  return { title: `${metaTitle} — Artists`, description: metaDescription };
+export function generateMetadata(): Promise<Metadata> {
+  return pageMetadata("artists");
 }
 
 export default async function ArtistsPage() {

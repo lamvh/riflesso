@@ -12,6 +12,7 @@ import { CrossIcon, PlusIcon } from "./ui/icons";
 import { MediaDropZone } from "./ui/media-drop-zone";
 import { SortableItem, SortableList } from "./ui/sortable-list";
 import { UploadButton } from "./ui/upload-button";
+import { MediaLibraryButton } from "./ui/media-library-picker";
 import { SwitchRow } from "./ui/switch-row";
 
 export function AlbumDrawer({
@@ -108,13 +109,22 @@ export function AlbumDrawer({
                 <CrossIcon size={12} />
               </button>
               {!shot.src && (
-                <UploadButton
-                  onUploaded={(src) => setShot(position, src)}
-                  accept="image/*,video/mp4,video/webm"
-                  className="absolute inset-x-0 bottom-0 flex justify-center bg-paper/90 py-[6px] font-sans text-[11px] leading-none font-medium"
-                >
-                  Upload
-                </UploadButton>
+                <div className="absolute inset-x-0 bottom-0 flex divide-x divide-line bg-paper/90 font-sans text-[11px] leading-none font-medium">
+                  <UploadButton
+                    onUploaded={(src) => setShot(position, src)}
+                    accept="image/*,video/mp4,video/webm"
+                    className="flex flex-1 justify-center py-[6px]"
+                  >
+                    Upload
+                  </UploadButton>
+                  <MediaLibraryButton
+                    videos
+                    onPick={(src) => setShot(position, src)}
+                    className="flex flex-1 justify-center py-[6px]"
+                  >
+                    Library
+                  </MediaLibraryButton>
+                </div>
               )}
               {position === 0 && shot.src && (
                 <span className="absolute bottom-[4px] left-[4px] rounded-[4px] bg-ink px-[6px] py-[3px] font-sans text-[11px] leading-none font-medium text-paper">

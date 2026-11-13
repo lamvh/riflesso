@@ -5,6 +5,7 @@ import {
 } from "@/lib/dashboard/admin-types";
 import { isPublishableSrc } from "@/lib/media-src";
 
+import { SEO_PAGES, withSeoDefaults } from "./site-seo";
 import { HIDEABLE_PARTS } from "./site-visibility";
 
 /*
@@ -62,6 +63,8 @@ export function findPublishProblem(input: unknown): string | null {
   ) {
     return "Malformed hidden pages";
   }
+  const seoProblem = findSeoProblem(settings.seo);
+  if (seoProblem) return seoProblem;
 
   const [contacts, artists, albums, cats, slides, blocks] = LIST_KEYS.map(
     (key) => input[key] as Row[],
@@ -110,8 +113,11 @@ export function findPublishProblem(input: unknown): string | null {
     }
   }
 
+  const seo = withSeoDefaults(settings.seo);
   const sources = [
     settings.logoUrl,
+    seo.shareImage,
+    ...SEO_PAGES.map(({ key }) => seo.pages[key].image),
     ...artists.map((artist) => artist.image),
     ...albums.flatMap((album) => album.frames as string[]),
     ...slides.map((slide) => slide.src),
@@ -122,3 +128,32 @@ export function findPublishProblem(input: unknown): string | null {
 
   return null;
 }
+
+/**
+ * SEO values end up inside meta tags, so they are kept to sane lengths and
+ * shapes here. Missing is fine (content from before the SEO settings).
+ */
+function findSeoProblem(input: unknown): string | null {
+  if (input === undefined) return null;
+  if (!isRow(input)) return "Malformed SEO settings";
+  const seo = withSeoDefaults(input);
+  for (const { key, label } of SEO_PAGES) {
+    const page = seo.pages[key];
+    if (page.title.length > 200) return `SEO ${label}: the title is too long`;
+    if (page.description.length > 500) return `SEO ${label}: the description is too long`;
+  }
+  if (seo.keywords.length > 500) return "SEO: too many keywords";
+  if (seo.facebookAppId.trim() && !/^\d{5,20}$/.test(seo.facebookAppId.trim())) {
+    return "SEO: the Facebook app id is digits only";
+  }
+  for (const [name, value] of [
+    ["Google", seo.googleVerification],
+    ["Bing", seo.bingVerification],
+  ] as const) {
+    if (value.trim() && !/^[A-Za-z0-9_\-:.=+/]{4,200}$/.test(value.trim())) {
+      return `SEO: paste only the content="…" value of the ${name} verification tag`;
+    }
+  }
+  return null;
+}
+

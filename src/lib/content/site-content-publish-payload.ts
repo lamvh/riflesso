@@ -1,3 +1,4 @@
+import { withSeoDefaults } from "./site-seo";
 import { isVideoSrc } from "@/lib/media-src";
 
 import { DEFAULT_POSITION, type SiteContent } from "./site-content-types";
@@ -20,6 +21,7 @@ export function toPublishPayload(content: SiteContent) {
       meta_description: settings.metaDescription.trim(),
       copyright: settings.copyright.trim(),
       hidden_parts: settings.hiddenParts,
+      seo: withSeoDefaults(settings.seo),
       about_paragraphs: trimmed(settings.aboutParagraphs),
       social_links: settings.socialLinks
         .filter((link) => link.label.trim() && link.href.trim())

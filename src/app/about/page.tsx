@@ -6,13 +6,10 @@ import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { getContactCards, getSiteSettings } from "@/lib/content/public-site-content";
 import { isPartShown } from "@/lib/content/site-visibility";
+import { pageMetadata } from "@/lib/seo/share-metadata";
 
-export async function generateMetadata(): Promise<Metadata> {
-  const { metaTitle, aboutParagraphs } = await getSiteSettings();
-  return {
-    title: `${metaTitle} — About`,
-    description: aboutParagraphs[0],
-  };
+export function generateMetadata(): Promise<Metadata> {
+  return pageMetadata("about");
 }
 
 const COPY = "font-serif text-[24px] leading-[132%] text-pretty";

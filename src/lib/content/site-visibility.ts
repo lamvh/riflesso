@@ -1,3 +1,4 @@
+import { withSeoDefaults } from "./site-seo";
 import type { SiteContent, SiteSettings } from "./site-content-types";
 
 /*
@@ -45,6 +46,8 @@ export function withVisibilityDefaults(content: SiteContent): SiteContent {
     settings: {
       ...content.settings,
       hiddenParts: content.settings.hiddenParts ?? [],
+      /* Older drafts and history entries predate SEO settings. */
+      seo: withSeoDefaults(content.settings.seo),
       socialLinks: content.settings.socialLinks.map((link) => ({ ...link, hidden: link.hidden ?? false })),
     },
     contacts: content.contacts.map((card) => ({ ...card, hidden: card.hidden ?? false })),

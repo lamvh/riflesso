@@ -1,5 +1,7 @@
 import "server-only";
 
+import { blankSeo } from "./site-seo";
+
 import { CONTACT_CARDS } from "@/data/contact-offices";
 import {
   seedAlbums,
@@ -37,6 +39,7 @@ const seedSettings = (): SiteSettings => ({
   ],
   copyright: "Riflesso Studio ©2026",
   hiddenParts: [],
+  seo: blankSeo(),
 });
 
 const seedContacts = (): ContactCardRecord[] =>

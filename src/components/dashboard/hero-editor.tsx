@@ -11,6 +11,7 @@ import { ArrowUpIcon, PlusIcon } from "./ui/icons";
 import { MediaDropZone } from "./ui/media-drop-zone";
 import { SortableItem, SortableList } from "./ui/sortable-list";
 import { UploadButton } from "./ui/upload-button";
+import { MediaLibraryButton } from "./ui/media-library-picker";
 import { Panel } from "./ui/panel";
 
 const INKS: { value: string; label: string }[] = [
@@ -179,12 +180,12 @@ export function HeroEditor({
 
             <LabelledField label="Image address" hint="A path under /assets or an https:// link">
               <ProseInput value={slide.src} placeholder="/assets/…" onChange={(src) => set({ src })} />
-              <UploadButton
-                onUploaded={(src) => set({ src })}
-                className={`${buttonClass("secondary", "sm")} self-start`}
-              >
-                Upload a file
-              </UploadButton>
+              <div className="flex flex-wrap gap-[6px]">
+                <UploadButton onUploaded={(src) => set({ src })} className={buttonClass("secondary", "sm")}>
+                  Upload a file
+                </UploadButton>
+                <MediaLibraryButton onPick={(src) => set({ src })} className={buttonClass("ghost", "sm")} />
+              </div>
             </LabelledField>
 
             <div className="flex flex-wrap items-center gap-[6px] border-t border-line pt-[14px]">
