@@ -5,9 +5,9 @@ import { isPartShown, type HideablePart } from "@/lib/content/site-visibility"
 
 type FooterLink = { label: string; href: string }
 
-const BOLD_LINK =
-  "font-sans text-[14px] leading-[94%] font-bold tracking-[-0.5px] hover:underline"
-const SERIF_LINK = "font-serif text-[15px] leading-[100%] hover:underline"
+/** Every footer line — links and copyright — shares this bold sans type. */
+const BOLD_TEXT = "font-sans text-[14px] leading-[94%] font-bold tracking-[-0.5px]"
+const BOLD_LINK = `${BOLD_TEXT} hover:underline`
 
 /** Each page link leaves the footer when its page is hidden. */
 const PAGE_LINKS: (FooterLink & { part: HideablePart })[] = [
@@ -82,20 +82,20 @@ export async function SiteFooter() {
         links={isPartShown(settings, "footer:social") ? socialLinks : []}
         linkClassName={BOLD_LINK}
       />
-      <FooterColumn links={LEGAL_LINKS} linkClassName={SERIF_LINK} />
+      <FooterColumn links={LEGAL_LINKS} linkClassName={BOLD_LINK} />
       <FooterColumn
         links={POLICY_LINKS}
-        linkClassName={SERIF_LINK}
+        linkClassName={BOLD_LINK}
         align="right"
       >
         {copyright && (
           <li className="hidden sm:list-item">
-            <p className="font-serif text-[15px] leading-[100%]">{copyright}</p>
+            <p className={BOLD_TEXT}>{copyright}</p>
           </li>
         )}
       </FooterColumn>
       {copyright && (
-        <p className="col-span-2 border-t border-black/10 pt-5 font-serif text-[15px] leading-[100%] sm:hidden">
+        <p className={`col-span-2 border-t border-black/10 pt-5 ${BOLD_TEXT} sm:hidden`}>
           {copyright}
         </p>
       )}
