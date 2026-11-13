@@ -16,6 +16,8 @@ export type RecordAction =
   | { type: "artist/delete" }
   | { type: "album/open"; index: number }
   | { type: "album/toggleHome"; index: number }
+  /** Swap an album's cover (its first frame) without opening the drawer. */
+  | { type: "album/setCover"; id: string; src: string }
   | { type: "album/save" }
   | { type: "album/delete" }
   | { type: "draft/set"; patch: Partial<ArtistDraft & AlbumDraft> }
@@ -49,6 +51,8 @@ export type SiteAction =
   | { type: "slide/remove" }
   | { type: "block/toggle"; index: number }
   | { type: "block/setImage"; index: number; image: string }
+  /** Which album a Full-bleed section fronts; null = the first of its kind. */
+  | { type: "block/setAlbum"; index: number; albumId: string | null }
   | { type: "block/move"; index: number; delta: number }
   /** Drag-and-drop: move one row of an ordered list to a new position. */
   | { type: "list/reorder"; list: ReorderableList; from: number; to: number };

@@ -2,7 +2,10 @@
 
 import { useState } from "react";
 
+import { appendCompression } from "@/lib/media/upload-compression";
+
 import { useAdmin } from "../admin-store";
+import { currentUploadCompression } from "../use-upload-compression";
 
 /**
  * Sends picked or dropped files to R2 and hands back their addresses. Pictures
@@ -42,6 +45,8 @@ export function useMediaUpload() {
     try {
       const body = new FormData();
       body.append("file", file);
+      /* Read per file, so a change mid-batch applies to the files still to go. */
+      appendCompression(body, currentUploadCompression());
       const response = await fetch("/api/media/upload", { method: "POST", body });
       const result = (await response.json()) as UploadResult;
       if (!response.ok || !result.url) {

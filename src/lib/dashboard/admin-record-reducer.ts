@@ -12,6 +12,7 @@ import {
 import { plural } from "./admin-changes";
 import { dropAt, fromDraft, moveItem, note, patchAt, withDraft } from "./admin-helpers";
 import type { AdminArtist } from "./admin-types";
+import { isVideoSrc } from "@/lib/media-src";
 
 /** Everything that edits an artist or an album, drawer included. */
 export function recordReducer(state: AdminState, action: RecordAction): AdminState {
@@ -87,6 +88,18 @@ export function recordReducer(state: AdminState, action: RecordAction): AdminSta
         album.home
           ? `${album.title} removed from the homepage`
           : `${album.title} featured on the homepage`,
+      );
+    }
+
+    case "album/setCover": {
+      const index = state.albums.findIndex((album) => album.id === action.id);
+      const album = state.albums[index];
+      if (!album || !action.src) return state;
+      /* The cover is the first frame; the rest of the set stays as it was. */
+      const frames = album.frames.length ? [action.src, ...album.frames.slice(1)] : [action.src];
+      return note(
+        { ...state, albums: patchAt(state.albums, index, { cover: action.src, frames, video: isVideoSrc(action.src) }) },
+        `${album.title || "Album"} cover replaced`,
       );
     }
 

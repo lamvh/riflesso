@@ -114,7 +114,7 @@ export function ArtistDrawer({
               <MediaLibraryButton onPick={(image) => set({ image })} className={buttonClass("ghost", "sm")} />
             </div>
             <p className="font-sans text-[12px] leading-[140%] text-graphite">
-              Or drop a file on the picture. Uploads are resized to 2400px, re-compressed and stored on R2.
+              Or drop a file on the picture. Uploads are compressed per the Compression setting (Media screen or album drawer) and stored on R2.
             </p>
           </div>
         </div>

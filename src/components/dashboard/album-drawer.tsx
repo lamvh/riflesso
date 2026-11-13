@@ -14,6 +14,7 @@ import { SortableItem, SortableList } from "./ui/sortable-list";
 import { UploadButton } from "./ui/upload-button";
 import { MediaLibraryButton } from "./ui/media-library-picker";
 import { SwitchRow } from "./ui/switch-row";
+import { UploadCompressionControl } from "./ui/upload-compression-control";
 
 /** What an album frame can hold. */
 const SHOT_TYPES = "image/*,video/mp4,video/webm";
@@ -98,6 +99,9 @@ export function AlbumDrawer({
           <MediaLibraryButton videos onPickMany={appendShots} className={buttonClass("ghost", "sm")}>
             Add from library
           </MediaLibraryButton>
+          <div className="ml-auto">
+            <UploadCompressionControl align="right" />
+          </div>
         </div>
         <MediaDropZone
           multiple

@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 
 import { optimizeImage } from "@/lib/media/optimize-image";
+import { KEEPABLE } from "@/lib/media/optimize-image-shared";
+import { compressionFromForm } from "@/lib/media/upload-compression";
 import { mediaKey, putObject, r2Config } from "@/lib/media/r2-storage";
 
 /**
@@ -68,11 +70,21 @@ export async function POST(request: Request) {
   }
 
   const input = Buffer.from(await file.arrayBuffer());
+  /* Quality and size come from the dashboard's compression setting, clamped. */
+  const compression = compressionFromForm(form);
+  const keepAsIs = isImage && compression.original && (KEEPABLE[file.type] || file.type === "image/gif");
 
   try {
-    const stored = isImage
-      ? await optimizeImage(input, { animated: file.type === "image/gif" })
-      : { body: input, contentType: file.type, extension: videoExtension, width: 0, height: 0 };
+    const stored = !isImage
+      ? { body: input, contentType: file.type, extension: videoExtension, width: 0, height: 0 }
+      : keepAsIs
+        ? { body: input, contentType: file.type, extension: KEEPABLE[file.type]?.extension ?? "gif", width: 0, height: 0 }
+        : await optimizeImage(input, {
+            animated: file.type === "image/gif",
+            /* "Original" on a format browsers can't show (TIFF) still converts, at full quality. */
+            quality: compression.original ? 100 : compression.quality,
+            maxEdge: compression.maxEdge,
+          });
 
     const key = mediaKey(file.name, stored.extension);
     const url = await putObject({

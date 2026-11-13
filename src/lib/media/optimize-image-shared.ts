@@ -24,7 +24,13 @@ export type OptimizedImage = {
   height: number;
 };
 
-export type OptimizeOptions = { animated?: boolean };
+export type OptimizeOptions = {
+  animated?: boolean;
+  /** Encoder quality; QUALITY when absent. */
+  quality?: number;
+  /** Longest edge kept; MAX_EDGE when absent. */
+  maxEdge?: number;
+};
 
 /** WebP is not always the smaller file, so each candidate is measured and the smallest wins. */
 export const smallest = (candidates: OptimizedImage[]): OptimizedImage =>

@@ -34,6 +34,7 @@ import { Panel } from "../ui/panel";
 import { SelectBox, toggleId } from "../ui/selection-controls";
 import { TextPromptDialog } from "../ui/text-prompt-dialog";
 import { UploadButton } from "../ui/upload-button";
+import { UploadCompressionControl } from "../ui/upload-compression-control";
 import type { UploadedFile } from "../ui/use-media-upload";
 
 type UsageFilter = "all" | "used" | "unused";
@@ -312,6 +313,7 @@ export function MediaScreen() {
             <Button size="sm" onClick={refresh} disabled={loading || deleting}>
               {loading ? "Listing…" : "Refresh"}
             </Button>
+            {report?.state === "ok" && <UploadCompressionControl align="right" />}
             {report?.state === "ok" && (
               <UploadButton multiple accept={LIBRARY_TYPES} onUploadedAll={afterUpload} className={buttonClass("primary", "sm")}>
                 <UploadIcon size={14} />

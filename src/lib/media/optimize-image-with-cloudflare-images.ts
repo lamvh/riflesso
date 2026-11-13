@@ -14,7 +14,7 @@ import {
 /*
  * Workers encoder. sharp cannot run on Workers, so pictures go through the
  * Cloudflare Images binding (`IMAGES` in wrangler.jsonc) instead, following the
- * same rules: fit inside MAX_EDGE, try WebP and JPEG, keep a lean original,
+ * same rules: fit inside the longest edge, try WebP and JPEG, keep a lean original,
  * store whichever is smallest.
  *
  * Only the slice of the binding this file uses is typed here, so the project
@@ -42,15 +42,15 @@ async function imagesBinding(): Promise<ImagesBinding> {
   return binding;
 }
 
-/** Size after fitting inside MAX_EDGE without enlarging — what scale-down produces. */
-function fitted(width: number, height: number) {
-  const scale = Math.min(1, MAX_EDGE / Math.max(width, height, 1));
+/** Size after fitting inside the longest edge without enlarging — what scale-down produces. */
+function fitted(width: number, height: number, maxEdge: number) {
+  const scale = Math.min(1, maxEdge / Math.max(width, height, 1));
   return { width: Math.round(width * scale), height: Math.round(height * scale) };
 }
 
 export async function optimizeImageWithCloudflareImages(
   input: Buffer,
-  { animated = false }: OptimizeOptions = {},
+  { animated = false, quality = QUALITY, maxEdge = MAX_EDGE }: OptimizeOptions = {},
 ): Promise<OptimizedImage> {
   const images = await imagesBinding();
   const info = await images.info(streamOf(input));
@@ -64,12 +64,12 @@ export async function optimizeImageWithCloudflareImages(
     return { body: input, contentType: "image/gif", extension: "gif", width, height };
   }
 
-  const size = fitted(width, height);
+  const size = fitted(width, height, maxEdge);
   const encode = async (format: string, extension: string): Promise<OptimizedImage> => {
     const result = await images
       .input(streamOf(input))
-      .transform({ width: MAX_EDGE, height: MAX_EDGE, fit: "scale-down" })
-      .output({ format, quality: QUALITY });
+      .transform({ width: maxEdge, height: maxEdge, fit: "scale-down" })
+      .output({ format, quality });
     const body = Buffer.from(await result.response().arrayBuffer());
     return { body, contentType: format, extension, ...size };
   };
@@ -80,7 +80,7 @@ export async function optimizeImageWithCloudflareImages(
   if (info.format === "image/jpeg") candidates.push(await encode("image/jpeg", "jpg"));
 
   /* An original that is already lean and needs no resizing is left untouched. */
-  if (keepable && Math.max(width, height) <= MAX_EDGE) {
+  if (keepable && Math.max(width, height) <= maxEdge) {
     candidates.push({ body: input, ...keepable, width, height });
   }
 

@@ -11,33 +11,13 @@ import { ArrowDownIcon, ArrowUpIcon } from "./ui/icons";
 import { MediaDropZone } from "./ui/media-drop-zone";
 import { MediaLibraryButton } from "./ui/media-library-picker";
 import { Panel } from "./ui/panel";
+import { SectionAlbumStrip, sectionAlbums, onHomepage } from "./section-album-strip";
+import { SelectField } from "./ui/fields";
 import { DragHandle, SortableItem, SortableList } from "./ui/sortable-list";
 import { UploadButton } from "./ui/upload-button";
 
 /** Small text buttons under a banner's name. */
 const IMAGE_ACTION = "cursor-pointer font-sans text-[12px] font-medium text-graphite underline-offset-2 hover:text-ink hover:underline";
-
-type Thumb = { id: string; src: string; pos: string; video?: boolean };
-
-/**
- * What an album-fed section would show: the album a feature fronts, or the
- * first four albums of a row's kind. Banners show their own image instead.
- */
-function thumbsFor(block: Block, albums: Album[]): Thumb[] {
-  const toThumb = (album: Album): Thumb => ({
-    id: album.id,
-    src: album.cover,
-    pos: album.pos,
-    video: album.video,
-  });
-
-  const matching = albums.filter((album) => album.kind === block.source);
-  if (block.kind === "Full-bleed") {
-    const featured = albums.find((album) => album.id === block.albumId) ?? matching[0];
-    return featured ? [toThumb(featured)] : [];
-  }
-  return matching.slice(0, 4).map(toThumb);
-}
 
 const describe = (block: Block) => {
   switch (block.kind) {
@@ -107,6 +87,29 @@ export function SectionList({
                 {block.on ? describe(block) : "Hidden from the homepage"}
                 {block.kind === "Banner" && !block.image && " · no image yet, so it is left off the page"}
               </p>
+              {block.kind === "Full-bleed" && (
+                <div className="mt-[8px] max-w-[320px]">
+                  <SelectField
+                    label={`Album ${block.label} features`}
+                    value={block.albumId ?? ""}
+                    onChange={(albumId) => dispatch({ type: "block/setAlbum", index, albumId: albumId || null })}
+                    options={[
+                      { value: "", label: `Latest ${block.source} album` },
+                      ...albums
+                        .filter((album) => onHomepage(album) && album.kind === block.source)
+                        .map((album) => ({ value: album.id, label: album.title || "Untitled album" })),
+                    ]}
+                  />
+                </div>
+              )}
+              {block.kind !== "Banner" && (
+                <SectionAlbumStrip
+                  albums={sectionAlbums(block, albums)}
+                  allAlbums={albums}
+                  dim={!block.on}
+                  dispatch={dispatch}
+                />
+              )}
               {block.kind === "Banner" && (
                 <div className="mt-[6px] flex flex-wrap gap-x-[12px] gap-y-[4px]">
                   <UploadButton onUploaded={(image) => setImage(index, image)} className={IMAGE_ACTION}>
@@ -133,15 +136,7 @@ export function SectionList({
               >
                 {block.image && <CoverImage src={block.image} pos="50% 50%" dim={block.on ? 1 : 0.4} />}
               </MediaDropZone>
-            ) : (
-              <div className="hidden shrink-0 gap-[4px] sm:flex">
-                {thumbsFor(block, albums).map((thumb) => (
-                  <div key={thumb.id} className="h-[44px] w-[34px] overflow-hidden rounded-[4px] bg-well">
-                    <CoverImage src={thumb.src} pos={thumb.pos} video={thumb.video} dim={block.on ? 1 : 0.4} />
-                  </div>
-                ))}
-              </div>
-            )}
+            ) : null}
 
             <div className="flex shrink-0">
               <IconButton

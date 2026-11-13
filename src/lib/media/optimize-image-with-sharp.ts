@@ -38,25 +38,25 @@ const encoded = (
 
 export async function optimizeImageWithSharp(
   input: Buffer,
-  { animated = false }: OptimizeOptions = {},
+  { animated = false, quality = QUALITY, maxEdge = MAX_EDGE }: OptimizeOptions = {},
 ): Promise<OptimizedImage> {
   /* Phone pictures carry their orientation in EXIF; re-encoding applies it and
      drops the rest of the metadata with it. */
   const image = sharp(input, { animated, failOn: "none" }).rotate();
   const meta = await image.metadata();
   const height = frameHeight(meta.height ?? 0, meta.pages);
-  const oversized = Math.max(meta.width ?? 0, height) > MAX_EDGE;
+  const oversized = Math.max(meta.width ?? 0, height) > maxEdge;
 
   const resized = image.resize({
-    width: MAX_EDGE,
-    height: MAX_EDGE,
+    width: maxEdge,
+    height: maxEdge,
     fit: "inside",
     withoutEnlargement: true,
   });
 
   const candidates: OptimizedImage[] = [
     encoded(
-      await resized.clone().webp({ quality: QUALITY, smartSubsample: true }).toBuffer({
+      await resized.clone().webp({ quality, smartSubsample: true }).toBuffer({
         resolveWithObject: true,
       }),
       "image/webp",
@@ -68,7 +68,7 @@ export async function optimizeImageWithSharp(
   if (!meta.hasAlpha && !animated) {
     candidates.push(
       encoded(
-        await resized.clone().jpeg({ quality: QUALITY, mozjpeg: true }).toBuffer({
+        await resized.clone().jpeg({ quality, mozjpeg: true }).toBuffer({
           resolveWithObject: true,
         }),
         "image/jpeg",

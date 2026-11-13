@@ -28,7 +28,9 @@ export function albumToMediaItem(album: Album): MediaItem {
     title,
     albumId: album.id,
   };
-  if (album.frames.length > 1) {
+  /* Every album opens on its own images, even a single one — never on
+     neighbouring albums' covers, which read as someone else's work. */
+  if (album.frames.length > 0) {
     item.gallery = album.frames.map((src, index) => ({
       src,
       kind: (index === 0 ? album.video : isVideoSrc(src)) ? "video" : "image",
