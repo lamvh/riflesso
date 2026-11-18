@@ -12,7 +12,8 @@ import { pathSuffixes } from "./media-usage";
  */
 
 /** True when `src` addresses the object `key`, under any media base URL. */
-export const pointsAt = (src: string, key: string) => pathSuffixes(src.trim()).includes(key);
+export const pointsAt = (src: string, key: string) =>
+  pathSuffixes(src.trim()).includes(key);
 
 type Swap = <T extends string>(src: T) => T;
 
@@ -30,7 +31,10 @@ function swapper(key: string, url: string) {
 function rewriteContent(content: SiteContent, swap: Swap): SiteContent {
   const { settings } = content;
   const pages = Object.fromEntries(
-    Object.entries(settings.seo.pages).map(([page, seo]) => [page, { ...seo, image: swap(seo.image) }]),
+    Object.entries(settings.seo.pages).map(([page, seo]) => [
+      page,
+      { ...seo, image: swap(seo.image) },
+    ]),
   ) as typeof settings.seo.pages;
 
   return {
@@ -38,16 +42,26 @@ function rewriteContent(content: SiteContent, swap: Swap): SiteContent {
     settings: {
       ...settings,
       logoUrl: swap(settings.logoUrl),
-      seo: { ...settings.seo, shareImage: swap(settings.seo.shareImage), pages },
+      seo: {
+        ...settings.seo,
+        shareImage: swap(settings.seo.shareImage),
+        pages,
+      },
     },
-    artists: content.artists.map((artist) => ({ ...artist, image: swap(artist.image) })),
+    artists: content.artists.map((artist) => ({
+      ...artist,
+      image: swap(artist.image),
+    })),
     albums: content.albums.map((album) => ({
       ...album,
       cover: swap(album.cover),
       frames: album.frames.map(swap),
     })),
     slides: content.slides.map((slide) => ({ ...slide, src: swap(slide.src) })),
-    blocks: content.blocks.map((block) => ({ ...block, image: swap(block.image) })),
+    blocks: content.blocks.map((block) => ({
+      ...block,
+      image: swap(block.image),
+    })),
   };
 }
 
@@ -55,7 +69,10 @@ function rewriteContent(content: SiteContent, swap: Swap): SiteContent {
 function rewriteDrawer(drawer: Drawer, swap: Swap): Drawer {
   if (!drawer) return drawer;
   if (drawer.kind === "artist") {
-    return { ...drawer, draft: { ...drawer.draft, image: swap(drawer.draft.image) } };
+    return {
+      ...drawer,
+      draft: { ...drawer.draft, image: swap(drawer.draft.image) },
+    };
   }
   const { draft } = drawer;
   return {
@@ -83,5 +100,9 @@ export function replaceMediaReferences(
   const inContent = swapper(key, url);
   const next = rewriteContent(content, inContent.swap);
   const inDrawer = swapper(key, url);
-  return { content: next, drawer: rewriteDrawer(drawer, inDrawer.swap), count: inContent.count() };
+  return {
+    content: next,
+    drawer: rewriteDrawer(drawer, inDrawer.swap),
+    count: inContent.count(),
+  };
 }

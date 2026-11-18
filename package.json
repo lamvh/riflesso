@@ -1,11 +1,11 @@
 {
   "name": "riflesso",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
     "build": "next build",
-    "dev": "next dev",
-    "start": "next start",
+    "dev": "NODE_OPTIONS=\"$NODE_OPTIONS --network-family-autoselection-attempt-timeout=2000\" next dev",
+    "start": "NODE_OPTIONS=\"$NODE_OPTIONS --network-family-autoselection-attempt-timeout=2000\" next start",
     "lint": "eslint",
     "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
     "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
