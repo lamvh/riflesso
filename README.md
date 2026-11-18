@@ -86,6 +86,10 @@ nội dung gốc trong `src/data/*`.
 12. **Backup DB**, rồi chạy `supabase/migrations/20261119020000_add_hero_slide_thumbnail_crop.sql`
     — cột `object_position_thumb` (crop riêng cho ô thumbnail dưới banner).
     Chưa chạy thì thumbnail theo crop desktop; crop thumbnail chỉ chưa được lưu khi Publish.
+13. **Backup DB**, rồi chạy `supabase/migrations/20261119030000_add_policy_page.sql`
+    — cột `policy` (jsonb: title, updated, body markdown) cho trang `/policy`.
+    Chưa chạy thì trang hiện nội dung mặc định (`src/lib/content/site-policy.ts`);
+    chỉnh sửa trong Dashboard → Policy chỉ chưa được lưu khi Publish.
 
 > **Chưa có auth.** Server action publish (và đọc History, tạo Preview) mở cho bất kỳ ai gọi được tới nó. Phải
 > thêm đăng nhập vào `src/lib/dashboard/publish-site-content.ts` + `/dashboard`
@@ -345,6 +349,15 @@ src/
   cho cả 3 màn hình (`hero-crop-workspace.tsx`, logic ở `lib/content/hero-crop.ts`).
   Ô thumbnail 177×110 trong dải dưới banner có crop riêng (tab **Thumbnail**),
   để trống thì theo desktop. Ảnh gốc và 4 preview nằm cạnh nhau.
+- **Policy** (`/policy`, `src/app/policy/page.tsx`) — một trang gồm Privacy,
+  Cookies, Terms of use…, soạn ở Dashboard → **Policy** bằng markdown đơn giản
+  (`## heading`, đoạn cách bằng dòng trống, `- list`, `**đậm**`, `*nghiêng*`,
+  `[link](url)`; không nhận HTML, link chỉ http(s)/mailto/tel/đường dẫn nội bộ),
+  có preview live bên cạnh. Parser ở `src/lib/content/policy-markdown.ts`, mỗi
+  `##` có anchor (`/policy#privacy`) và hiện ở mục lục bên trái từ `lg`. Footer:
+  Privacy Policy / Cookie Policy / Terms of Use trỏ vào các anchor đó (đổi tên
+  heading thì link chỉ mở đầu trang). Ẩn trang bằng công tắc Show page hoặc
+  Visibility → Policy page (404 + mất link footer). Có trong sitemap, SEO, search.
 - **Rail** — cuộn ngang bằng wheel, touch, hoặc kéo chuột. Click phát sinh ở cuối
   thao tác kéo bị chặn ở capture phase để không vô tình điều hướng.
 - **Video** — muted + loop + playsinline; `IntersectionObserver` (margin 200px)
