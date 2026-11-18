@@ -80,6 +80,17 @@ export function recordReducer(state: AdminState, action: RecordAction): AdminSta
       };
     }
 
+    case "album/openForSection": {
+      const draft: AlbumDraft = {
+        ...blankAlbum(),
+        kind: action.kind,
+        live: true,
+        home: true,
+        shots: action.srcs.map((src): Shot => ({ src, pos: "50% 18%" })),
+      };
+      return { ...state, drawer: { kind: "album", index: -1, draft } };
+    }
+
     case "album/toggleHome": {
       const album = state.albums[action.index];
       const albums = patchAt(state.albums, action.index, { home: !album.home });

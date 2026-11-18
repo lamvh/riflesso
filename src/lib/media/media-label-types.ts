@@ -14,7 +14,14 @@ export type MediaLabel = {
 export type MediaLabelMap = Record<string, MediaLabel>;
 
 export type MediaLabelsReport =
-  | { state: "ok"; labels: MediaLabelMap }
+  | {
+      state: "ok";
+      labels: MediaLabelMap;
+      /** Folders made with "New folder" (table media_library_folders), empty or not. */
+      folders: string[];
+      /** False while the media_library_folders migration has not been run. */
+      foldersReady: boolean;
+    }
   /** Supabase is not configured. */
   | { state: "unconfigured" }
   /** Configured, but the media_library_labels migration has not been run. */
@@ -30,7 +37,8 @@ export type MediaLabelChange = {
 };
 
 export type MediaLabelUpdateResult =
-  | { ok: true; labels: MediaLabelMap }
+  /** `folders`, when present, is the full list of created folders after the change. */
+  | { ok: true; labels: MediaLabelMap; folders?: string[] }
   | { ok: false; error: string };
 
 export const EMPTY_LABEL: MediaLabel = { folder: "", tags: [] };
@@ -81,6 +89,19 @@ export function applyLabelChange(current: MediaLabel, change: MediaLabelChange):
     if (!tags.some((kept) => sameTag(kept, tag))) tags.push(tag);
   }
   return { folder, tags: tags.slice(0, LABEL_LIMITS.tagsPerFile) };
+}
+
+/**
+ * Swaps one tag for another in place (any case), or drops it when `to` is
+ * null. Renaming onto a tag the file already has merges the two.
+ */
+export function replaceTag(current: MediaLabel, from: string, to: string | null): MediaLabel {
+  const tags: string[] = [];
+  for (const tag of current.tags) {
+    const next = sameTag(tag, from) ? to : tag;
+    if (next && !tags.some((kept) => sameTag(kept, next))) tags.push(next);
+  }
+  return { folder: current.folder, tags };
 }
 
 /** Whether `folder` is `parent` or sits somewhere inside it. */

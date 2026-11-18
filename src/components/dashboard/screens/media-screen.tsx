@@ -13,6 +13,7 @@ import { formatBytes, type MediaLibraryReport } from "@/lib/media/media-library-
 
 import { useAdmin } from "../admin-store";
 import { MediaBulkActions } from "../media-bulk-actions";
+import { MediaDragArea } from "../media-file-drag";
 import {
   ALL_FOLDERS,
   folderPathOf,
@@ -23,6 +24,8 @@ import {
 } from "../media-folder-list";
 import { MediaLibraryStats } from "../media-library-stats";
 import { MediaObjectCard } from "../media-object-card";
+import { MediaOrganiserDialogs, type OrganiserDialog } from "../media-organiser-dialogs";
+import { MediaTagList } from "../media-tag-list";
 import { useDeleteMediaFiles } from "../use-delete-media-files";
 import { useMediaGroups } from "../use-media-groups";
 import { useMediaLabels } from "../use-media-labels";
@@ -32,7 +35,6 @@ import { UploadIcon } from "../ui/icons";
 import { MediaDropZone } from "../ui/media-drop-zone";
 import { Panel } from "../ui/panel";
 import { SelectBox, toggleId } from "../ui/selection-controls";
-import { TextPromptDialog } from "../ui/text-prompt-dialog";
 import { UploadButton } from "../ui/upload-button";
 import { UploadCompressionControl } from "../ui/upload-compression-control";
 import type { UploadedFile } from "../ui/use-media-upload";
@@ -74,7 +76,7 @@ export function MediaScreen() {
   /** "" = any; otherwise "tag:…", "album:…" or "artist:…". */
   const [tagFilter, setTagFilter] = useState("");
   const [selected, setSelected] = useState<Set<string>>(new Set());
-  const [renaming, setRenaming] = useState<string | null>(null);
+  const [dialog, setDialog] = useState<OrganiserDialog>(null);
   const labels = useMediaLabels(dispatch);
   const { labelOf } = labels;
 
@@ -121,8 +123,9 @@ export function MediaScreen() {
     [report, usageOf, labelOf, groupsOf],
   );
 
-  /* Folder tree, counts and every tag/group in use, for navigation. */
-  const catalogue = useMemo(() => mediaCatalogue(rows), [rows]);
+  /* Folder tree (created empty folders too), counts and every tag/group in use. */
+  const { createdFolders } = labels;
+  const catalogue = useMemo(() => mediaCatalogue(rows, createdFolders), [rows, createdFolders]);
 
   const totals = useMemo(() => {
     const sum = (list: typeof rows) => list.reduce((total, row) => total + row.object.size, 0);
@@ -199,6 +202,24 @@ export function MediaScreen() {
     tagOptions.push({ value: tagFilter, label: tagFilter.replace(/^tag:/, "#") });
   }
 
+  const activeTag = tagFilter.startsWith("tag:") ? tagFilter.slice("tag:".length) : null;
+
+  /* Folder and tag management; each confirms anything that touches many files. */
+  const organise = {
+    newFolder: () => setDialog({ kind: "new-folder", parent: folderPath ?? "" }),
+    renameFolder: (path: string) => setDialog({ kind: "rename-folder", path }),
+    removeFolder: (path: string) => {
+      if (!window.confirm(`Remove the folder ${path} and the folders inside it? Their files stay in the library, unfiled.`)) return;
+      labels.rename(path, "", () => setFolder(ALL_FOLDERS));
+    },
+    renameTag: (tag: string) => setDialog({ kind: "rename-tag", tag }),
+    deleteTag: (tag: string) => {
+      const count = catalogue.tagCounts.get(tag) ?? 0;
+      if (!window.confirm(`Delete #${tag} from ${plural(count, "file")}? The files themselves stay.`)) return;
+      labels.retag(tag, null, () => setTagFilter(""));
+    },
+  };
+
   const folderNav = {
     folders: catalogue.folders,
     counts: catalogue.counts,
@@ -251,22 +272,37 @@ export function MediaScreen() {
         </p>
       )}
 
+      {labels.ready && !labels.foldersReady && (
+        <p className="font-sans text-[13px] break-words text-draft">
+          To keep empty folders, back up the database, then run
+          <code className="break-all">supabase/migrations/20261118000000_add_media_library_folders.sql</code>. Everything else works already.
+        </p>
+      )}
+
+      <MediaDragArea
+        onDrop={(keys, target) => {
+          const moving = keys.filter((key) => labelOf(key).folder !== target);
+          if (moving.length) labels.update(moving, { folder: target }, target ? `Moved to ${target}` : "Unfiled");
+        }}
+      >
       <div className="grid gap-[14px] lg:grid-cols-[200px_minmax(0,1fr)] lg:items-start">
-        <aside className="hidden lg:sticky lg:top-[16px] lg:block">
+        <aside className="hidden lg:sticky lg:top-[16px] lg:flex lg:max-h-[calc(100vh-32px)] lg:flex-col lg:gap-[18px] lg:overflow-y-auto">
           <MediaFolderList
             {...folderNav}
-            onRename={labels.ready ? setRenaming : undefined}
-            onUnfile={
-              labels.ready
-                ? (path) => {
-                    if (window.confirm(`Remove the folder ${path}? Its files stay in the library, unfiled.`)) {
-                      labels.rename(path, "");
-                      setFolder(ALL_FOLDERS);
-                    }
-                  }
-                : undefined
-            }
+            onRename={labels.ready ? organise.renameFolder : undefined}
+            onUnfile={labels.ready ? organise.removeFolder : undefined}
+            onCreate={labels.foldersReady ? organise.newFolder : undefined}
           />
+          {labels.ready && (
+            <MediaTagList
+              tags={catalogue.tags}
+              counts={catalogue.tagCounts}
+              active={activeTag}
+              onPick={(tag) => setTagFilter(tag ? `tag:${tag}` : "")}
+              onRename={organise.renameTag}
+              onDelete={organise.deleteTag}
+            />
+          )}
         </aside>
 
         <MediaDropZone
@@ -322,6 +358,36 @@ export function MediaScreen() {
             )}
           </div>
 
+          {labels.ready && (labels.foldersReady || folderPath || activeTag) && (
+            <div className="flex flex-wrap gap-[6px] lg:hidden">
+              {labels.foldersReady && (
+                <Button size="sm" variant="ghost" onClick={organise.newFolder}>
+                  New folder
+                </Button>
+              )}
+              {folderPath && (
+                <>
+                  <Button size="sm" variant="ghost" onClick={() => organise.renameFolder(folderPath)}>
+                    Rename folder
+                  </Button>
+                  <Button size="sm" variant="ghost" onClick={() => organise.removeFolder(folderPath)}>
+                    Remove folder
+                  </Button>
+                </>
+              )}
+              {activeTag && (
+                <>
+                  <Button size="sm" variant="ghost" onClick={() => organise.renameTag(activeTag)}>
+                    Rename #{activeTag}
+                  </Button>
+                  <Button size="sm" variant="ghost" onClick={() => organise.deleteTag(activeTag)}>
+                    Delete #{activeTag}
+                  </Button>
+                </>
+              )}
+            </div>
+          )}
+
           {report?.state === "error" && (
             <p role="alert" className="rounded-[10px] border border-line bg-paper shadow-sheet px-[20px] py-[14px] font-sans text-[13px] text-danger">
               {report.message}
@@ -353,6 +419,8 @@ export function MediaScreen() {
                   onFilter={setTagFilter}
                   onCopy={copy}
                   onDelete={() => remove([object.key], object.key.slice(object.key.lastIndexOf("/") + 1))}
+                  onEdit={labels.ready ? () => setDialog({ kind: "edit", key: object.key }) : undefined}
+                  dragKeys={selected.has(object.key) ? pickedKeys : [object.key]}
                   busy={deleting}
                 />
               ))}
@@ -360,6 +428,7 @@ export function MediaScreen() {
           )}
         </MediaDropZone>
       </div>
+      </MediaDragArea>
 
       {pickedKeys.length > 0 && (
         <MediaBulkActions
@@ -376,23 +445,21 @@ export function MediaScreen() {
         />
       )}
 
-      {renaming !== null && (
-        <TextPromptDialog
-          title="Rename folder"
-          description="Folders inside it move along. Use / to move it under another folder."
-          label="Folder"
-          initial={renaming}
-          suggestions={catalogue.folders}
-          confirm="Rename"
-          onClose={() => setRenaming(null)}
-          onSubmit={(target) => {
-            const from = renaming;
-            setRenaming(null);
-            labels.rename(from, target);
-            setFolder(ALL_FOLDERS);
-          }}
-        />
-      )}
+      <MediaOrganiserDialogs
+        dialog={dialog}
+        folders={catalogue.folders}
+        tags={catalogue.tags}
+        labelOf={labelOf}
+        onClose={() => setDialog(null)}
+        onCreateFolder={(path) => labels.createFolder(path)}
+        onRenameFolder={(from, to) => labels.rename(from, to, () => setFolder(ALL_FOLDERS))}
+        onRenameTag={(from, to) =>
+          labels.retag(from, to, () => {
+            if (activeTag) setTagFilter(`tag:${to.trim().replace(/^#+/, "")}`);
+          })
+        }
+        onEditFile={(key, change) => labels.update([key], change, "Folder and tags saved")}
+      />
     </div>
   );
 }

@@ -72,6 +72,10 @@ nội dung gốc trong `src/data/*`.
 8. **Backup DB**, rồi chạy `supabase/migrations/20261113050000_add_contact_whatsapp.sql`
    — thêm cột `whatsapp` cho contact card (hiện trên About + Contact, link wa.me).
    Chưa chạy thì site vẫn bình thường; số WhatsApp nhập trong dashboard chỉ chưa được lưu khi Publish.
+9. **Backup DB**, rồi chạy `supabase/migrations/20261118000000_add_media_library_folders.sql`
+   — bảng `media_library_folders` giữ folder tạo bằng **+ New** ở màn Media, kể cả
+   khi chưa có file nào. Chưa chạy thì nút New folder ẩn; folder theo file, tag,
+   kéo thả và Edit trên card vẫn chạy.
 
 > **Chưa có auth.** Server action publish (và đọc History, tạo Preview) mở cho bất kỳ ai gọi được tới nó. Phải
 > thêm đăng nhập vào `src/lib/dashboard/publish-site-content.ts` + `/dashboard`
@@ -162,6 +166,12 @@ tính là Unused cho tới khi được gắn vào đâu đó.
 - **Nhóm tự động theo album (bộ ảnh) và artist**, tính từ nội dung đang sửa,
   không cần lưu: file thuộc album nào, portrait của artist nào, và frame của album
   cũng được gắn cho artist trong roster có tên ở credit của album đó.
+- **Quản lý folder/tag** (`src/lib/media/media-folder-tag-store.ts`):
+  **+ New** tạo folder rỗng (bảng `media_library_folders`); kéo card (hoặc cả
+  nhóm đang chọn) thả vào folder / Unfiled ở sidebar để chuyển; nút **Edit**
+  trên card sửa folder + tag của một file; sidebar **Tags** liệt kê tag kèm số
+  file — bấm để lọc, **Rename tag** (đổi sang tag đã có = gộp) và **Delete tag**
+  áp lên mọi file. Màn hẹp có các nút tương ứng phía trên lưới.
 
 Lọc theo folder, album, artist, tag có ở cả màn Media lẫn hộp "Choose from
 library"; ô search tìm cả tên file, folder, tag, album/artist và record đang dùng

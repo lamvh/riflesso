@@ -17,23 +17,33 @@ export type MediaCatalogue = {
   counts: Map<string, number>;
   unfiled: number;
   tags: string[];
+  /** Files carrying each tag (keyed by the spelling listed in `tags`). */
+  tagCounts: Map<string, number>;
   groups: MediaGroup[];
 };
 
 const byName = (a: string, b: string) => a.localeCompare(b, undefined, { sensitivity: "base", numeric: true });
 
-/** Folders, tags and groups in use among `files`, for navigation and filters. */
-export function mediaCatalogue(files: OrganisedFile[]): MediaCatalogue {
-  const folders = folderTree(files.map((file) => file.label.folder).filter(Boolean));
+/**
+ * Folders, tags and groups in use among `files`, for navigation and filters.
+ * `extraFolders` are folders created while empty; they list with a 0 count.
+ */
+export function mediaCatalogue(files: OrganisedFile[], extraFolders: string[] = []): MediaCatalogue {
+  const folders = folderTree([...files.map((file) => file.label.folder).filter(Boolean), ...extraFolders]);
   const counts = new Map(folders.map((path) => [path, 0]));
   const tags: string[] = [];
+  const tagCounts = new Map<string, number>();
   const groups = new Map<string, MediaGroup>();
   let unfiled = 0;
 
   for (const file of files) {
     if (!file.label.folder) unfiled += 1;
     for (const path of folders) if (isInFolder(file.label.folder, path)) counts.set(path, counts.get(path)! + 1);
-    for (const tag of file.label.tags) if (!tags.some((known) => sameTag(known, tag))) tags.push(tag);
+    for (const tag of file.label.tags) {
+      const known = tags.find((name) => sameTag(name, tag));
+      if (!known) tags.push(tag);
+      tagCounts.set(known ?? tag, (tagCounts.get(known ?? tag) ?? 0) + 1);
+    }
     for (const group of file.groups) groups.set(groupId(group), group);
   }
 
@@ -42,6 +52,7 @@ export function mediaCatalogue(files: OrganisedFile[]): MediaCatalogue {
     counts,
     unfiled,
     tags: tags.sort(byName),
+    tagCounts,
     groups: [...groups.values()].sort((a, b) => a.kind.localeCompare(b.kind) || byName(a.name, b.name)),
   };
 }

@@ -7,6 +7,7 @@ import { formatBytes, type MediaObject } from "@/lib/media/media-library-types";
 import { isVideoSrc } from "@/lib/media-src";
 
 import { CoverImage } from "./cover-image";
+import { useMediaCardDrag } from "./media-file-drag";
 import { Button, StatusPill, buttonClass, type Tone } from "./ui/controls";
 import { SelectBox } from "./ui/selection-controls";
 
@@ -29,6 +30,8 @@ const CHIP =
 /**
  * One stored object: preview, size, upload date, its folder and tags, and
  * every record that uses it. Tag and group chips set the screen's filter.
+ * While labels can be edited the card can be dragged onto a folder, and
+ * Edit opens its folder and tags.
  */
 export function MediaObjectCard({
   object,
@@ -40,6 +43,8 @@ export function MediaObjectCard({
   onFilter,
   onCopy,
   onDelete,
+  onEdit,
+  dragKeys,
   busy,
 }: {
   object: MediaObject;
@@ -55,17 +60,24 @@ export function MediaObjectCard({
   onCopy: (url: string) => void;
   /** Offered only for files nothing uses. */
   onDelete: () => void;
+  /** Absent while folders and tags are unavailable; also turns dragging off. */
+  onEdit?: () => void;
+  /** What a drag of this card carries (the selection, or just this file). */
+  dragKeys: string[];
   busy: boolean;
 }) {
+  const { setNodeRef, dragProps, isDragging } = useMediaCardDrag(object.key, dragKeys, !onEdit);
   const [tone, pill, hint] = USAGE_PILL[usage.state];
   const name = object.key.slice(object.key.lastIndexOf("/") + 1);
   const extra = usage.places.length - PLACE_LIMIT;
 
   return (
     <article
-      className={`flex min-w-0 flex-col overflow-hidden rounded-[10px] border bg-paper shadow-sheet ${
+      ref={setNodeRef}
+      {...dragProps}
+      className={`flex min-w-0 flex-col overflow-hidden rounded-[10px] border bg-paper shadow-sheet transition-opacity ${
         selected ? "border-ink ring-1 ring-ink" : "border-line"
-      }`}
+      } ${isDragging ? "opacity-50" : ""} ${onEdit ? "touch-manipulation" : ""}`}
     >
       <div className="relative aspect-4/3 overflow-hidden bg-well">
         <CoverImage src={object.url} pos="50% 50%" video={isVideoSrc(object.url)} />
@@ -132,13 +144,18 @@ export function MediaObjectCard({
           )}
         </div>
 
-        <div className="mt-auto flex items-center gap-[6px] border-t border-line pt-[10px]">
+        <div className="mt-auto flex flex-wrap items-center gap-[6px] border-t border-line pt-[10px]">
           <a href={object.url} target="_blank" rel="noreferrer" className={buttonClass("secondary", "sm")}>
             Open
           </a>
           <Button size="sm" variant="ghost" onClick={() => onCopy(object.url)}>
             Copy URL
           </Button>
+          {onEdit && (
+            <Button size="sm" variant="ghost" onClick={onEdit}>
+              Edit
+            </Button>
+          )}
           {usage.state === "unused" && (
             <Button size="sm" variant="danger" onClick={onDelete} disabled={busy} className="ml-auto">
               Delete

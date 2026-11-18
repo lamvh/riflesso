@@ -20,18 +20,20 @@ import {
 } from "./media-label-types";
 
 /*
- * Reads and writes media_library_labels with the service role. Every entry
+ * Reads and writes media_library_labels with the service role. Created
+ * (possibly empty) folders and whole-library tag edits live in
+ * media-folder-tag-store.ts, which reuses the helpers exported here. Every entry
  * point returns a result instead of throwing, so a missing table or a paused
  * project only switches organising off — the Media screen keeps working.
  */
 
-const TABLE = "media_library_labels";
+export const TABLE = "media_library_labels";
 /** Supabase caps a response at 1000 rows by default. */
 const PAGE_SIZE = 1000;
 /** `.in()` filters travel in the URL; keep each request comfortably short. */
 const KEY_CHUNK = 100;
 
-type Row = { object_key: string; folder: string; tags: string[] | null };
+export type Row = { object_key: string; folder: string; tags: string[] | null };
 
 const MIGRATION_HINT =
   "Folders and tags need the media_library_labels table. Back up the database, then run supabase/migrations/20261113040000_add_media_library_labels.sql.";
@@ -44,12 +46,12 @@ const isObjectKey = (key: unknown): key is string =>
   !key.includes("..") &&
   !/[\s\u0000-\u001f\u007f]/.test(key);
 
-const toLabel = (row: Row): MediaLabel => ({ folder: row.folder ?? "", tags: row.tags ?? [] });
+export const toLabel = (row: Row): MediaLabel => ({ folder: row.folder ?? "", tags: row.tags ?? [] });
 
-const chunks = <T>(list: T[], size: number) =>
+export const chunks = <T>(list: T[], size: number) =>
   Array.from({ length: Math.ceil(list.length / size) }, (_, index) => list.slice(index * size, (index + 1) * size));
 
-const failure = (error: { code?: string; message: string }): MediaLabelUpdateResult => ({
+export const failure = (error: { code?: string; message: string }): MediaLabelUpdateResult => ({
   ok: false,
   error: isMissingTable(error) ? MIGRATION_HINT : error.message,
 });
@@ -58,18 +60,18 @@ const failure = (error: { code?: string; message: string }): MediaLabelUpdateRes
  * Every row a query returns, page by page. `query` must be rebuilt per page
  * (supabase-js builders are single-use) and carry a stable order.
  */
-async function selectAllRows(query: (from: number, to: number) => PromiseLike<{ data: unknown; error: { code?: string; message: string } | null }>) {
-  const rows: Row[] = [];
+export async function selectAllRows<T = Row>(query: (from: number, to: number) => PromiseLike<{ data: unknown; error: { code?: string; message: string } | null }>) {
+  const rows: T[] = [];
   for (let from = 0; ; from += PAGE_SIZE) {
     const { data, error } = await query(from, from + PAGE_SIZE - 1);
     if (error) return { error };
-    const page = (data ?? []) as Row[];
+    const page = (data ?? []) as T[];
     rows.push(...page);
     if (page.length < PAGE_SIZE) return { rows };
   }
 }
 
-const COLUMNS = "object_key, folder, tags";
+export const COLUMNS = "object_key, folder, tags";
 
 export async function readMediaLabels(): Promise<MediaLabelsReport> {
   const client = serviceRoleClient();
@@ -84,7 +86,7 @@ export async function readMediaLabels(): Promise<MediaLabelsReport> {
     }
     const labels: MediaLabelMap = {};
     for (const row of result.rows) labels[row.object_key] = toLabel(row);
-    return { state: "ok", labels };
+    return { state: "ok", labels, folders: [], foldersReady: false };
   } catch (error) {
     return { state: "error", message: error instanceof Error ? error.message : "Folders and tags could not be read" };
   }
@@ -105,7 +107,7 @@ async function readLabelsOf(client: SupabaseClient, keys: string[]) {
  * Writes the final label of each key: rows that still carry a folder or a tag
  * are upserted, rows left empty are deleted.
  */
-async function writeLabels(client: SupabaseClient, next: MediaLabelMap) {
+export async function writeLabels(client: SupabaseClient, next: MediaLabelMap) {
   const now = new Date().toISOString();
   const entries = Object.entries(next);
   const kept = entries.filter(([, label]) => label.folder || label.tags.length);

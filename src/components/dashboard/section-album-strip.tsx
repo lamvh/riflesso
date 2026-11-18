@@ -1,7 +1,7 @@
 "use client";
 
 import type { AdminAction } from "@/lib/dashboard/admin-reducer";
-import type { Album, Block } from "@/lib/dashboard/admin-types";
+import type { Album, AlbumKind, Block } from "@/lib/dashboard/admin-types";
 
 import { CoverImage } from "./cover-image";
 import { MediaDropZone } from "./ui/media-drop-zone";
@@ -36,17 +36,23 @@ const OVERLAY_BUTTON =
 export function SectionAlbumStrip({
   albums,
   allAlbums,
+  addKind,
   dim,
   dispatch,
 }: {
   albums: Album[];
   allAlbums: Album[];
+  /** Offer a tile that starts a new album of this type for the section. */
+  addKind?: AlbumKind;
   dim: boolean;
   dispatch: (action: AdminAction) => void;
 }) {
-  if (albums.length === 0) {
+  if (albums.length === 0 && !addKind) {
     return <p className="mt-[8px] font-sans text-[12px] text-draft">No live homepage albums of this type yet.</p>;
   }
+  /* New frames open the album drawer prefilled; nothing goes live until Save. */
+  const addAlbum = (srcs: string[]) =>
+    addKind && srcs.length && dispatch({ type: "album/openForSection", kind: addKind, srcs });
 
   return (
     <ul className="mt-[10px] flex gap-[8px] overflow-x-auto pb-[4px] [scrollbar-width:thin]">
@@ -84,6 +90,32 @@ export function SectionAlbumStrip({
           </li>
         );
       })}
+      {addKind && (
+        <li className="w-[72px] shrink-0">
+          <MediaDropZone
+            accept={SHOT_TYPES}
+            label="Drop"
+            onUploaded={addAlbum}
+            className="group relative flex aspect-3/4 items-center justify-center overflow-hidden rounded-[5px] border border-dashed border-line bg-well"
+          >
+            <span aria-hidden className="font-sans text-[22px] leading-none text-graphite">+</span>
+            <div className="absolute inset-x-0 bottom-0 z-[2] flex flex-col divide-y divide-line bg-paper/90 font-sans opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100 pointer-coarse:opacity-100">
+              <UploadButton
+                accept={SHOT_TYPES}
+                multiple
+                onUploadedAll={(files) => addAlbum(files.map((file) => file.url))}
+                className={OVERLAY_BUTTON}
+              >
+                Upload
+              </UploadButton>
+              <MediaLibraryButton videos onPickMany={addAlbum} className={OVERLAY_BUTTON}>
+                Library
+              </MediaLibraryButton>
+            </div>
+          </MediaDropZone>
+          <p className="mt-[4px] truncate font-sans text-[11px] text-graphite">Add album</p>
+        </li>
+      )}
     </ul>
   );
 }

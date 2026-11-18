@@ -6,7 +6,7 @@ import type {
 } from "@/lib/content/site-content-types";
 
 import type { AlbumDraft, ArtistDraft, ToastTone } from "./admin-state";
-import type { Activity, Credit, Slide } from "./admin-types";
+import type { Activity, AlbumKind, Credit, Slide } from "./admin-types";
 
 /** Edits to an artist or an album, including everything the drawer touches. */
 export type RecordAction =
@@ -16,6 +16,8 @@ export type RecordAction =
   | { type: "artist/delete" }
   | { type: "album/open"; index: number }
   | { type: "album/toggleHome"; index: number }
+  /** A new album for a homepage section: its type set, live, on the homepage, these frames in. */
+  | { type: "album/openForSection"; kind: AlbumKind; srcs: string[] }
   /** Swap an album's cover (its first frame) without opening the drawer. */
   | { type: "album/setCover"; id: string; src: string }
   | { type: "album/save" }

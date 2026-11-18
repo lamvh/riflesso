@@ -1,12 +1,14 @@
 "use client";
 
+import { useFolderDrop } from "./media-file-drag";
 import { SelectField } from "./ui/fields";
 
 /*
  * Folder navigation for the Media screen. Folders are labels kept in the
- * database, so one exists as long as a file is filed in it; a new folder is
- * made by moving files into it. Choosing a folder shows its nested folders'
- * files too.
+ * database: one exists while a file is filed in it, or once it is made with
+ * New folder (then it stays, empty or not, until removed). Choosing a folder
+ * shows its nested folders' files too. Folder rows and Unfiled take dropped
+ * cards (see media-file-drag).
  */
 
 /** "all", "unfiled", or a folder path. */
@@ -36,42 +38,77 @@ type Props = {
   /** Absent while folders can't be edited. */
   onRename?: (path: string) => void;
   onUnfile?: (path: string) => void;
+  /** Absent until the media_library_folders migration has run. */
+  onCreate?: () => void;
 };
 
+type Row = { value: FolderFilter; label: string; count: number; depth: number; title?: string; drop?: string };
+
+/** One sidebar row; folder rows and Unfiled accept dropped files while editing works. */
+function FolderRow({ row, active, droppable, onChange }: { row: Row; active: boolean; droppable: boolean; onChange: (value: FolderFilter) => void }) {
+  const { setNodeRef, isOver } = useFolderDrop(row.drop ?? "", !droppable || row.drop === undefined);
+  return (
+    <button
+      ref={setNodeRef}
+      type="button"
+      aria-current={active ? "true" : undefined}
+      title={row.title}
+      onClick={() => onChange(row.value)}
+      style={{ paddingLeft: 10 + row.depth * 14 }}
+      className={`flex h-[32px] cursor-pointer items-center gap-[8px] rounded-[6px] pr-[10px] text-left text-[13px] transition-colors ${
+        isOver
+          ? "bg-ink/15 text-ink ring-1 ring-ink"
+          : active
+            ? "bg-ink text-paper"
+            : "text-body hover:bg-hover hover:text-ink"
+      }`}
+    >
+      <span className="min-w-0 flex-1 truncate font-medium">{row.label}</span>
+      <span className={`tabular-nums ${active && !isOver ? "text-paper/70" : "text-subtle"}`}>{row.count}</span>
+    </button>
+  );
+}
+
 /** Sidebar on wide screens. */
-export function MediaFolderList({ folders, counts, total, unfiled, value, onChange, onRename, onUnfile }: Props) {
+export function MediaFolderList({ folders, counts, total, unfiled, value, onChange, onRename, onUnfile, onCreate }: Props) {
   const current = folderPathOf(value);
-  const rows: { value: FolderFilter; label: string; count: number; depth: number }[] = [
+  const rows: Row[] = [
     { value: ALL_FOLDERS, label: "All files", count: total, depth: 0 },
-    { value: UNFILED, label: "Unfiled", count: unfiled, depth: 0 },
-    ...folders.map((path) => ({ value: folderValue(path), label: leafOf(path), count: counts.get(path) ?? 0, depth: depthOf(path) })),
+    { value: UNFILED, label: "Unfiled", count: unfiled, depth: 0, drop: "" },
+    ...folders.map((path) => ({
+      value: folderValue(path),
+      label: leafOf(path),
+      count: counts.get(path) ?? 0,
+      depth: depthOf(path),
+      title: path,
+      drop: path,
+    })),
   ];
 
   return (
     <nav aria-label="Folders" className="flex flex-col gap-[2px] font-sans">
-      <p className="px-[10px] pb-[6px] text-[12px] font-medium tracking-[0.2px] text-subtle uppercase">Folders</p>
-      {rows.map((row) => {
-        const active = row.value === value;
-        return (
+      <div className="flex items-center justify-between pb-[6px] pl-[10px]">
+        <p className="text-[12px] font-medium tracking-[0.2px] text-subtle uppercase">Folders</p>
+        {onCreate && (
           <button
-            key={row.value}
             type="button"
-            aria-current={active ? "true" : undefined}
-            onClick={() => onChange(row.value)}
-            style={{ paddingLeft: 10 + row.depth * 14 }}
-            className={`flex h-[32px] cursor-pointer items-center gap-[8px] rounded-[6px] pr-[10px] text-left text-[13px] transition-colors ${
-              active ? "bg-ink text-paper" : "text-body hover:bg-hover hover:text-ink"
-            }`}
+            onClick={onCreate}
+            className="h-[24px] cursor-pointer rounded-[6px] px-[8px] text-[12px] font-medium text-graphite hover:bg-hover hover:text-ink"
           >
-            <span className="min-w-0 flex-1 truncate font-medium">{row.label}</span>
-            <span className={`tabular-nums ${active ? "text-paper/70" : "text-subtle"}`}>{row.count}</span>
+            + New
           </button>
-        );
-      })}
+        )}
+      </div>
+      {rows.map((row) => (
+        <FolderRow key={row.value} row={row} active={row.value === value} droppable={Boolean(onRename)} onChange={onChange} />
+      ))}
       {folders.length === 0 && onRename && (
         <p className="px-[10px] pt-[6px] text-[12px] leading-[145%] text-graphite">
-          Select files, then Move to folder to make one.
+          {onCreate ? "Make one with + New, or select files and Move to folder." : "Select files, then Move to folder to make one."}
         </p>
+      )}
+      {folders.length > 0 && onRename && (
+        <p className="px-[10px] pt-[6px] text-[12px] leading-[145%] text-subtle">Drag files onto a folder to move them.</p>
       )}
       {current && onRename && onUnfile && (
         <div className="mt-[8px] flex flex-wrap gap-[4px] border-t border-line px-[6px] pt-[10px]">

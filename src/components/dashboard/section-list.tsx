@@ -106,6 +106,7 @@ export function SectionList({
                 <SectionAlbumStrip
                   albums={sectionAlbums(block, albums)}
                   allAlbums={albums}
+                  addKind={block.kind === "Scroll row" || !sectionAlbums(block, albums).length ? block.source : undefined}
                   dim={!block.on}
                   dispatch={dispatch}
                 />
