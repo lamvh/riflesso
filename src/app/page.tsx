@@ -48,7 +48,7 @@ export default async function HomePage() {
 
   return (
     <div
-      className="flex min-h-svh flex-col overflow-x-hidden"
+      className="rfl-home flex min-h-svh flex-col overflow-x-hidden"
       style={displayVars}
     >
       <SiteHeader
@@ -71,7 +71,7 @@ export default async function HomePage() {
           )}
 
           <section>
-            {sections.map((section) => {
+            {sections.map((section, index) => {
               switch (section.layout) {
                 case "rail":
                   /* No category: New Signs cards go to the directory, not a gallery. */
@@ -81,6 +81,8 @@ export default async function HomePage() {
                       heading={section.heading}
                       items={section.items}
                       category={section.category}
+                      /* With no hero the first rail is what the page opens on. */
+                      eagerCount={!showHero && index === 0 ? 4 : 0}
                     />
                   );
                 case "feature":

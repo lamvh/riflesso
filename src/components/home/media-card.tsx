@@ -12,10 +12,16 @@ import Link from "next/link";
 
 import { useVideoAutoplay } from "@/hooks/use-video-autoplay";
 import { describeMedia, type MediaItem } from "@/lib/media-item";
+import { optimizedImgProps } from "@/lib/optimized-img-props";
 
 import { ArtistCreditLine } from "./artist-credit-line";
 
 const MEDIA_SIZING = "block h-[var(--rfl-rail-height)] w-auto max-w-none";
+/*
+ * Cards are --rfl-rail-height (350px) tall, so even a wide frame stays near
+ * 560px across; on phones a card is at most most of the screen.
+ */
+const RAIL_SIZES = "(max-width: 640px) 80vw, 560px";
 const CARD = "group flex shrink-0 grow-0 basis-auto flex-col items-start text-left";
 
 /** Where a card without a gallery points, matching the New Signs rail. */
@@ -40,9 +46,11 @@ type MediaCardProps = {
   item: MediaItem;
   /** Given by rails that carry a category; without it the card is a link. */
   onOpen?: () => void;
+  /** First cards of a rail that is on screen at load: fetch now instead of lazily. */
+  eager?: boolean;
 };
 
-export function MediaCard({ item, onOpen }: MediaCardProps) {
+export function MediaCard({ item, onOpen, eager = false }: MediaCardProps) {
   const label = describeMedia(item);
 
   const body = (
@@ -50,9 +58,9 @@ export function MediaCard({ item, onOpen }: MediaCardProps) {
       <div className="overflow-hidden">
         {item.kind === "image" ? (
           <img
-            src={item.src}
+            {...optimizedImgProps(item.src, RAIL_SIZES)}
             alt={label}
-            loading="lazy"
+            loading={eager ? "eager" : "lazy"}
             draggable={false}
             className={`${MEDIA_SIZING} transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[var(--rfl-rail-zoom)]`}
           />

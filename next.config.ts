@@ -29,6 +29,10 @@ const nextConfig: NextConfig = {
   },
   images: {
     remotePatterns: mediaPattern(),
+    /* AVIF first (smallest), WebP for browsers without it. */
+    formats: ["image/avif", "image/webp"],
+    /* Uploads get a fresh key every time, so a resized copy never goes stale. */
+    minimumCacheTTL: 60 * 60 * 24 * 30,
   },
 };
 

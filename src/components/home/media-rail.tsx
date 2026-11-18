@@ -19,15 +19,17 @@ type MediaRailProps = {
    * directory instead, as in the design.
    */
   category?: string;
+  /** The rail sits right under the hero, so its first cards are fetched at once. */
+  eagerCount?: number;
 };
 
-export function MediaRail({ heading, items, category }: MediaRailProps) {
+export function MediaRail({ heading, items, category, eagerCount = 0 }: MediaRailProps) {
   const railRef = useDragScroll<HTMLDivElement>();
   const openWork = useOpenWork();
   const section = category ? { heading, category, items } : null;
 
   return (
-    <div className="pt-[70px]">
+    <div className="rfl-reveal pt-[70px]">
       <SectionHeading>{heading}</SectionHeading>
       <div
         ref={railRef}
@@ -38,6 +40,7 @@ export function MediaRail({ heading, items, category }: MediaRailProps) {
             key={`${item.src}-${index}`}
             item={item}
             onOpen={section ? () => openWork(item, section) : undefined}
+            eager={index < eagerCount}
           />
         ))}
       </div>

@@ -13,6 +13,7 @@ import { useEffect, useState } from "react";
 import { CloseIcon } from "@/components/close-icon";
 import { useVideoAutoplay } from "@/hooks/use-video-autoplay";
 import { describeMedia, type MediaItem } from "@/lib/media-item";
+import { optimizedImgProps } from "@/lib/optimized-img-props";
 import type { WorkDetail } from "@/lib/work-detail";
 
 /*
@@ -77,7 +78,7 @@ function Thumbnail({
     >
       {item.kind === "image" ? (
         <img
-          src={item.src}
+          {...optimizedImgProps(item.src, "75px")}
           alt=""
           loading="lazy"
           draggable={false}
@@ -150,7 +151,7 @@ export function WorkDetailOverlay({ work, onClose }: WorkDetailOverlayProps) {
       <div className="flex justify-center px-5 pt-[22px]">
         {current.kind === "image" ? (
           <img
-            src={current.src}
+            {...optimizedImgProps(current.src, "(max-width: 768px) 92vw, 1200px")}
             alt={label}
             draggable={false}
             className={STAGE_SIZING}

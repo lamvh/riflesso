@@ -16,8 +16,37 @@ type HeroBannerProps = {
   autoplay?: boolean;
 };
 
+/**
+ * Runs `work` once the page has finished loading and the main thread is idle,
+ * so background fetches never compete with the first paint.
+ */
+function afterLoadIdle(work: () => void) {
+  let idle = 0;
+  const schedule = () => {
+    idle =
+      typeof window.requestIdleCallback === "function"
+        ? window.requestIdleCallback(work, { timeout: 2500 })
+        : window.setTimeout(work, 1200);
+  };
+  if (document.readyState === "complete") schedule();
+  else window.addEventListener("load", schedule, { once: true });
+  return () => {
+    window.removeEventListener("load", schedule);
+    if (typeof window.cancelIdleCallback === "function") window.cancelIdleCallback(idle);
+    window.clearTimeout(idle);
+  };
+}
+
 export function HeroBanner({ slides, autoplay = false }: HeroBannerProps) {
   const [active, setActive] = useState(0);
+  /*
+   * Only the first slide's full-screen frame loads with the page. The others
+   * are stacked invisibly on top of it, and since they sit "in view" the
+   * browser would fetch them all at once and slow the first one down; they
+   * mount once the page has loaded (or as soon as one is picked).
+   */
+  const [warm, setWarm] = useState(false);
+  useEffect(() => afterLoadIdle(() => setWarm(true)), []);
   const thumbnailsRef = useDragScroll<HTMLDivElement>();
   const count = slides.length;
 
@@ -49,21 +78,23 @@ export function HeroBanner({ slides, autoplay = false }: HeroBannerProps) {
                 color: slide.captionColor,
               }}
             >
-              <Image
-                src={slide.src}
-                alt={`${slide.publication} — ${slide.credits
-                  .map((credit) => credit.name.trim())
-                  .join(", ")}`}
-                fill
-                priority={index === 0}
-                sizes="100vw"
-                draggable={false}
-                unoptimized={!canOptimizeImage(slide.src)}
-                className="object-cover"
-                style={{ objectPosition: slide.position }}
-              />
+              {(index === 0 || isActive || warm) && (
+                <Image
+                  src={slide.src}
+                  alt={`${slide.publication} — ${slide.credits
+                    .map((credit) => credit.name.trim())
+                    .join(", ")}`}
+                  fill
+                  priority={index === 0}
+                  sizes="100vw"
+                  draggable={false}
+                  unoptimized={!canOptimizeImage(slide.src)}
+                  className={`object-cover ${index === 0 ? "rfl-hero-settle" : ""}`}
+                  style={{ objectPosition: slide.position }}
+                />
+              )}
 
-              <div className="absolute inset-x-0 bottom-0 z-[1] mx-auto w-max max-w-full p-[30px]">
+              <div className="rfl-intro rfl-intro-2 absolute inset-x-0 bottom-0 z-[1] mx-auto w-max max-w-full p-[30px]">
                 <p className="font-serif text-[15px] leading-[100%]">
                   {slide.credits.map((credit, creditIndex) => (
                     <span key={`${credit.name}-${creditIndex}`}>
@@ -83,7 +114,7 @@ export function HeroBanner({ slides, autoplay = false }: HeroBannerProps) {
 
       <div
         ref={thumbnailsRef}
-        className={`mx-auto flex w-fit max-w-full cursor-grab gap-[17px] overflow-x-auto bg-paper px-[18px] pt-3 pb-[31px] ${HIDE_SCROLLBAR}`}
+        className={`rfl-intro rfl-intro-3 mx-auto flex w-fit max-w-full cursor-grab gap-[17px] overflow-x-auto bg-paper px-[18px] pt-3 pb-[31px] ${HIDE_SCROLLBAR}`}
       >
         {slides.map((slide, index) => (
           <button

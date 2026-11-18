@@ -1,5 +1,6 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -8,7 +9,9 @@ import { DEFAULT_LOGO_URL } from "@/lib/content/site-content-types";
 import { canOptimizeImage, isPublishableSrc } from "@/lib/media-src";
 
 import { SearchIcon } from "./search-icon";
-import { SiteSearch } from "./site-search";
+/* Search opens on demand; its code loads on first use (or hover / focus of the button). */
+const loadSearch = () => import("./site-search");
+const SiteSearch = dynamic(() => loadSearch().then((module) => module.SiteSearch), { ssr: false });
 
 /**
  * Layout box for the wordmark at its largest rendered size, matching the
@@ -178,6 +181,8 @@ export function SiteHeader({
           aria-haspopup="dialog"
           aria-expanded={searching}
           onClick={() => setSearching(true)}
+          onPointerEnter={() => void loadSearch()}
+          onFocus={() => void loadSearch()}
           className="flex cursor-pointer items-center gap-[7px] font-sans text-[13px] leading-[94%] font-bold tracking-[-0.5px] sm:text-[15px]"
         >
           <span>Search</span>

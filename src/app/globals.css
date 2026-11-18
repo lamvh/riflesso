@@ -148,3 +148,72 @@ body[data-bulk] .admin-toast {
   background: #141412;
 }
 
+
+/*
+ * Homepage entrance. Pure CSS, so it costs no script and starts with the
+ * first paint:
+ *
+ * - the first hero frame settles from a slight zoom (transform only, so the
+ *   picture is visible at once and Largest Contentful Paint is not delayed);
+ * - the masthead, caption and thumbnail strip fade up in sequence;
+ * - rails and features rise into place as they scroll in, where the browser
+ *   supports scroll-driven animations. Elsewhere they simply appear.
+ *
+ * Everything is off for visitors who ask for reduced motion.
+ */
+@keyframes rfl-settle {
+  from {
+    transform: scale(1.06);
+  }
+  to {
+    transform: none;
+  }
+}
+
+@keyframes rfl-rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes rfl-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .rfl-hero-settle {
+    animation: rfl-settle 1.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .rfl-home > header {
+    animation: rfl-fade 0.8s ease-out 0.15s both;
+  }
+
+  .rfl-intro {
+    animation: rfl-rise 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  .rfl-intro-2 {
+    animation-delay: 0.35s;
+  }
+  .rfl-intro-3 {
+    animation-delay: 0.55s;
+  }
+
+  @supports (animation-timeline: view()) {
+    .rfl-reveal {
+      animation: rfl-rise linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 40%;
+    }
+  }
+}

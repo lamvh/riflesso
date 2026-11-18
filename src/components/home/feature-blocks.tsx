@@ -8,6 +8,7 @@
  */
 
 import { describeMedia, type MediaItem } from "@/lib/media-item";
+import { optimizedImgProps } from "@/lib/optimized-img-props";
 import type { MediaSection } from "@/lib/work-detail";
 
 import { ArtistCreditLine } from "./artist-credit-line";
@@ -28,7 +29,7 @@ export function FeatureEditorial({
   const openWork = useOpenWork();
 
   return (
-    <section className="pt-[70px]">
+    <section className="rfl-reveal pt-[70px]">
       <SectionHeading>{heading}</SectionHeading>
       <button
         type="button"
@@ -36,7 +37,7 @@ export function FeatureEditorial({
         className="block w-full text-left"
       >
         <img
-          src={item.src}
+          {...optimizedImgProps(item.src, "100vw")}
           alt={describeMedia(item)}
           loading="lazy"
           draggable={false}
@@ -56,11 +57,11 @@ export function FeatureEditorial({
 /** Banner image, inset rather than full-bleed and with no caption. */
 export function FeatureAnniversary({ heading, src }: { heading: string; src: string }) {
   return (
-    <section className="pt-[70px]">
+    <section className="rfl-reveal pt-[70px]">
       <SectionHeading>{heading}</SectionHeading>
       <a href="#" className="block px-5">
         <img
-          src={src}
+          {...optimizedImgProps(src, "calc(100vw - 40px)")}
           alt={heading}
           loading="lazy"
           draggable={false}

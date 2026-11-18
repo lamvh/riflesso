@@ -1,6 +1,7 @@
 "use client";
 
-import { createContext, useCallback, useContext, useState } from "react";
+import dynamic from "next/dynamic";
+import { createContext, useCallback, useContext, useEffect, useState } from "react";
 
 import { trackContentView } from "@/lib/analytics/track-content-view";
 import type { MediaItem } from "@/lib/media-item";
@@ -10,7 +11,15 @@ import {
   type WorkDetail,
 } from "@/lib/work-detail";
 
-import { WorkDetailOverlay } from "./work-detail-overlay";
+/*
+ * The gallery is only needed once a card is clicked, so its code stays out of
+ * the first load. It is fetched in the background after the page settles, so
+ * the first click opens it without a wait.
+ */
+const loadOverlay = () => import("./work-detail-overlay");
+const WorkDetailOverlay = dynamic(() => loadOverlay().then((module) => module.WorkDetailOverlay), {
+  ssr: false,
+});
 
 type OpenWork = (item: MediaItem, section: MediaSection) => void;
 
@@ -48,6 +57,16 @@ export function WorkDetailProvider({
   );
 
   const closeWork = useCallback(() => setWork(null), []);
+
+  useEffect(() => {
+    const warm = () => void loadOverlay();
+    if (document.readyState === "complete") {
+      const timer = window.setTimeout(warm, 1500);
+      return () => window.clearTimeout(timer);
+    }
+    window.addEventListener("load", warm, { once: true });
+    return () => window.removeEventListener("load", warm);
+  }, []);
 
   return (
     <WorkDetailContext value={openWork}>
