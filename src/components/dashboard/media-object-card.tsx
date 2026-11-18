@@ -10,6 +10,8 @@ import { CoverImage } from "./cover-image";
 import { useMediaCardDrag } from "./media-file-drag";
 import { Button, StatusPill, buttonClass, type Tone } from "./ui/controls";
 import { SelectBox } from "./ui/selection-controls";
+import { UploadButton } from "./ui/upload-button";
+import type { UploadedFile } from "./ui/use-media-upload";
 
 export const USAGE_PILL: Record<MediaUsageState, [Tone, string, string]> = {
   live: ["live", "In use", "Saved and on the site"],
@@ -44,6 +46,7 @@ export function MediaObjectCard({
   onCopy,
   onDelete,
   onEdit,
+  onReplace,
   dragKeys,
   busy,
 }: {
@@ -62,6 +65,8 @@ export function MediaObjectCard({
   onDelete: () => void;
   /** Absent while folders and tags are unavailable; also turns dragging off. */
   onEdit?: () => void;
+  /** Re-upload: the new file takes this one's place everywhere it is used. */
+  onReplace: (file: UploadedFile) => void;
   /** What a drag of this card carries (the selection, or just this file). */
   dragKeys: string[];
   busy: boolean;
@@ -70,6 +75,7 @@ export function MediaObjectCard({
   const [tone, pill, hint] = USAGE_PILL[usage.state];
   const name = object.key.slice(object.key.lastIndexOf("/") + 1);
   const extra = usage.places.length - PLACE_LIMIT;
+  const video = isVideoSrc(object.url);
 
   return (
     <article
@@ -80,7 +86,7 @@ export function MediaObjectCard({
       } ${isDragging ? "opacity-50" : ""} ${onEdit ? "touch-manipulation" : ""}`}
     >
       <div className="relative aspect-4/3 overflow-hidden bg-well">
-        <CoverImage src={object.url} pos="50% 50%" video={isVideoSrc(object.url)} />
+        <CoverImage src={object.url} pos="50% 50%" video={video} />
         <span className="absolute top-[8px] left-[8px]" title={hint}>
           <StatusPill tone={tone}>{pill}</StatusPill>
         </span>
@@ -156,6 +162,13 @@ export function MediaObjectCard({
               Edit
             </Button>
           )}
+          <UploadButton
+            accept={video ? "video/mp4,video/webm" : "image/*"}
+            onUploadedAll={([file]) => file && onReplace(file)}
+            className={buttonClass("ghost", "sm")}
+          >
+            <span title="Upload a new version; every record using this file switches to it">Replace</span>
+          </UploadButton>
           {usage.state === "unused" && (
             <Button size="sm" variant="danger" onClick={onDelete} disabled={busy} className="ml-auto">
               Delete

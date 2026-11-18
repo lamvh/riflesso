@@ -6,6 +6,7 @@ import { dropAt, moveItem, note, patchAt, swap } from "./admin-helpers";
 import { recordReducer } from "./admin-record-reducer";
 import { settingsReducer } from "./admin-settings-reducer";
 import { newId, type AdminState } from "./admin-state";
+import { replaceMediaReferences } from "./media-replace";
 import type { Block, CategoryRow } from "./admin-types";
 
 export type { AdminAction } from "./admin-actions";
@@ -115,6 +116,15 @@ export function adminReducer(state: AdminState, action: AdminAction): AdminState
       return note(
         { ...state, blocks: patchAt(state.blocks, action.index, { albumId: action.albumId }) },
         `${block.label} now features ${album?.title || `the latest ${block.source} album`}`,
+      );
+    }
+
+    case "media/replace": {
+      const { content, drawer, count } = replaceMediaReferences(pickSiteContent(state), state.drawer, action.key, action.url);
+      if (count === 0 && drawer === state.drawer) return state;
+      return note(
+        { ...state, ...content, drawer },
+        `Replaced ${action.name}${count ? ` in ${count === 1 ? "1 place" : `${count} places`}` : ""}`,
       );
     }
 

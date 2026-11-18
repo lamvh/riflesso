@@ -165,6 +165,30 @@ export function MediaScreen() {
     if (folderPath) labels.update(keys, { folder: folderPath }, `Filed in ${folderPath}`);
   };
 
+  /*
+   * A new version of a file: it is stored under a new key (the old address is
+   * cached as immutable), every record using the old one switches to it, and
+   * it inherits the old file's folder and tags. The old file stays, now
+   * unused, so history restores keep working; delete it when ready.
+   */
+  const replace = (old: string, file: UploadedFile) => {
+    const name = old.slice(old.lastIndexOf("/") + 1);
+    const { places } = usageOf(old);
+    dispatch({ type: "media/replace", key: old, url: file.url, name });
+    const label = labelOf(old);
+    if (labels.ready && file.key && (label.folder || label.tags.length)) {
+      labels.update([file.key], { folder: label.folder, addTags: label.tags }, "Folder and tags carried over");
+    }
+    load();
+    setSelected(new Set(file.key ? [file.key] : []));
+    dispatch({
+      type: "toast",
+      message: places.length
+        ? `Replaced in ${plural(places.length, "place")}. The old file is now unused; delete it once the change is saved.`
+        : "New version uploaded. The old file was not used anywhere.",
+    });
+  };
+
   const copy = async (url: string) => {
     try {
       await navigator.clipboard.writeText(url);
@@ -420,6 +444,7 @@ export function MediaScreen() {
                   onCopy={copy}
                   onDelete={() => remove([object.key], object.key.slice(object.key.lastIndexOf("/") + 1))}
                   onEdit={labels.ready ? () => setDialog({ kind: "edit", key: object.key }) : undefined}
+                  onReplace={(file) => replace(object.key, file)}
                   dragKeys={selected.has(object.key) ? pickedKeys : [object.key]}
                   busy={deleting}
                 />

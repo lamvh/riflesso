@@ -152,6 +152,15 @@ tick). Hộp "Choose from library" ở mọi chỗ cũng nhận kéo thả / Upl
 file vừa up được tick sẵn, ở ô một ảnh thì up 1 file là chọn luôn. File mới up
 tính là Unused cho tới khi được gắn vào đâu đó.
 
+**Replace (thay bản mới)** (`src/lib/dashboard/media-replace.ts`) — nút **Replace**
+trên card up một file mới (vd. bản chất lượng cao hơn; chỉnh nén ở nút compression
+trước khi up) và mọi chỗ đang dùng file cũ chuyển sang file mới: logo, ảnh SEO,
+portrait artist, cover + frame album, hero slide, section trang chủ, cả drawer đang
+mở. Autosave đưa thay đổi lên site và ghi vào History. File mới có **key mới** chứ
+không ghi đè key cũ, vì object được cache `immutable` 1 năm — ghi đè thì khách vẫn
+thấy ảnh cũ. File mới nhận folder + tag của file cũ. File cũ được giữ lại (Unused
+sau khi lưu xong) để restore History vẫn có ảnh; xoá khi không cần.
+
 **Folder + tag** (`src/lib/media/media-label-store.ts`, `media-label-types.ts`,
 `src/lib/dashboard/media-groups.ts`, `media-library-filters.ts`) — hai kiểu phân loại:
 

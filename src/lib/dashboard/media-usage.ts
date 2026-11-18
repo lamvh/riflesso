@@ -26,6 +26,8 @@ function contentReferences(content: SiteContent): [string, MediaPlace][] {
   };
 
   add(content.settings.logoUrl, "Site settings · Logo");
+  add(content.settings.seo.shareImage, "SEO · Default share picture");
+  for (const [page, seo] of Object.entries(content.settings.seo.pages)) add(seo.image, `SEO · ${page} share picture`);
   for (const artist of content.artists) add(artist.image, `Artist · ${artist.name || "Untitled"}`);
   for (const album of content.albums) {
     const place = `Album · ${album.title || "Untitled"}`;

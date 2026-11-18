@@ -57,7 +57,9 @@ export type SiteAction =
   | { type: "block/setAlbum"; index: number; albumId: string | null }
   | { type: "block/move"; index: number; delta: number }
   /** Drag-and-drop: move one row of an ordered list to a new position. */
-  | { type: "list/reorder"; list: ReorderableList; from: number; to: number };
+  | { type: "list/reorder"; list: ReorderableList; from: number; to: number }
+  /** A stored file was re-uploaded: point every use of `key` at `url`. */
+  | { type: "media/replace"; key: string; url: string; name: string };
 
 export type ReorderableList = "cats" | "blocks" | "slides" | "contacts";
 
