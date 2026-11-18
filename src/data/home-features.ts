@@ -1,4 +1,3 @@
-import { siteAsset } from "./media-url";
 import { STORY_CARDS } from "./stories";
 
 /**
@@ -14,5 +13,6 @@ export const FEATURE_EDITORIAL = {
 /** Credits sheet for the Traces of Memories shoot, inset by the 20px gutter. */
 export const FEATURE_ANNIVERSARY = {
   heading: "Traces of Memories",
-  src: siteAsset("traces-of-memories-credits.jpg"),
+  /* Uploaded from the dashboard (Homepage → this section). */
+  src: "",
 };

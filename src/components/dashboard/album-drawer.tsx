@@ -182,7 +182,7 @@ export function AlbumDrawer({
         <ProseTextarea
           rows={4}
           value={draft.shots.map((shot) => shot.src).join("\n")}
-          placeholder="/assets/stories/…"
+          placeholder="https://…"
           onChange={(text) =>
             set({
               shots: text.split("\n").map((src, position) => ({

@@ -48,3 +48,6 @@ next-env.d.ts
 
 # Brand masters: large originals kept locally, never deployed or committed
 design/*-source.*
+
+# Local database exports (contain personal contact data)
+backups/

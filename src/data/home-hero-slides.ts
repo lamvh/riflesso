@@ -1,5 +1,3 @@
-import { STORIES, storyFrame } from "./stories";
-
 export type HeroSlide = {
   src: string;
   /** CSS object-position; each frame is hand-cropped around its subject. */
@@ -11,8 +9,9 @@ export type HeroSlide = {
 };
 
 /**
- * A frame from each shoot, so the banner reads as a table of contents for the
- * rails below it.
+ * One slide per shoot, so the banner reads as a table of contents for the
+ * rails below it. Pictures are uploaded from the dashboard; a slide without
+ * one is left off the banner.
  *
  * Two constraints pick the frames. Tearsheets that carry their own printed
  * copy are skipped — the banner sets a caption in the same corner and the two
@@ -21,7 +20,7 @@ export type HeroSlide = {
  */
 export const HERO_SLIDES: HeroSlide[] = [
   {
-    src: storyFrame(STORIES.gildedFrame, 4),
+    src: "",
     position: "50% 28%",
     captionColor: "#fff",
     credits: [
@@ -31,7 +30,7 @@ export const HERO_SLIDES: HeroSlide[] = [
     publication: "The Gilded Frame",
   },
   {
-    src: storyFrame(STORIES.artTwo, 19),
+    src: "",
     position: "50% 45%",
     captionColor: "#fff",
     credits: [
@@ -41,7 +40,7 @@ export const HERO_SLIDES: HeroSlide[] = [
     publication: "Cadmium",
   },
   {
-    src: storyFrame(STORIES.artTwo, 8),
+    src: "",
     position: "50% 50%",
     captionColor: "#fff",
     credits: [
@@ -51,7 +50,7 @@ export const HERO_SLIDES: HeroSlide[] = [
     publication: "Golden Spiral",
   },
   {
-    src: storyFrame(STORIES.artTwo, 1),
+    src: "",
     position: "50% 30%",
     captionColor: "#fff",
     credits: [
@@ -61,7 +60,7 @@ export const HERO_SLIDES: HeroSlide[] = [
     publication: "Porcelain Garden",
   },
   {
-    src: storyFrame(STORIES.traces, 1),
+    src: "",
     position: "50% 38%",
     captionColor: "#fff",
     credits: [
@@ -71,7 +70,7 @@ export const HERO_SLIDES: HeroSlide[] = [
     publication: "Traces of Memories",
   },
   {
-    src: storyFrame(STORIES.settingCurls, 4),
+    src: "",
     position: "50% 30%",
     captionColor: "#000",
     credits: [
@@ -81,7 +80,7 @@ export const HERO_SLIDES: HeroSlide[] = [
     publication: "Setting Curls",
   },
   {
-    src: storyFrame(STORIES.elle, 4),
+    src: "",
     position: "50% 30%",
     captionColor: "#000",
     credits: [
@@ -91,7 +90,7 @@ export const HERO_SLIDES: HeroSlide[] = [
     publication: "The Soulful Splendor",
   },
   {
-    src: storyFrame(STORIES.gildedFrame, 1),
+    src: "",
     position: "50% 25%",
     captionColor: "#fff",
     credits: [{ name: "May Truong", role: " Hair, " }],

@@ -55,7 +55,7 @@ export function seedAlbums(): Album[] {
       const kind = item.category === "Beauty" ? "Editorial" : KIND_BY_RAIL[rail.slug];
       /* A card that fronts a shoot already carries its frames; a standalone
          frame is a set of one. */
-      const frames = item.gallery?.map((frame) => frame.src) ?? [item.src];
+      const frames = (item.gallery?.map((frame) => frame.src) ?? [item.src]).filter(Boolean);
       return {
         id: stableSeedId("album", rail.slug, String(index)),
         title: albumTitle(item, kind),
@@ -132,7 +132,8 @@ export const seedSlides = (): Slide[] =>
 /** The homepage, top to bottom, exactly as it rendered before the database. */
 export function seedBlocks(albums: Album[]): Block[] {
   const featured =
-    albums.find((album) => album.cover === FEATURE_EDITORIAL.item.src)?.id ?? null;
+    albums.find((album) => album.kind === "Editorial" && album.title === FEATURE_EDITORIAL.item.title)?.id ??
+    null;
 
   const block = (
     label: string,

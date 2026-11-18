@@ -179,7 +179,7 @@ export function HeroEditor({
             </div>
 
             <LabelledField label="Image address" hint="A path under /assets or an https:// link">
-              <ProseInput value={slide.src} placeholder="/assets/…" onChange={(src) => set({ src })} />
+              <ProseInput value={slide.src} placeholder="https://…" onChange={(src) => set({ src })} />
               <div className="flex flex-wrap gap-[6px]">
                 <UploadButton onUploaded={(src) => set({ src })} className={buttonClass("secondary", "sm")}>
                   Upload a file

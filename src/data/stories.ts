@@ -15,17 +15,7 @@ export type Story = {
   /** Label the work detail prints under the credits. */
   category: string;
   credits: readonly (readonly [name: string, roles: string])[];
-  /** How many `<slug>-NN.jpg` files sit in `public/assets/stories/`. */
-  frameCount: number;
-  /**
-   * Which frame fronts the shoot on a rail. The gallery is re-ordered to lead
-   * with it, so the opened frame is always the one that was clicked.
-   */
-  coverIndex?: number;
 };
-
-const frameSrc = (slug: string, index: number) =>
-  `/assets/stories/${slug}-${String(index + 1).padStart(2, "0")}.jpg`;
 
 export const STORIES = {
   gildedFrame: {
@@ -36,7 +26,6 @@ export const STORIES = {
       ["Bincio", "Photography"],
       ["Nguyen Tan Thanh", "Styling"],
     ],
-    frameCount: 6,
   },
   settingCurls: {
     slug: "setting-curls",
@@ -46,7 +35,6 @@ export const STORIES = {
       ["May Truong", "Hair"],
       ["Dinh Tran", "Makeup"],
     ],
-    frameCount: 7,
   },
   traces: {
     slug: "traces",
@@ -60,8 +48,6 @@ export const STORIES = {
       ["Victor Chau", "Lighting"],
       ["Cathy Tran", "Props"],
     ],
-    frameCount: 3,
-    coverIndex: 1,
   },
   /**
    * One production, run as five chapters: moss and rock, the yellow spiral,
@@ -79,7 +65,6 @@ export const STORIES = {
       ["Shishi", "Hair"],
       ["May Truong", "Hair"],
     ],
-    frameCount: 23,
   },
   elle: {
     slug: "elle",
@@ -91,7 +76,6 @@ export const STORIES = {
       ["Dinh Tran", "Makeup"],
       ["May Truong", "Hair"],
     ],
-    frameCount: 10,
   },
   dep: {
     slug: "dep",
@@ -102,7 +86,6 @@ export const STORIES = {
       ["Dinh Tran", "Makeup"],
       ["May Truong", "Hair"],
     ],
-    frameCount: 2,
   },
   /** Thuy Anh's book: the printed editorial, then the tests behind it. */
   thuyAnh: {
@@ -116,33 +99,20 @@ export const STORIES = {
       ["Dinh Tran", "Makeup"],
       ["May Truong", "Hair"],
     ],
-    frameCount: 5,
   },
 } as const satisfies Record<string, Story>;
 
 /**
- * The rail card for a shoot, carrying every frame of that shoot as its gallery.
- *
- * The gallery leads with the cover and then runs the shoot in order, wrapping
- * past the cover — so the first frame the overlay shows is the card that was
- * clicked, and the sequence after it still reads as the editor laid it out.
+ * The rail card for a shoot. The repo no longer ships imagery, so the shoot
+ * keeps its title and credits but starts with no frames: its album is filled
+ * by uploading from the dashboard.
  */
 export function storyCard(story: Story): MediaItem {
-  const { slug, title, category, credits, frameCount } = story;
-  const cover = story.coverIndex ?? 0;
-
-  const gallery = Array.from({ length: frameCount }, (_, step) =>
-    imageItem(frameSrc(slug, (cover + step) % frameCount), credits, title),
-  );
-
-  return { ...gallery[0], category, gallery };
+  const { title, category, credits } = story;
+  return { ...imageItem("", credits, title), category, gallery: [] };
 }
 
 /** Every shoot as a rail card, keyed the same way as `STORIES`. */
 export const STORY_CARDS = Object.fromEntries(
   Object.entries(STORIES).map(([key, story]) => [key, storyCard(story)]),
 ) as Record<keyof typeof STORIES, MediaItem>;
-
-/** A single frame of a shoot, for places that want one picture and no gallery. */
-export const storyFrame = (story: Pick<Story, "slug">, index: number) =>
-  frameSrc(story.slug, index);

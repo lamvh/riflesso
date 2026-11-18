@@ -1,9 +1,8 @@
-/**
- * Imagery that ships with the repo — the design references these as
- * `./assets/<name>`, and they live in `public/assets/`. Anything uploaded from
- * the dashboard is served from R2 instead (`NEXT_PUBLIC_MEDIA_BASE_URL`).
+/*
+ * The repo ships no imagery: every picture is uploaded from the dashboard and
+ * served from R2 (`NEXT_PUBLIC_MEDIA_BASE_URL`). The seed content keeps its
+ * records and credits with empty image fields, to be filled from there.
  */
-export const siteAsset = (name: string) => `/assets/${name}`;
 
 /**
  * Credit and title for studio frames that don't belong to a named shoot.
