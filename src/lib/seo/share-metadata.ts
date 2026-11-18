@@ -9,6 +9,7 @@ import {
   getHomeContent,
   getSiteSettings,
 } from "@/lib/content/public-site-content";
+import { policySummary } from "@/lib/content/policy-markdown";
 import { DEFAULT_LOGO_URL, type SiteSettings } from "@/lib/content/site-content-types";
 import { SEO_PAGES, twitterHandleOf, type SeoPageKey } from "@/lib/content/site-seo";
 import { isPartShown } from "@/lib/content/site-visibility";
@@ -87,6 +88,7 @@ async function derived(page: SeoPageKey, settings: SiteSettings) {
   const label = SEO_PAGES.find((entry) => entry.key === page)!.label;
   let description = settings.metaDescription;
   if (page === "about") description = settings.aboutParagraphs[0] || description;
+  if (page === "policy") description = policySummary(settings.policy.body) || description;
   if (page === "contact") {
     const cards = await getContactCards();
     if (cards.length) description = `Offices and enquiries: ${cards.map((card) => card.heading).join(", ")}.`;

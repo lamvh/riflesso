@@ -68,6 +68,7 @@ export async function buildSiteSearchIndex(): Promise<SiteSearchIndex> {
     { label: "Artists", href: "/artists", part: "page:artists" as const },
     { label: "About", href: "/about", part: "page:about" as const },
     { label: "Contact", href: "/contact", part: "page:contact" as const },
+    { label: "Policy", href: "/policy", part: "page:policy" as const },
   ]
     .filter((page) => isPartShown(settings, page.part))
     .map(({ label, href }) => ({ label, href }));

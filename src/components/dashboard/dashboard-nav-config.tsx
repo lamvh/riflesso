@@ -5,6 +5,7 @@ import type { View } from "@/lib/dashboard/admin-views";
 import {
   AlbumIcon,
   ClockIcon,
+  DocumentIcon,
   GearIcon,
   HomeIcon,
   OverviewIcon,
@@ -20,7 +21,7 @@ import {
 export const GROUPS: { label?: string; views: View[] }[] = [
   { views: ["overview"] },
   { label: "Library", views: ["artists", "albums", "cats", "media"] },
-  { label: "Site", views: ["home", "settings"] },
+  { label: "Site", views: ["home", "policy", "settings"] },
   { label: "System", views: ["history", "status"] },
 ];
 
@@ -31,6 +32,7 @@ export const VIEW_ICON: Record<View, (props: { size?: number }) => ReactNode> = 
   cats: TagIcon,
   media: StackIcon,
   home: HomeIcon,
+  policy: DocumentIcon,
   settings: GearIcon,
   history: ClockIcon,
   status: PulseIcon,

@@ -16,6 +16,7 @@ import {
   type SiteSeo,
 } from "@/lib/content/site-seo";
 import type { AdminAction } from "@/lib/dashboard/admin-reducer";
+import { policySummary } from "@/lib/content/policy-markdown";
 import { isPublishableSrc } from "@/lib/media-src";
 import { siteUrl } from "@/lib/seo/site-url";
 
@@ -79,7 +80,9 @@ export function SettingsSeoPanel({
   const autoDescription =
     pageKey === "about"
       ? settings.aboutParagraphs[0] || settings.metaDescription
-      : settings.metaDescription;
+      : pageKey === "policy"
+        ? policySummary(settings.policy.body) || settings.metaDescription
+        : settings.metaDescription;
   const title = page.title.trim() || autoTitle;
   const description = page.description.trim() || autoDescription;
 

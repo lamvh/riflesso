@@ -15,15 +15,18 @@ const PAGE_LINKS: (FooterLink & { part: HideablePart })[] = [
   { label: "Contact", href: "/contact", part: "page:contact" },
 ]
 
-const LEGAL_LINKS: FooterLink[] = [
-  { label: "Do Not Sell", href: "#" },
-  { label: "Terms of Use", href: "#" },
-  { label: "Site Credits", href: "#" },
+/*
+ * Terms, privacy and cookies are sections of the one /policy page; the anchors
+ * are the slugs of its default headings (site-policy.ts). They leave the
+ * footer with the page.
+ */
+const LEGAL_LINKS: (FooterLink & { part?: HideablePart })[] = [
+  { label: "Terms of Use", href: "/policy#terms-of-use", part: "page:policy" },
 ]
 
-const POLICY_LINKS: FooterLink[] = [
-  { label: "Privacy Policy", href: "#" },
-  { label: "Cookie Policy", href: "#" },
+const POLICY_LINKS: (FooterLink & { part?: HideablePart })[] = [
+  { label: "Privacy Policy", href: "/policy#privacy", part: "page:policy" },
+  { label: "Cookie Policy", href: "/policy#cookies", part: "page:policy" },
 ]
 
 function FooterColumn({
@@ -73,7 +76,8 @@ function FooterColumn({
 export async function SiteFooter() {
   const settings = await getSiteSettings()
   const { socialLinks, copyright } = settings
-  const pageLinks = PAGE_LINKS.filter((link) => isPartShown(settings, link.part))
+  const shown = (link: { part?: HideablePart }) => !link.part || isPartShown(settings, link.part)
+  const pageLinks = PAGE_LINKS.filter(shown)
 
   return (
     <footer className="mt-[110px] grid grid-cols-2 items-start gap-x-6 gap-y-9 px-5 pb-[calc(40px+env(safe-area-inset-bottom))] sm:flex sm:flex-wrap sm:justify-between sm:gap-10 sm:pb-10">
@@ -82,9 +86,9 @@ export async function SiteFooter() {
         links={isPartShown(settings, "footer:social") ? socialLinks : []}
         linkClassName={BOLD_LINK}
       />
-      <FooterColumn links={LEGAL_LINKS} linkClassName={BOLD_LINK} />
+      <FooterColumn links={LEGAL_LINKS.filter(shown)} linkClassName={BOLD_LINK} />
       <FooterColumn
-        links={POLICY_LINKS}
+        links={POLICY_LINKS.filter(shown)}
         linkClassName={BOLD_LINK}
         align="right"
       >

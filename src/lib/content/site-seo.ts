@@ -10,6 +10,7 @@ export const SEO_PAGES = [
   { key: "artists", label: "Artists", path: "/artists" },
   { key: "about", label: "About", path: "/about" },
   { key: "contact", label: "Contact", path: "/contact" },
+  { key: "policy", label: "Policy", path: "/policy" },
 ] as const;
 
 export type SeoPageKey = (typeof SEO_PAGES)[number]["key"];
@@ -17,7 +18,7 @@ export type SeoPageKey = (typeof SEO_PAGES)[number]["key"];
 export type PageSeo = {
   /** <title> and og:title. Empty: derived from the site title. */
   title: string;
-  /** Meta and og:description. Empty: the site description (About: its first paragraph). */
+  /** Meta and og:description. Empty: the site description (About, Policy: their first paragraph). */
   description: string;
   /** Preview picture. Empty: cut from the page's photo, else the default card. */
   image: string;
@@ -52,7 +53,7 @@ export const SEO_LOCALES = [
 const blankPage = (): PageSeo => ({ title: "", description: "", image: "", noindex: false });
 
 export const blankSeo = (): SiteSeo => ({
-  pages: { home: blankPage(), artists: blankPage(), about: blankPage(), contact: blankPage() },
+  pages: { home: blankPage(), artists: blankPage(), about: blankPage(), contact: blankPage(), policy: blankPage() },
   shareImage: "",
   locale: "en_US",
   keywords: "",

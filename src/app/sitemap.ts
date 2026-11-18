@@ -12,6 +12,7 @@ const PAGE_PART: Partial<Record<string, HideablePart>> = {
   artists: "page:artists",
   about: "page:about",
   contact: "page:contact",
+  policy: "page:policy",
 };
 
 /** The public pages, minus any hidden from the site or marked noindex in SEO settings. */

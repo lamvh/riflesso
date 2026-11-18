@@ -45,6 +45,7 @@ const WORDMARK_HEIGHT = 20;
  */
 const QUICK_HIDE: Partial<Record<View, HideablePart>> = {
   artists: "page:artists",
+  policy: "page:policy",
 };
 
 

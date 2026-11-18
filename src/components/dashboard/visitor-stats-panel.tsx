@@ -14,6 +14,7 @@ const PAGE_LABEL: Record<string, string> = {
   "/artists": "Artists",
   "/about": "About",
   "/contact": "Contact",
+  "/policy": "Policy",
 };
 
 const number = (value: number) => value.toLocaleString();

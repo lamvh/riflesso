@@ -1,6 +1,7 @@
 import "server-only";
 
 import { withHeroAutoplayDefaults } from "./hero-autoplay";
+import { withPolicyDefaults } from "./site-policy";
 import { withSeoDefaults } from "./site-seo";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
@@ -109,6 +110,8 @@ type SettingsRow = {
   seo?: unknown;
   /** Absent until the hero autoplay migration has run. */
   hero_autoplay?: unknown;
+  /** Absent until the policy migration has run. */
+  policy?: unknown;
   logo: AssetRef;
 };
 
@@ -165,6 +168,7 @@ export async function querySettings(
       hiddenParts: settings.hidden_parts ?? [],
       seo: withSeoDefaults(settings.seo),
       heroAutoplay: withHeroAutoplayDefaults(settings.hero_autoplay),
+      policy: withPolicyDefaults(settings.policy),
     },
   };
 }

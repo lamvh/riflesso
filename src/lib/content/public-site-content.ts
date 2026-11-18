@@ -19,6 +19,7 @@ import {
 } from "./site-content-queries";
 import { seedSiteContent } from "./site-content-seed";
 import { withHeroAutoplayDefaults } from "./hero-autoplay";
+import { withPolicyDefaults } from "./site-policy";
 import { withSeoDefaults } from "./site-seo";
 import { shownOnly } from "./site-visibility";
 import { SITE_CONTENT_TAG, type ContactCardRecord, type SiteContent, type SiteSettings } from "./site-content-types";
@@ -79,6 +80,7 @@ const visibleSettings = (settings: SiteSettings): SiteSettings => ({
   hiddenParts: settings.hiddenParts ?? [],
   seo: withSeoDefaults(settings.seo),
   heroAutoplay: withHeroAutoplayDefaults(settings.heroAutoplay),
+  policy: withPolicyDefaults(settings.policy),
 });
 
 const cachedSiteSettings = publicQuery(
@@ -97,6 +99,7 @@ export const getSiteSettings = cache(async (): Promise<SiteSettings> => {
     hiddenParts: settings.hiddenParts ?? [],
     seo: withSeoDefaults(settings.seo),
     heroAutoplay: withHeroAutoplayDefaults(settings.heroAutoplay),
+    policy: withPolicyDefaults(settings.policy),
   };
 });
 

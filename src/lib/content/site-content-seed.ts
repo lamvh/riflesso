@@ -1,6 +1,7 @@
 import "server-only";
 
 import { DEFAULT_HERO_AUTOPLAY } from "./hero-autoplay";
+import { DEFAULT_POLICY } from "./site-policy";
 import { blankSeo } from "./site-seo";
 
 import { CONTACT_CARDS } from "@/data/contact-offices";
@@ -42,6 +43,7 @@ const seedSettings = (): SiteSettings => ({
   hiddenParts: [],
   seo: blankSeo(),
   heroAutoplay: { ...DEFAULT_HERO_AUTOPLAY },
+  policy: { ...DEFAULT_POLICY },
 });
 
 const seedContacts = (): ContactCardRecord[] =>

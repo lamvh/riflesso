@@ -1,4 +1,5 @@
 import { withHeroAutoplayDefaults } from "./hero-autoplay";
+import { withPolicyDefaults } from "./site-policy";
 import { withSeoDefaults } from "./site-seo";
 import type { SiteContent, SiteSettings } from "./site-content-types";
 
@@ -16,6 +17,7 @@ export const HIDEABLE_PARTS = [
   { key: "page:artists", group: "Pages", label: "Artists page", note: "/artists answers 404 and leaves the menu" },
   { key: "page:about", group: "Pages", label: "About page", note: "/about answers 404 and leaves the footer" },
   { key: "page:contact", group: "Pages", label: "Contact page", note: "/contact answers 404 and leaves the footer" },
+  { key: "page:policy", group: "Pages", label: "Policy page", note: "/policy answers 404 and its footer links go" },
   { key: "home:hero", group: "Homepage", label: "Hero banner", note: "The rotating slides at the top of the homepage" },
   { key: "about:copy", group: "About", label: "About copy", note: "The paragraphs at the top of the About page" },
   { key: "about:contacts", group: "About", label: "Contact grid on About", note: "Contact keeps its own grid" },
@@ -51,6 +53,8 @@ export function withVisibilityDefaults(content: SiteContent): SiteContent {
       seo: withSeoDefaults(content.settings.seo),
       /* ...and hero autoplay. */
       heroAutoplay: withHeroAutoplayDefaults(content.settings.heroAutoplay),
+      /* ...and the policy page. */
+      policy: withPolicyDefaults(content.settings.policy),
       socialLinks: content.settings.socialLinks.map((link) => ({ ...link, hidden: link.hidden ?? false })),
     },
     /* Older drafts and history entries predate the WhatsApp field. */

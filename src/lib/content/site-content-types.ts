@@ -7,6 +7,7 @@ import type {
 } from "@/lib/dashboard/admin-types";
 
 import type { HeroAutoplay } from "./hero-autoplay";
+import type { SitePolicy } from "./site-policy";
 import type { SiteSeo } from "./site-seo";
 
 export type SocialLink = {
@@ -33,6 +34,8 @@ export type SiteSettings = {
   seo: SiteSeo;
   /** Whether the hero banner advances on its own; see hero-autoplay.ts. */
   heroAutoplay: HeroAutoplay;
+  /** The /policy page; see site-policy.ts. */
+  policy: SitePolicy;
 };
 
 /**

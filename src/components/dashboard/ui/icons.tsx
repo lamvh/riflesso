@@ -115,6 +115,13 @@ export const HomeIcon = (props: IconProps) => (
   </Svg>
 );
 
+export const DocumentIcon = (props: IconProps) => (
+  <Svg {...props}>
+    <path d="M4 1.8h5.2L12 4.6v9.6H4z" />
+    <path d="M9 1.8v3h3M6 8h4M6 10.6h4" />
+  </Svg>
+);
+
 export const GearIcon = (props: IconProps) => (
   <Svg {...props}>
     <circle cx="8" cy="8" r="2.2" />

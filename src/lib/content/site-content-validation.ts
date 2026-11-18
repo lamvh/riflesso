@@ -63,6 +63,8 @@ export function findPublishProblem(input: unknown): string | null {
   ) {
     return "Malformed hidden pages";
   }
+  /* Missing is fine (a draft from before the policy page). */
+  if (settings.policy !== undefined && !isRow(settings.policy)) return "Malformed policy page";
   const seoProblem = findSeoProblem(settings.seo);
   if (seoProblem) return seoProblem;
 

@@ -5,7 +5,7 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 /** The site's public pages. A 404 under any other path is not counted, so
     stray URLs cannot fill the table. */
-const PUBLIC_PATHS = new Set(["/", "/artists", "/about", "/contact"]);
+const PUBLIC_PATHS = new Set(["/", "/artists", "/about", "/contact", "/policy"]);
 const isPublicPath = (ref: string) => PUBLIC_PATHS.has(ref);
 
 /** Accept only refs that can be real, so the table cannot be filled with junk. */

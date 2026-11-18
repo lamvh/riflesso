@@ -95,6 +95,55 @@ export function ProseTextarea({
   );
 }
 
+/** Monospace text area for markup (the Policy page's markdown), so marks line up as typed. */
+export function CodeTextarea({
+  value,
+  onChange,
+  rows = 20,
+  id,
+  label,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  rows?: number;
+  id?: string;
+  /** Accessible name when no visible <label> points at it. */
+  label?: string;
+}) {
+  return (
+    <textarea
+      id={id}
+      rows={rows}
+      value={value}
+      aria-label={label}
+      spellCheck
+      onChange={(event) => onChange(event.target.value)}
+      className={`${BOX} resize-y py-[10px] font-mono text-[13px] leading-[160%]`}
+    />
+  );
+}
+
+/** Native date picker; the value is YYYY-MM-DD or ''. */
+export function DateInput({
+  value,
+  onChange,
+  id,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  id?: string;
+}) {
+  return (
+    <input
+      id={id}
+      type="date"
+      value={value}
+      onChange={(event) => onChange(event.target.value)}
+      className={`${BOX} h-[40px] w-auto font-sans text-[14px] tabular-nums`}
+    />
+  );
+}
+
 /** Label, optional hint, then the control. */
 export function LabelledField({
   label,

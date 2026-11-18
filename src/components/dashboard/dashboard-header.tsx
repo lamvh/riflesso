@@ -25,6 +25,7 @@ const EYEBROW: Record<View, string> = {
   cats: "Library",
   media: "Library",
   home: "Site",
+  policy: "Site",
   settings: "Site",
   history: "System",
   status: "System",
@@ -45,6 +46,7 @@ function addActionFor(view: View): [string, AdminAction] | null {
     case "settings":
       return ["Add contact card", { type: "contact/add" }];
     case "media":
+    case "policy":
     case "status":
     case "history":
       return null;
