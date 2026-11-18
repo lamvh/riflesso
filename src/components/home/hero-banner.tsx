@@ -65,6 +65,13 @@ export function HeroBanner({ slides, autoplay = false }: HeroBannerProps) {
       <div className="relative w-full flex-grow overflow-hidden">
         {slides.map((slide, index) => {
           const isActive = index === active;
+          /*
+           * The first frame is the LCP element. Next 16's `priority` sets
+           * `loading="eager"` and emits the preload link, but it no longer sets
+           * `fetchPriority` on its own (image-component.js passes the prop through
+           * verbatim), so the hero requests it explicitly — upgrading both the
+           * <img> and that preload link to high priority.
+           */
           return (
             <a
               key={`${slide.src}-${index}`}
@@ -86,6 +93,7 @@ export function HeroBanner({ slides, autoplay = false }: HeroBannerProps) {
                     .join(", ")}`}
                   fill
                   priority={index === 0}
+                  fetchPriority={index === 0 ? "high" : "auto"}
                   sizes="100vw"
                   draggable={false}
                   unoptimized={!canOptimizeImage(slide.src)}

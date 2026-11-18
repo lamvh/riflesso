@@ -48,7 +48,7 @@ export default async function HomePage() {
 
   return (
     <div
-      className="rfl-home flex min-h-svh flex-col overflow-x-hidden"
+      className="rfl-page flex min-h-svh flex-col overflow-x-hidden"
       style={displayVars}
     >
       <SiteHeader

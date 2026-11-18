@@ -27,7 +27,7 @@ export function ArtistPreviewImage({ src, alt }: ArtistPreviewImageProps) {
             alt={alt}
             fill
             sizes="min(30vw, 521px)"
-            className="object-cover object-center"
+            className="rfl-swap object-cover object-center"
           />
         )}
       </div>

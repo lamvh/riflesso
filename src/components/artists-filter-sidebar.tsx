@@ -24,7 +24,7 @@ export function ArtistsFilterSidebar({
   onQueryChange,
 }: ArtistsFilterSidebarProps) {
   return (
-    <aside className="w-full lg:sticky lg:top-0 lg:left-0 lg:w-[240px] lg:min-w-[240px] lg:pt-[240px]">
+    <aside className="rfl-intro w-full lg:sticky lg:top-0 lg:left-0 lg:w-[240px] lg:min-w-[240px] lg:pt-[240px]">
       {/* Territory toggle sits above the filter stack, anchored to the sticky aside. */}
       <div className="mb-6 flex items-center pl-2 lg:absolute lg:top-[160px] lg:left-0 lg:mb-0">
         {TERRITORIES.map((option, index) => (

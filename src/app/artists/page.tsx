@@ -19,7 +19,7 @@ export default async function ArtistsPage() {
   const { artists, categories } = toDirectory(content.artists, content.cats);
 
   return (
-    <div className="flex min-h-svh flex-col">
+    <div className="rfl-page flex min-h-svh flex-col">
       <SiteHeader
         currentSection="artists"
         showArtists

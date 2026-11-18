@@ -12,7 +12,7 @@ export default async function NotFound() {
   const [settings, frames] = await Promise.all([getSiteSettings(), getHeroFrames()]);
 
   return (
-    <div className="min-h-svh overflow-x-hidden">
+    <div className="rfl-page min-h-svh overflow-x-hidden">
       <SiteHeader
         overImagery
         logoUrl={settings.logoUrl}

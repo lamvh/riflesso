@@ -195,18 +195,34 @@ body[data-bulk] .admin-toast {
     animation: rfl-settle 1.8s cubic-bezier(0.22, 1, 0.36, 1) both;
   }
 
-  .rfl-home > header {
+  /* Every public page: the masthead fades in once the content starts to move. */
+  .rfl-page > header {
     animation: rfl-fade 0.8s ease-out 0.15s both;
   }
 
+  /*
+   * Rise into place on first paint. `--rfl-i` (set by staggerStyle) staggers a
+   * list item by item; the cap keeps a long list from waiting on its tail.
+   */
   .rfl-intro {
     animation: rfl-rise 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation-delay: calc(var(--rfl-delay, 0s) + min(var(--rfl-i, 0), 12) * 60ms);
   }
   .rfl-intro-2 {
     animation-delay: 0.35s;
   }
   .rfl-intro-3 {
     animation-delay: 0.55s;
+  }
+
+  /* A whole sheet appearing, e.g. the album gallery over the home page. */
+  .rfl-fade-in {
+    animation: rfl-fade 0.45s ease-out both;
+  }
+
+  /* Content swapped in place (gallery frame, artist preview): a short fade. */
+  .rfl-swap {
+    animation: rfl-fade 0.35s ease-out both;
   }
 
   @supports (animation-timeline: view()) {

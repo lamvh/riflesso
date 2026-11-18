@@ -33,7 +33,7 @@ export function NotFoundPanel({ frames }: { frames: string[] }) {
 
   return (
     <div className="fixed inset-0 z-20 flex items-center justify-center overflow-hidden bg-paper">
-      <div className="relative inline-block">
+      <div className="rfl-intro relative inline-block">
         <span className={`${NUMERAL} block ${count ? "invisible" : ""}`} aria-hidden={count > 0}>
           404
         </span>
@@ -58,7 +58,7 @@ export function NotFoundPanel({ frames }: { frames: string[] }) {
         ))}
       </div>
 
-      <div className="absolute bottom-[34px] left-5 flex flex-col items-start gap-[11px]">
+      <div className="rfl-intro rfl-intro-2 absolute bottom-[34px] left-5 flex flex-col items-start gap-[11px]">
         <p className="font-serif text-[27px] leading-[100%] italic">
           Page not found
         </p>

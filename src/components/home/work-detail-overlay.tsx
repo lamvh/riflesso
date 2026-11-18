@@ -14,6 +14,7 @@ import { CloseIcon } from "@/components/close-icon";
 import { useVideoAutoplay } from "@/hooks/use-video-autoplay";
 import { describeMedia, type MediaItem } from "@/lib/media-item";
 import { optimizedImgProps } from "@/lib/optimized-img-props";
+import { staggerStyle } from "@/lib/stagger-style";
 import type { WorkDetail } from "@/lib/work-detail";
 
 /*
@@ -76,17 +77,24 @@ function Thumbnail({
       className="block h-[95px] w-[75px] overflow-hidden transition-opacity duration-[250ms] ease-in-out"
       style={{ opacity: isActive ? 0.4 : 1 }}
     >
-      {item.kind === "image" ? (
-        <img
-          {...optimizedImgProps(item.src, "75px")}
-          alt=""
-          loading="lazy"
-          draggable={false}
-          className="block size-full object-cover object-center"
-        />
-      ) : (
-        <ThumbnailVideo src={item.src} />
-      )}
+      {/* The entrance runs on this inner box: its opacity fill would otherwise
+          override the button's dimming. */}
+      <span
+        className="rfl-intro block size-full"
+        style={staggerStyle(index, 0.1)}
+      >
+        {item.kind === "image" ? (
+          <img
+            {...optimizedImgProps(item.src, "75px")}
+            alt=""
+            loading="lazy"
+            draggable={false}
+            className="block size-full object-cover object-center"
+          />
+        ) : (
+          <ThumbnailVideo src={item.src} />
+        )}
+      </span>
     </button>
   );
 }
@@ -125,7 +133,7 @@ export function WorkDetailOverlay({ work, onClose }: WorkDetailOverlayProps) {
       role="dialog"
       aria-modal="true"
       aria-label={work.title || "Gallery"}
-      className="fixed inset-0 z-40 overflow-x-hidden overflow-y-auto overscroll-contain bg-paper"
+      className="rfl-fade-in fixed inset-0 z-40 overflow-x-hidden overflow-y-auto overscroll-contain bg-paper"
     >
       <button
         type="button"
@@ -151,17 +159,25 @@ export function WorkDetailOverlay({ work, onClose }: WorkDetailOverlayProps) {
       <div className="flex justify-center px-5 pt-[22px]">
         {current.kind === "image" ? (
           <img
-            {...optimizedImgProps(current.src, "(max-width: 768px) 92vw, 1200px")}
+            /* A new key per frame replays the fade when the frame changes. */
+            key={current.src}
+            {...optimizedImgProps(
+              current.src,
+              "(max-width: 768px) 92vw, 1200px",
+            )}
             alt={label}
             draggable={false}
-            className={STAGE_SIZING}
+            className={`rfl-swap ${STAGE_SIZING}`}
           />
         ) : (
           <StageVideo src={current.src} label={label} />
         )}
       </div>
 
-      <div className="flex flex-col items-start gap-[11px] px-5 pt-[30px] pb-[44px]">
+      <div
+        className="rfl-intro flex flex-col items-start gap-[11px] px-5 pt-[30px] pb-[44px]"
+        style={staggerStyle(0, 0.25)}
+      >
         {work.title && (
           <p className="font-serif text-[27px] leading-[100%] italic">
             {work.title}

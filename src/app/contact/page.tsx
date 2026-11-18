@@ -17,7 +17,7 @@ export default async function ContactPage() {
   if (!isPartShown(settings, "page:contact")) notFound();
 
   return (
-    <div className="flex min-h-svh flex-col overflow-x-hidden">
+    <div className="rfl-page flex min-h-svh flex-col overflow-x-hidden">
       <SiteHeader
         logoUrl={settings.logoUrl}
         logoAlt={settings.logoAlt}

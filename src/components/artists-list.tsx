@@ -1,6 +1,7 @@
 "use client";
 
 import type { Artist } from "@/data/artists";
+import { staggerStyle } from "@/lib/stagger-style";
 
 type ArtistsListProps = {
   artists: Artist[];
@@ -21,7 +22,13 @@ export function ArtistsList({
     <div className="@container flex h-fit min-w-0 flex-1 self-start pt-10 lg:pt-[240px]">
       <div className="h-fit w-full">
         {artists.map((artist, index) => (
-          <div key={artist.name} className="mb-[10px]">
+          <div
+            key={artist.name}
+            /* Names rise one after another; after a filter change only the
+               newly listed ones do. */
+            className="rfl-intro mb-[10px]"
+            style={staggerStyle(index, 0.15)}
+          >
             <a
               href="#"
               onMouseEnter={() => onActivate(index)}
