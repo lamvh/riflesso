@@ -5,10 +5,10 @@ import type { AdminAction } from "@/lib/dashboard/admin-reducer";
 import type { Slide } from "@/lib/dashboard/admin-types";
 
 import { CoverImage } from "./cover-image";
+import { HeroCropWorkspace } from "./hero-crop-workspace";
 import { Button, Segmented, StatusPill, Switch, buttonClass } from "./ui/controls";
 import { LabelledField, NameInput, ProseInput } from "./ui/fields";
 import { ArrowUpIcon, PlusIcon } from "./ui/icons";
-import { MediaDropZone } from "./ui/media-drop-zone";
 import { SortableItem, SortableList } from "./ui/sortable-list";
 import { UploadButton } from "./ui/upload-button";
 import { MediaLibraryButton } from "./ui/media-library-picker";
@@ -17,13 +17,6 @@ import { Panel } from "./ui/panel";
 const INKS: { value: string; label: string }[] = [
   { value: "#fff", label: "Light" },
   { value: "#000", label: "Dark" },
-];
-
-/** The three crops the design offers, rather than free-typed object-position. */
-const CROPS: { value: string; label: string }[] = [
-  { value: "50% 10%", label: "Top" },
-  { value: "50% 45%", label: "Centre" },
-  { value: "50% 85%", label: "Bottom" },
 ];
 
 export function HeroEditor({
@@ -123,22 +116,8 @@ export function HeroEditor({
       </SortableList>
 
       {slide ? (
-        <div className="grid items-start gap-[20px] lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
-          <MediaDropZone
-            onUploaded={([src]) => set({ src })}
-            label="Drop to replace this slide's image"
-            className="aspect-16/10 overflow-hidden rounded-[6px] bg-well"
-          >
-            <CoverImage src={slide.src} pos={slide.pos} />
-            <div className="absolute inset-x-0 bottom-0 flex justify-center bg-linear-to-t from-black/45 to-transparent px-[16px] pt-[40px] pb-[14px]">
-              <p
-                className="text-center font-serif text-[14px] leading-[130%]"
-                style={{ color: slide.ink }}
-              >
-                {slide.credit} <em>{slide.pub}</em>
-              </p>
-            </div>
-          </MediaDropZone>
+        <div className="grid items-start gap-[20px] xl:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]">
+          <HeroCropWorkspace slide={slide} onChange={set} />
 
           <div className="flex min-w-0 flex-col gap-[16px]">
             <div className="flex items-center justify-between gap-[12px] rounded-[6px] border border-line px-[12px] py-[10px]">
@@ -172,9 +151,6 @@ export function HeroEditor({
             <div className="flex flex-wrap gap-[16px]">
               <LabelledField label="Caption colour">
                 <Segmented label="Caption colour" options={INKS} value={slide.ink} onChange={(ink) => set({ ink })} />
-              </LabelledField>
-              <LabelledField label="Crop focus">
-                <Segmented label="Crop focus" options={CROPS} value={slide.pos} onChange={(pos) => set({ pos })} />
               </LabelledField>
             </div>
 

@@ -4,6 +4,8 @@ import type { MediaItem } from "@/lib/media-item";
 import { isVideoSrc } from "@/lib/media-src";
 import type { MediaSection } from "@/lib/work-detail";
 
+import { resolveHeroCrops } from "./hero-crop";
+
 /**
  * The label a work detail prints under the credits, per album kind. New
  * Signings have none, which is what makes their cards link to the directory
@@ -103,12 +105,18 @@ export function buildHomeSections(blocks: Block[], albums: Album[]): HomeSection
  */
 const CREDIT_SEPARATOR = /,\s*(?=[^,]*—)/;
 
+/** A slide's crop for each screen, empty ones already filled from the next size up. */
+function heroPositions(slide: Slide) {
+  const crops = resolveHeroCrops(slide);
+  return { position: crops.desktop, positionTablet: crops.tablet, positionMobile: crops.mobile };
+}
+
 export function toHeroSlides(slides: Slide[]): HeroSlide[] {
   return slides
     .filter((slide) => slide.src)
     .map((slide) => ({
       src: slide.src,
-      position: slide.pos,
+      ...heroPositions(slide),
       captionColor: slide.ink,
       publication: slide.pub,
       credits: slide.credit

@@ -82,6 +82,8 @@ export function toPublishPayload(content: SiteContent) {
       credit_line: slide.credit.trim(),
       image_url: slide.src.trim(),
       object_position: slide.pos,
+      object_position_tablet: (slide.posTablet ?? "").trim(),
+      object_position_mobile: (slide.posMobile ?? "").trim(),
       caption_color: slide.ink,
       is_visible: !slide.hidden,
     })),

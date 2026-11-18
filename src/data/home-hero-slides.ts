@@ -1,7 +1,10 @@
 export type HeroSlide = {
   src: string;
-  /** CSS object-position; each frame is hand-cropped around its subject. */
+  /** CSS object-position on desktop; each frame is hand-cropped around its subject. */
   position: string;
+  /** Crops for smaller screens, already resolved (never empty) when set. */
+  positionTablet?: string;
+  positionMobile?: string;
   /** Caption colour — flipped to white over dark imagery. */
   captionColor: string;
   credits: { name: string; role: string }[];

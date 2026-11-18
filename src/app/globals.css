@@ -190,6 +190,26 @@ body[data-bulk] .admin-toast {
   }
 }
 
+/*
+ * Hero crop per screen. The banner sets the three crops as variables on the
+ * image; breakpoints match Tailwind md / lg and HERO_SCREEN_INFO.
+ */
+.rfl-hero-crop {
+  object-position: var(--rfl-pos-mobile, var(--rfl-pos-desktop, 50% 50%));
+}
+
+@media (min-width: 48rem) {
+  .rfl-hero-crop {
+    object-position: var(--rfl-pos-tablet, var(--rfl-pos-desktop, 50% 50%));
+  }
+}
+
+@media (min-width: 64rem) {
+  .rfl-hero-crop {
+    object-position: var(--rfl-pos-desktop, 50% 50%);
+  }
+}
+
 @media (prefers-reduced-motion: no-preference) {
   .rfl-hero-settle {
     animation: rfl-settle 1.8s cubic-bezier(0.22, 1, 0.36, 1) both;

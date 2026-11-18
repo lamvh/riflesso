@@ -76,6 +76,10 @@ nội dung gốc trong `src/data/*`.
    — bảng `media_library_folders` giữ folder tạo bằng **+ New** ở màn Media, kể cả
    khi chưa có file nào. Chưa chạy thì nút New folder ẩn; folder theo file, tag,
    kéo thả và Edit trên card vẫn chạy.
+10. **Backup DB**, rồi chạy `supabase/migrations/20261119000000_add_hero_slide_screen_crops.sql`
+    — thêm cột `object_position_tablet` / `object_position_mobile` cho hero slide.
+    Chưa chạy thì site vẫn bình thường (mọi màn hình dùng crop desktop); crop
+    tablet/mobile chỉ chưa được lưu khi Publish.
 
 > **Chưa có auth.** Server action publish (và đọc History, tạo Preview) mở cho bất kỳ ai gọi được tới nó. Phải
 > thêm đăng nhập vào `src/lib/dashboard/publish-site-content.ts` + `/dashboard`
@@ -264,6 +268,7 @@ src/
 │       ├── artist-drawer.tsx          # form sửa artist
 │       ├── album-drawer.tsx           # form sửa album (lưới frame + credit)
 │       ├── hero-editor.tsx            # khối hero banner của màn Homepage
+│       ├── hero-crop-workspace.tsx    # crop hero theo desktop / tablet / mobile + preview
 │       ├── section-list.tsx           # danh sách section của trang chủ
 │       ├── cover-image.tsx            # <img> thuần, preview URL bất kỳ
 │       ├── screens/                   # 5 màn: overview/artists/albums/categories/homepage
@@ -318,6 +323,12 @@ src/
 
 - **Hero** — slide chồng nhau, cross-fade `opacity` 0.5s. Click thumbnail để đổi
   slide; màu caption đảo trắng/đen theo từng ảnh. Autoplay 5s tắt mặc định.
+  Crop riêng cho từng màn hình: desktop (≥1024px), tablet (≥768px), mobile.
+  Tablet/mobile để trống thì theo màn lớn hơn kế tiếp. Ảnh nhận 3 biến
+  `--rfl-pos-*`, class `.rfl-hero-crop` trong `globals.css` chọn theo breakpoint.
+  Dashboard (Homepage → Hero banner) cho chọn 9 điểm neo, hoặc click / kéo trên
+  ảnh gốc để đặt điểm focus bất kỳ (phím mũi tên để chỉnh), kèm ảnh render mẫu
+  cho cả 3 màn hình (`hero-crop-workspace.tsx`, logic ở `lib/content/hero-crop.ts`).
 - **Rail** — cuộn ngang bằng wheel, touch, hoặc kéo chuột. Click phát sinh ở cuối
   thao tác kéo bị chặn ở capture phase để không vô tình điều hướng.
 - **Video** — muted + loop + playsinline; `IntersectionObserver` (margin 200px)

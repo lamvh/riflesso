@@ -79,6 +79,8 @@ export function adminReducer(state: AdminState, action: AdminAction): AdminState
               credit: "Artist — Role",
               src: "",
               pos: "50% 18%",
+              posTablet: "",
+              posMobile: "",
               ink: "#fff",
               hidden: false,
             },

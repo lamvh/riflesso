@@ -52,6 +52,12 @@ export function withVisibilityDefaults(content: SiteContent): SiteContent {
     },
     /* Older drafts and history entries predate the WhatsApp field. */
     contacts: content.contacts.map((card) => ({ ...card, whatsapp: card.whatsapp ?? "", hidden: card.hidden ?? false })),
-    slides: content.slides.map((slide) => ({ ...slide, hidden: slide.hidden ?? false })),
+    /* Older drafts and history entries predate per-screen crops. */
+    slides: content.slides.map((slide) => ({
+      ...slide,
+      posTablet: slide.posTablet ?? "",
+      posMobile: slide.posMobile ?? "",
+      hidden: slide.hidden ?? false,
+    })),
   };
 }

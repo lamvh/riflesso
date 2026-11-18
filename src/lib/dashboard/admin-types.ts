@@ -56,7 +56,12 @@ export type Slide = {
   /** Rendered as one running line under the banner. */
   credit: string;
   src: string;
+  /** Desktop crop (CSS object-position); the base the other screens fall back to. */
   pos: string;
+  /** Tablet crop; '' follows desktop. */
+  posTablet: string;
+  /** Mobile crop; '' follows tablet. */
+  posMobile: string;
   /** Caption colour, flipped to black over light imagery. */
   ink: string;
   /** Kept in the dashboard, left out of the banner. */

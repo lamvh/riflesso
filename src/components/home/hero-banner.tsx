@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 
 import type { HeroSlide } from "@/data/home-hero-slides";
 import { useDragScroll } from "@/hooks/use-drag-scroll";
@@ -15,6 +15,14 @@ type HeroBannerProps = {
   /** Off by default, matching the design's `bannerAutoplay` prop. */
   autoplay?: boolean;
 };
+
+/** Each screen's crop as a variable; `.rfl-hero-crop` picks one per breakpoint. */
+const cropStyle = (slide: HeroSlide) =>
+  ({
+    "--rfl-pos-desktop": slide.position,
+    "--rfl-pos-tablet": slide.positionTablet ?? slide.position,
+    "--rfl-pos-mobile": slide.positionMobile ?? slide.positionTablet ?? slide.position,
+  }) as CSSProperties;
 
 /**
  * Runs `work` once the page has finished loading and the main thread is idle,
@@ -97,8 +105,8 @@ export function HeroBanner({ slides, autoplay = false }: HeroBannerProps) {
                   sizes="100vw"
                   draggable={false}
                   unoptimized={!canOptimizeImage(slide.src)}
-                  className={`object-cover ${index === 0 ? "rfl-hero-settle" : ""}`}
-                  style={{ objectPosition: slide.position }}
+                  className={`rfl-hero-crop object-cover ${index === 0 ? "rfl-hero-settle" : ""}`}
+                  style={cropStyle(slide)}
                 />
               )}
 

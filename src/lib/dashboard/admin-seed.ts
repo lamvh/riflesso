@@ -125,6 +125,8 @@ export const seedSlides = (): Slide[] =>
       .join(", "),
     src: slide.src,
     pos: slide.position,
+    posTablet: "",
+    posMobile: "",
     ink: slide.captionColor,
     hidden: false,
   }));
