@@ -82,6 +82,7 @@ export function adminReducer(state: AdminState, action: AdminAction): AdminState
               pos: "50% 18%",
               posTablet: "",
               posMobile: "",
+              posThumb: "",
               ink: "#fff",
               hidden: false,
             },

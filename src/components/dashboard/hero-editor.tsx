@@ -1,6 +1,7 @@
 "use client";
 
 import type { HeroAutoplay } from "@/lib/content/hero-autoplay";
+import { resolveHeroCrops } from "@/lib/content/hero-crop";
 import { plural } from "@/lib/dashboard/admin-changes";
 import type { AdminAction } from "@/lib/dashboard/admin-reducer";
 import type { Slide } from "@/lib/dashboard/admin-types";
@@ -98,11 +99,11 @@ export function HeroEditor({
               className="flex w-[120px] shrink-0 cursor-pointer touch-manipulation flex-col gap-[6px] text-left"
             >
               <span
-                className={`relative block h-[76px] overflow-hidden rounded-[6px] bg-well transition-opacity ${
+                className={`relative block aspect-177/110 overflow-hidden rounded-[6px] bg-well transition-opacity ${
                   active ? "shadow-[0_0_0_2px_var(--color-ink)]" : "opacity-70 hover:opacity-100"
                 }`}
               >
-                <CoverImage src={entry.src} pos={entry.pos} dim={entry.hidden ? 0.35 : 1} />
+                <CoverImage src={entry.src} pos={resolveHeroCrops(entry).thumbnail} dim={entry.hidden ? 0.35 : 1} />
                 {entry.hidden && (
                   <span className="absolute right-[4px] bottom-[4px] rounded-[4px] bg-paper/90 px-[5px] py-[3px] font-sans text-[11px] leading-none font-bold">
                     Hidden
@@ -128,11 +129,12 @@ export function HeroEditor({
       </SortableList>
 
       {slide ? (
-        <div className="grid items-start gap-[20px] xl:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]">
+        <div className="flex flex-col gap-[20px]">
+          {/* Full width, so the picture and every rendered crop sit side by side. */}
           <HeroCropWorkspace slide={slide} onChange={set} />
 
-          <div className="flex min-w-0 flex-col gap-[16px]">
-            <div className="flex items-center justify-between gap-[12px] rounded-[6px] border border-line px-[12px] py-[10px]">
+          <div className="grid min-w-0 items-start gap-[16px] border-t border-line pt-[18px] lg:grid-cols-2">
+            <div className="flex items-center justify-between gap-[12px] rounded-[6px] border border-line px-[12px] py-[10px] lg:col-span-2">
               <span className="flex items-center gap-[8px] font-sans text-[14px] font-bold">
                 Show this slide
                 {slide.hidden && <StatusPill tone="draft">Hidden</StatusPill>}
@@ -176,7 +178,7 @@ export function HeroEditor({
               </div>
             </LabelledField>
 
-            <div className="flex flex-wrap items-center gap-[6px] border-t border-line pt-[14px]">
+            <div className="flex flex-wrap items-center gap-[6px] border-t border-line pt-[14px] lg:col-span-2">
               <Button
                 size="sm"
                 disabled={current === 0}

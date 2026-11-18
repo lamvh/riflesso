@@ -5,6 +5,8 @@ export type HeroSlide = {
   /** Crops for smaller screens, already resolved (never empty) when set. */
   positionTablet?: string;
   positionMobile?: string;
+  /** Crop of the tile in the strip under the banner; defaults to `position`. */
+  positionThumb?: string;
   /** Caption colour — flipped to white over dark imagery. */
   captionColor: string;
   credits: { name: string; role: string }[];

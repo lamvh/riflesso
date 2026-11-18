@@ -8,7 +8,13 @@ import { plural } from "@/lib/dashboard/admin-changes";
 import { VIEW_HREF } from "@/lib/dashboard/admin-views";
 import { listMediaLibrary } from "@/lib/dashboard/list-media-library";
 import { groupAndTagOptions, inMediaScope, matchesMediaSearch, mediaCatalogue } from "@/lib/dashboard/media-library-filters";
-import { mediaUsageIndex } from "@/lib/dashboard/media-usage";
+import {
+  hasReplacedTag,
+  mediaUsageIndex,
+  REPLACED_TAG,
+  withReplaced,
+  type MediaUsageState,
+} from "@/lib/dashboard/media-usage";
 import { formatBytes, type MediaLibraryReport } from "@/lib/media/media-library-types";
 
 import { useAdmin } from "../admin-store";
@@ -39,7 +45,11 @@ import { UploadButton } from "../ui/upload-button";
 import { UploadCompressionControl } from "../ui/upload-compression-control";
 import type { UploadedFile } from "../ui/use-media-upload";
 
-type UsageFilter = "all" | "used" | "unused";
+type UsageFilter = "all" | "used" | "replaced" | "unused";
+
+/** Which usage filter a file falls under. */
+const usageGroup = (state: MediaUsageState): Exclude<UsageFilter, "all"> =>
+  state === "unused" || state === "replaced" ? state : "used";
 
 /** Anything an album frame, portrait or slide can hold. */
 const LIBRARY_TYPES = "image/*,video/mp4,video/webm";
@@ -47,6 +57,7 @@ const LIBRARY_TYPES = "image/*,video/mp4,video/webm";
 const USAGE_OPTIONS = [
   { value: "all", label: "All" },
   { value: "used", label: "In use" },
+  { value: "replaced", label: "Replaced" },
   { value: "unused", label: "Unused" },
 ] as const;
 
@@ -112,13 +123,16 @@ export function MediaScreen() {
   const rows = useMemo(
     () =>
       report?.state === "ok"
-        ? report.objects.map((object) => ({
-            key: object.key,
-            object,
-            usage: usageOf(object.key),
-            label: labelOf(object.key),
-            groups: groupsOf(object.key),
-          }))
+        ? report.objects.map((object) => {
+            const label = labelOf(object.key);
+            return {
+              key: object.key,
+              object,
+              usage: withReplaced(usageOf(object.key), label.tags),
+              label,
+              groups: groupsOf(object.key),
+            };
+          })
         : [],
     [report, usageOf, labelOf, groupsOf],
   );
@@ -130,7 +144,8 @@ export function MediaScreen() {
   const totals = useMemo(() => {
     const sum = (list: typeof rows) => list.reduce((total, row) => total + row.object.size, 0);
     const unused = rows.filter((row) => row.usage.state === "unused");
-    const used = rows.filter((row) => row.usage.state !== "unused");
+    /* Replaced files are neither: kept on purpose, but not on the site. */
+    const used = rows.filter((row) => row.usage.state !== "unused" && row.usage.state !== "replaced");
     return { all: sum(rows), used: used.length, usedBytes: sum(used), unused: unused.length, unusedBytes: sum(unused) };
   }, [rows]);
 
@@ -138,7 +153,7 @@ export function MediaScreen() {
   const folderPath = folderPathOf(folder);
   const visible = rows
     .filter((row) => {
-      if (filter !== "all" && (filter === "unused") !== (row.usage.state === "unused")) return false;
+      if (filter !== "all" && usageGroup(row.usage.state) !== filter) return false;
       if (folder === UNFILED && row.label.folder) return false;
       if (folderPath && !inMediaScope(row, `folder:${folderPath}`)) return false;
       return inMediaScope(row, tagFilter) && matchesMediaSearch(row, needle, row.usage.places);
@@ -168,23 +183,27 @@ export function MediaScreen() {
   /*
    * A new version of a file: it is stored under a new key (the old address is
    * cached as immutable), every record using the old one switches to it, and
-   * it inherits the old file's folder and tags. The old file stays, now
-   * unused, so history restores keep working; delete it when ready.
+   * it inherits the old file's folder and tags. The old file stays, tagged
+   * "replaced" so it is not mistaken for (or bulk-deleted with) unused files,
+   * and history restores keep working; delete it when ready.
    */
   const replace = (old: string, file: UploadedFile) => {
     const name = old.slice(old.lastIndexOf("/") + 1);
     const { places } = usageOf(old);
     dispatch({ type: "media/replace", key: old, url: file.url, name });
     const label = labelOf(old);
-    if (labels.ready && file.key && (label.folder || label.tags.length)) {
-      labels.update([file.key], { folder: label.folder, addTags: label.tags }, "Folder and tags carried over");
+    /* The new version is current: it never inherits the old one's replaced tag. */
+    const carried = label.tags.filter((tag) => !hasReplacedTag([tag]));
+    if (labels.ready && file.key && (label.folder || carried.length)) {
+      labels.update([file.key], { folder: label.folder, addTags: carried }, "Folder and tags carried over");
     }
+    if (labels.ready) labels.update([old], { addTags: [REPLACED_TAG] }, `${name} tagged #${REPLACED_TAG}`);
     load();
     setSelected(new Set(file.key ? [file.key] : []));
     dispatch({
       type: "toast",
       message: places.length
-        ? `Replaced in ${plural(places.length, "place")}. The old file is now unused; delete it once the change is saved.`
+        ? `Replaced in ${plural(places.length, "place")}. The old file is kept as replaced; delete it once the change is saved.`
         : "New version uploaded. The old file was not used anywhere.",
     });
   };

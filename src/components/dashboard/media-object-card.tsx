@@ -17,6 +17,7 @@ export const USAGE_PILL: Record<MediaUsageState, [Tone, string, string]> = {
   live: ["live", "In use", "Saved and on the site"],
   pending: ["draft", "Saving", "Used by an edit that is not saved yet"],
   removing: ["draft", "Being removed", "Still on the site until the latest edit saves"],
+  replaced: ["neutral", "Replaced", "A newer version took its place; kept so history restores still work"],
   unused: ["danger", "Unused", "No record points at this file"],
 };
 
@@ -169,7 +170,7 @@ export function MediaObjectCard({
           >
             <span title="Upload a new version; every record using this file switches to it">Replace</span>
           </UploadButton>
-          {usage.state === "unused" && (
+          {(usage.state === "unused" || usage.state === "replaced") && (
             <Button size="sm" variant="danger" onClick={onDelete} disabled={busy} className="ml-auto">
               Delete
             </Button>

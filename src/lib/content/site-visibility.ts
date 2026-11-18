@@ -60,6 +60,7 @@ export function withVisibilityDefaults(content: SiteContent): SiteContent {
       ...slide,
       posTablet: slide.posTablet ?? "",
       posMobile: slide.posMobile ?? "",
+      posThumb: slide.posThumb ?? "",
       hidden: slide.hidden ?? false,
     })),
   };

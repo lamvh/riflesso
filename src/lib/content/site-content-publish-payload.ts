@@ -86,6 +86,7 @@ export function toPublishPayload(content: SiteContent) {
       object_position: slide.pos,
       object_position_tablet: (slide.posTablet ?? "").trim(),
       object_position_mobile: (slide.posMobile ?? "").trim(),
+      object_position_thumb: (slide.posThumb ?? "").trim(),
       caption_color: slide.ink,
       is_visible: !slide.hidden,
     })),

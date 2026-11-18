@@ -164,7 +164,8 @@ export function HeroBanner({ slides, autoplay = false, seconds = DEFAULT_HERO_AU
                 sizes="177px"
                 draggable={false}
                 unoptimized={!canOptimizeImage(slide.src)}
-                className="pointer-events-none object-cover object-center"
+                className="pointer-events-none object-cover"
+                style={{ objectPosition: slide.positionThumb ?? slide.position }}
               />
             </div>
           </button>

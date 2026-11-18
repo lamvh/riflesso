@@ -105,10 +105,15 @@ export function buildHomeSections(blocks: Block[], albums: Album[]): HomeSection
  */
 const CREDIT_SEPARATOR = /,\s*(?=[^,]*—)/;
 
-/** A slide's crop for each screen, empty ones already filled from the next size up. */
+/** A slide's crop for each screen and its thumbnail, empty ones already filled from their fallback. */
 function heroPositions(slide: Slide) {
   const crops = resolveHeroCrops(slide);
-  return { position: crops.desktop, positionTablet: crops.tablet, positionMobile: crops.mobile };
+  return {
+    position: crops.desktop,
+    positionTablet: crops.tablet,
+    positionMobile: crops.mobile,
+    positionThumb: crops.thumbnail,
+  };
 }
 
 export function toHeroSlides(slides: Slide[]): HeroSlide[] {

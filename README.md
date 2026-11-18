@@ -83,6 +83,9 @@ nội dung gốc trong `src/data/*`.
 11. **Backup DB**, rồi chạy `supabase/migrations/20261119010000_add_hero_autoplay_setting.sql`
     — cột `hero_autoplay` (jsonb) cho Auto scroll của hero banner. Chưa chạy thì
     banner đứng yên như cũ; công tắc trong dashboard chỉ chưa được lưu.
+12. **Backup DB**, rồi chạy `supabase/migrations/20261119020000_add_hero_slide_thumbnail_crop.sql`
+    — cột `object_position_thumb` (crop riêng cho ô thumbnail dưới banner).
+    Chưa chạy thì thumbnail theo crop desktop; crop thumbnail chỉ chưa được lưu khi Publish.
 
 > **Chưa có auth.** Server action publish (và đọc History, tạo Preview) mở cho bất kỳ ai gọi được tới nó. Phải
 > thêm đăng nhập vào `src/lib/dashboard/publish-site-content.ts` + `/dashboard`
@@ -165,8 +168,10 @@ trước khi up) và mọi chỗ đang dùng file cũ chuyển sang file mới: 
 portrait artist, cover + frame album, hero slide, section trang chủ, cả drawer đang
 mở. Autosave đưa thay đổi lên site và ghi vào History. File mới có **key mới** chứ
 không ghi đè key cũ, vì object được cache `immutable` 1 năm — ghi đè thì khách vẫn
-thấy ảnh cũ. File mới nhận folder + tag của file cũ. File cũ được giữ lại (Unused
-sau khi lưu xong) để restore History vẫn có ảnh; xoá khi không cần.
+thấy ảnh cũ. File mới nhận folder + tag của file cũ (trừ tag `replaced`). File cũ
+được giữ lại, gắn tag `replaced` → hiện pill **Replaced** thay vì Unused, có filter
+riêng, không bị gom vào "Delete N unused" (xoá lẻ từng file vẫn được), để restore
+History vẫn có ảnh. Cần bảng media labels; thiếu thì file cũ vẫn hiện Unused.
 
 **Folder + tag** (`src/lib/media/media-label-store.ts`, `media-label-types.ts`,
 `src/lib/dashboard/media-groups.ts`, `media-library-filters.ts`) — hai kiểu phân loại:
@@ -338,6 +343,8 @@ src/
   Dashboard (Homepage → Hero banner) cho chọn 9 điểm neo, hoặc click / kéo trên
   ảnh gốc để đặt điểm focus bất kỳ (phím mũi tên để chỉnh), kèm ảnh render mẫu
   cho cả 3 màn hình (`hero-crop-workspace.tsx`, logic ở `lib/content/hero-crop.ts`).
+  Ô thumbnail 177×110 trong dải dưới banner có crop riêng (tab **Thumbnail**),
+  để trống thì theo desktop. Ảnh gốc và 4 preview nằm cạnh nhau.
 - **Rail** — cuộn ngang bằng wheel, touch, hoặc kéo chuột. Click phát sinh ở cuối
   thao tác kéo bị chặn ở capture phase để không vô tình điều hướng.
 - **Video** — muted + loop + playsinline; `IntersectionObserver` (margin 200px)

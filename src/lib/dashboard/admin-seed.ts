@@ -127,6 +127,7 @@ export const seedSlides = (): Slide[] =>
     pos: slide.position,
     posTablet: "",
     posMobile: "",
+    posThumb: "",
     ink: slide.captionColor,
     hidden: false,
   }));

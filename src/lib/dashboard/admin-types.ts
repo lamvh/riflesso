@@ -62,6 +62,8 @@ export type Slide = {
   posTablet: string;
   /** Mobile crop; '' follows tablet. */
   posMobile: string;
+  /** Crop of the tile in the strip under the banner; '' follows desktop. */
+  posThumb: string;
   /** Caption colour, flipped to black over light imagery. */
   ink: string;
   /** Kept in the dashboard, left out of the banner. */

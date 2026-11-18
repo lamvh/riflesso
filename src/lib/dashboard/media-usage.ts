@@ -1,4 +1,5 @@
 import type { SiteContent } from "@/lib/content/site-content-types";
+import { sameTag } from "@/lib/media/media-label-types";
 
 /*
  * Which records point at which stored object. Pure: it reads two snapshots of
@@ -12,9 +13,24 @@ export type MediaPlace = string;
 /**
  * `live` — published and still in the draft. `pending` — only in the draft, so
  * it goes live on Publish. `removing` — published, but the draft dropped it, so
- * it leaves the site on Publish. `unused` — nothing points at it.
+ * it leaves the site on Publish. `replaced` — nothing points at it because a
+ * newer version took its place (kept so history restores still find it).
+ * `unused` — nothing points at it.
  */
-export type MediaUsageState = "live" | "pending" | "removing" | "unused";
+export type MediaUsageState = "live" | "pending" | "removing" | "replaced" | "unused";
+
+/**
+ * Tag the dashboard puts on a file once Replace swaps it out. Kept with the
+ * file's folder and tags in Supabase, so the file reads as replaced rather
+ * than unused on every visit and is left out of "Delete unused".
+ */
+export const REPLACED_TAG = "replaced";
+
+export const hasReplacedTag = (tags: string[]) => tags.some((tag) => sameTag(tag, REPLACED_TAG));
+
+/** An unused file that carries the replaced tag reads as replaced. */
+export const withReplaced = (usage: MediaUsage, tags: string[]): MediaUsage =>
+  usage.state === "unused" && hasReplacedTag(tags) ? { ...usage, state: "replaced" } : usage;
 
 export type MediaUsage = { state: MediaUsageState; places: MediaPlace[] };
 

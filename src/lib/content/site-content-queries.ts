@@ -302,6 +302,8 @@ export async function queryHeroSlides(client: SupabaseClient): Promise<Slide[]> 
     /* Absent until the screen-crops migration runs. */
     object_position_tablet?: string | null;
     object_position_mobile?: string | null;
+    /* Absent until the thumbnail-crop migration runs. */
+    object_position_thumb?: string | null;
     caption_color: string;
     is_visible?: boolean;
     image: AssetRef;
@@ -321,6 +323,7 @@ export async function queryHeroSlides(client: SupabaseClient): Promise<Slide[]> 
     pos: row.object_position,
     posTablet: row.object_position_tablet ?? "",
     posMobile: row.object_position_mobile ?? "",
+    posThumb: row.object_position_thumb ?? "",
     ink: row.caption_color,
     hidden: row.is_visible === false,
   }));
