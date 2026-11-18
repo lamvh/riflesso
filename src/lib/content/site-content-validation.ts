@@ -102,7 +102,8 @@ export function findPublishProblem(input: unknown): string | null {
     }
   }
 
-  if (slides.some((slide) => !text(slide.pub))) return "Every hero slide needs a publication";
+  /* Publication is optional: an empty one leaves the caption to the credits. */
+  if (slides.some((slide) => typeof slide.pub !== "string")) return "A hero slide publication is malformed";
 
   for (const block of blocks) {
     if (!oneOf(BLOCK_KINDS, block.kind) || !oneOf(ALBUM_KINDS, block.source)) {

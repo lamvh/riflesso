@@ -81,6 +81,10 @@ export type SessionAction =
   | { type: "hydrated" }
   /** An autosave landed: this content is now what the site shows. */
   | { type: "saved"; revision: number; baseline: string; sentActivity: number }
+  /** A save was stale: move the tab onto the latest publish (`theirs`), merging
+      its edits since `base` on top. Merged against the live state, so edits
+      made while the failed save was in flight are kept too. */
+  | { type: "rebased"; base: SiteContent; theirs: SiteContent; revision: number }
   /** Load an earlier history entry as the working copy; autosave then
       writes it as a new revision. */
   | { type: "history/restore"; content: SiteContent; label: string }

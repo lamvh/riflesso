@@ -80,6 +80,9 @@ nội dung gốc trong `src/data/*`.
     — thêm cột `object_position_tablet` / `object_position_mobile` cho hero slide.
     Chưa chạy thì site vẫn bình thường (mọi màn hình dùng crop desktop); crop
     tablet/mobile chỉ chưa được lưu khi Publish.
+11. **Backup DB**, rồi chạy `supabase/migrations/20261119010000_add_hero_autoplay_setting.sql`
+    — cột `hero_autoplay` (jsonb) cho Auto scroll của hero banner. Chưa chạy thì
+    banner đứng yên như cũ; công tắc trong dashboard chỉ chưa được lưu.
 
 > **Chưa có auth.** Server action publish (và đọc History, tạo Preview) mở cho bất kỳ ai gọi được tới nó. Phải
 > thêm đăng nhập vào `src/lib/dashboard/publish-site-content.ts` + `/dashboard`
@@ -322,7 +325,13 @@ src/
 **Trang chủ**
 
 - **Hero** — slide chồng nhau, cross-fade `opacity` 0.5s. Click thumbnail để đổi
-  slide; màu caption đảo trắng/đen theo từng ảnh. Autoplay 5s tắt mặc định.
+  slide; màu caption đảo trắng/đen theo từng ảnh. Publication không bắt buộc
+  (để trống thì caption chỉ còn credit).
+  **Auto scroll** bật/tắt + 3–15 giây/slide ở Homepage → Hero banner (lưu
+  `site_settings.hero_autoplay`, mặc định tắt, 5s). Click thumbnail thì đếm lại
+  từ đầu; dải thumbnail tự cuộn tới slide đang hiện. Dừng khi hover dải
+  thumbnail, focus bằng bàn phím trong banner, tab bị ẩn, banner cuộn khỏi màn
+  hình; không chạy nếu máy bật reduced motion (`src/hooks/use-hero-autoplay.ts`).
   Crop riêng cho từng màn hình: desktop (≥1024px), tablet (≥768px), mobile.
   Tablet/mobile để trống thì theo màn lớn hơn kế tiếp. Ảnh nhận 3 biến
   `--rfl-pos-*`, class `.rfl-hero-crop` trong `globals.css` chọn theo breakpoint.
@@ -423,6 +432,13 @@ lưu được gom vào lần sau. Hệ quả: không còn "nháp" để xem trư
 muốn giấu thứ đang sửa dở thì tắt nó (xem "Tạm ẩn" bên dưới). Thay đổi chưa lưu
 vẫn nằm ở `sessionStorage` kèm revision, nên reload không mất; đóng tab khi còn
 thay đổi chưa lưu sẽ bị hỏi lại.
+
+**Hai tab / hai người cùng sửa.** Khi lần lưu bị từ chối vì có người publish
+trước (`stale_revision`), dashboard tự tải bản mới nhất và gộp 3 chiều
+(`src/lib/dashboard/rebase-site-content.ts`): từng field của Site settings, từng
+bản ghi theo id (artist, album, slide, section, …) và thứ tự danh sách. Phần chỉ
+một bên sửa được giữ, rồi lưu tiếp như bình thường. Chỉ khi hai bên sửa **cùng**
+một field / bản ghi khác nhau mới báo "Someone else changed the same … — reload".
 
 **Tạm ẩn thay vì xoá.** Mọi trang và phần nội dung đều tắt được mà không mất
 dữ liệu (`src/lib/content/site-visibility.ts`):

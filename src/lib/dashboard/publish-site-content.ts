@@ -93,12 +93,14 @@ export async function publishSiteContent(
   });
 
   if (error) {
-    return {
-      ok: false,
-      error: error.message.startsWith("stale_revision")
-        ? "Someone published in the meantime — reload the dashboard to pick up their changes"
-        : `Publish failed: ${error.message}`,
-    };
+    if (error.message.startsWith("stale_revision")) {
+      return {
+        ok: false,
+        stale: true,
+        error: "Someone published in the meantime — reload the dashboard to pick up their changes",
+      };
+    }
+    return { ok: false, error: `Publish failed: ${error.message}` };
   }
 
   /* Expire cached reads, then every prerendered page: the logo and footer

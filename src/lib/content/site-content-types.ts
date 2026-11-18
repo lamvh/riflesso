@@ -6,6 +6,7 @@ import type {
   Slide,
 } from "@/lib/dashboard/admin-types";
 
+import type { HeroAutoplay } from "./hero-autoplay";
 import type { SiteSeo } from "./site-seo";
 
 export type SocialLink = {
@@ -30,6 +31,8 @@ export type SiteSettings = {
   hiddenParts: string[];
   /** Search and link-preview settings; see site-seo.ts. */
   seo: SiteSeo;
+  /** Whether the hero banner advances on its own; see hero-autoplay.ts. */
+  heroAutoplay: HeroAutoplay;
 };
 
 /**
@@ -83,7 +86,8 @@ export type LoadedSiteContent = {
 
 export type PublishResult =
   | { ok: true; revision: number }
-  | { ok: false; error: string };
+  /** `stale`: another tab or editor published since this one loaded. */
+  | { ok: false; error: string; stale?: boolean };
 
 /** Cache tag every public read carries; publishing expires it. */
 export const SITE_CONTENT_TAG = "site-content";

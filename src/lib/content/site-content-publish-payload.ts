@@ -1,3 +1,4 @@
+import { withHeroAutoplayDefaults } from "./hero-autoplay";
 import { withSeoDefaults } from "./site-seo";
 import { isVideoSrc } from "@/lib/media-src";
 
@@ -22,6 +23,7 @@ export function toPublishPayload(content: SiteContent) {
       copyright: settings.copyright.trim(),
       hidden_parts: settings.hiddenParts,
       seo: withSeoDefaults(settings.seo),
+      hero_autoplay: withHeroAutoplayDefaults(settings.heroAutoplay),
       about_paragraphs: trimmed(settings.aboutParagraphs),
       social_links: settings.socialLinks
         .filter((link) => link.label.trim() && link.href.trim())

@@ -18,6 +18,7 @@ import {
   querySettings,
 } from "./site-content-queries";
 import { seedSiteContent } from "./site-content-seed";
+import { withHeroAutoplayDefaults } from "./hero-autoplay";
 import { withSeoDefaults } from "./site-seo";
 import { shownOnly } from "./site-visibility";
 import { SITE_CONTENT_TAG, type ContactCardRecord, type SiteContent, type SiteSettings } from "./site-content-types";
@@ -77,6 +78,7 @@ const visibleSettings = (settings: SiteSettings): SiteSettings => ({
   /* Cached reads can outlive a deploy that added fields; fill them in here. */
   hiddenParts: settings.hiddenParts ?? [],
   seo: withSeoDefaults(settings.seo),
+  heroAutoplay: withHeroAutoplayDefaults(settings.heroAutoplay),
 });
 
 const cachedSiteSettings = publicQuery(
@@ -90,7 +92,12 @@ const cachedSiteSettings = publicQuery(
    newer fields, and the cache outlives deploys. */
 export const getSiteSettings = cache(async (): Promise<SiteSettings> => {
   const settings = await cachedSiteSettings();
-  return { ...settings, hiddenParts: settings.hiddenParts ?? [], seo: withSeoDefaults(settings.seo) };
+  return {
+    ...settings,
+    hiddenParts: settings.hiddenParts ?? [],
+    seo: withSeoDefaults(settings.seo),
+    heroAutoplay: withHeroAutoplayDefaults(settings.heroAutoplay),
+  };
 });
 
 const cachedContactCards = publicQuery(

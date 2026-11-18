@@ -1,10 +1,12 @@
 "use client";
 
+import type { HeroAutoplay } from "@/lib/content/hero-autoplay";
 import { plural } from "@/lib/dashboard/admin-changes";
 import type { AdminAction } from "@/lib/dashboard/admin-reducer";
 import type { Slide } from "@/lib/dashboard/admin-types";
 
 import { CoverImage } from "./cover-image";
+import { HeroAutoplayControl } from "./hero-autoplay-control";
 import { HeroCropWorkspace } from "./hero-crop-workspace";
 import { Button, Segmented, StatusPill, Switch, buttonClass } from "./ui/controls";
 import { LabelledField, NameInput, ProseInput } from "./ui/fields";
@@ -24,9 +26,14 @@ export function HeroEditor({
   current,
   bannerShown,
   onToggleBanner,
+  autoplay,
+  onAutoplayChange,
   dispatch,
 }: {
   slides: Slide[];
+  /** Auto scroll setting for the banner on the site. */
+  autoplay: HeroAutoplay;
+  onAutoplayChange: (next: HeroAutoplay) => void;
   /** Whether the whole banner shows; switched off it keeps every slide. */
   bannerShown: boolean;
   onToggleBanner: () => void;
@@ -38,7 +45,7 @@ export function HeroEditor({
   const set = (patch: Partial<Slide>) => dispatch({ type: "slide/set", patch });
 
   const remove = () => {
-    if (window.confirm(`Remove the ${slide.pub} slide from the banner?`)) {
+    if (window.confirm(`Remove the ${slide.pub || "untitled"} slide from the banner?`)) {
       dispatch({ type: "slide/remove" });
     }
   };
@@ -65,6 +72,11 @@ export function HeroEditor({
       }
       bodyClassName="flex flex-col gap-[18px] p-[20px]"
     >
+      <HeroAutoplayControl
+        value={autoplay}
+        disabled={!bannerShown || slides.filter((entry) => !entry.hidden && entry.src).length < 2}
+        onChange={onAutoplayChange}
+      />
       <SortableList
         layout="horizontal"
         ids={slides.map((entry) => entry.id)}
@@ -105,7 +117,7 @@ export function HeroEditor({
                   active ? "font-bold" : "font-medium text-graphite"
                 }`}
               >
-                {entry.pub}
+                {entry.pub || "Untitled"}
               </span>
             </button>
             )}
@@ -127,12 +139,12 @@ export function HeroEditor({
               </span>
               <Switch
                 on={!slide.hidden}
-                label={`Show the ${slide.pub} slide in the banner`}
+                label={`Show the ${slide.pub || "untitled"} slide in the banner`}
                 onClick={() => set({ hidden: !slide.hidden })}
               />
             </div>
 
-            <LabelledField label="Publication">
+            <LabelledField label="Publication" hint="Optional — left empty, the caption shows only the credits">
               <NameInput
                 value={slide.pub}
                 placeholder="e.g. Vogue UK"

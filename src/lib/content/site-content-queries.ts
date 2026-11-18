@@ -1,5 +1,6 @@
 import "server-only";
 
+import { withHeroAutoplayDefaults } from "./hero-autoplay";
 import { withSeoDefaults } from "./site-seo";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
@@ -106,6 +107,8 @@ type SettingsRow = {
   hidden_parts?: string[] | null;
   /** Absent until the SEO migration has run. */
   seo?: unknown;
+  /** Absent until the hero autoplay migration has run. */
+  hero_autoplay?: unknown;
   logo: AssetRef;
 };
 
@@ -161,6 +164,7 @@ export async function querySettings(
       copyright: settings.copyright,
       hiddenParts: settings.hidden_parts ?? [],
       seo: withSeoDefaults(settings.seo),
+      heroAutoplay: withHeroAutoplayDefaults(settings.hero_autoplay),
     },
   };
 }

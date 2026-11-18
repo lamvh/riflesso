@@ -1,5 +1,6 @@
 "use client";
 
+import { withHeroAutoplayDefaults } from "@/lib/content/hero-autoplay";
 import { isPartShown, toggledParts } from "@/lib/content/site-visibility";
 import type { Block } from "@/lib/dashboard/admin-types";
 
@@ -38,6 +39,8 @@ export function HomepageScreen() {
               patch: { hiddenParts: toggledParts(state.settings, "home:hero") },
             })
           }
+          autoplay={withHeroAutoplayDefaults(state.settings.heroAutoplay)}
+          onAutoplayChange={(heroAutoplay) => dispatch({ type: "settings/set", patch: { heroAutoplay } })}
           dispatch={dispatch}
         />
         <SectionList blocks={state.blocks} albums={state.albums} dispatch={dispatch} />
@@ -61,7 +64,7 @@ export function HomepageScreen() {
               className="absolute inset-x-0 bottom-[6px] text-center font-serif text-[10px] leading-none italic"
               style={{ color: hero?.ink }}
             >
-              {hero?.pub}
+              {hero && (hero.pub || "Untitled")}
             </span>
           </div>
 

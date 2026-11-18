@@ -5,8 +5,9 @@ import { isRecordAction, isSettingsAction, type AdminAction } from "./admin-acti
 import { dropAt, moveItem, note, patchAt, swap } from "./admin-helpers";
 import { recordReducer } from "./admin-record-reducer";
 import { settingsReducer } from "./admin-settings-reducer";
-import { newId, type AdminState } from "./admin-state";
+import { newId, serializeContent, type AdminState } from "./admin-state";
 import { replaceMediaReferences } from "./media-replace";
+import { rebaseSiteContent } from "./rebase-site-content";
 import type { Block, CategoryRow } from "./admin-types";
 
 export type { AdminAction } from "./admin-actions";
@@ -203,6 +204,27 @@ export function adminReducer(state: AdminState, action: AdminAction): AdminState
         ),
         restoring: false,
       };
+
+    case "rebased": {
+      const merged = rebaseSiteContent(
+        action.base,
+        pickSiteContent(withVisibilityDefaults(pickSiteContent(state))),
+        action.theirs,
+      );
+      /* A clash with an edit made mid-save: stay put; the next save is
+         refused again and reports it. */
+      if (!merged.ok) return state;
+      return note(
+        {
+          ...state,
+          ...merged.content,
+          revision: action.revision,
+          baseline: serializeContent(action.theirs),
+          source: "database",
+        },
+        "Picked up changes published elsewhere; your edits are kept",
+      );
+    }
 
     case "history/restore":
       return {

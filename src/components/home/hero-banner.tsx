@@ -5,16 +5,25 @@ import { useEffect, useState, type CSSProperties } from "react";
 
 import type { HeroSlide } from "@/data/home-hero-slides";
 import { useDragScroll } from "@/hooks/use-drag-scroll";
+import { useHeroAutoplay, useKeepThumbnailInView } from "@/hooks/use-hero-autoplay";
+import { DEFAULT_HERO_AUTOPLAY } from "@/lib/content/hero-autoplay";
 import { canOptimizeImage } from "@/lib/media-src";
 
-const AUTOPLAY_INTERVAL_MS = 5000;
 const HIDE_SCROLLBAR = "[scrollbar-width:none] [&::-webkit-scrollbar]:hidden";
 
 type HeroBannerProps = {
   slides: HeroSlide[];
-  /** Off by default, matching the design's `bannerAutoplay` prop. */
+  /** Advance on its own; set on the dashboard (Homepage → Hero banner). */
   autoplay?: boolean;
+  /** Seconds per slide while autoplaying. */
+  seconds?: number;
 };
+
+/** "Publication — Name, Name", leaving out whichever part is empty. */
+const slideLabel = (slide: HeroSlide) =>
+  [slide.publication.trim(), slide.credits.map((credit) => credit.name.trim()).filter(Boolean).join(", ")]
+    .filter(Boolean)
+    .join(" — ") || "Hero image";
 
 /** Each screen's crop as a variable; `.rfl-hero-crop` picks one per breakpoint. */
 const cropStyle = (slide: HeroSlide) =>
@@ -45,7 +54,7 @@ function afterLoadIdle(work: () => void) {
   };
 }
 
-export function HeroBanner({ slides, autoplay = false }: HeroBannerProps) {
+export function HeroBanner({ slides, autoplay = false, seconds = DEFAULT_HERO_AUTOPLAY.seconds }: HeroBannerProps) {
   const [active, setActive] = useState(0);
   /*
    * Only the first slide's full-screen frame loads with the page. The others
@@ -58,17 +67,18 @@ export function HeroBanner({ slides, autoplay = false }: HeroBannerProps) {
   const thumbnailsRef = useDragScroll<HTMLDivElement>();
   const count = slides.length;
 
-  useEffect(() => {
-    if (!autoplay || count < 2) return;
-    const timer = setInterval(
-      () => setActive((current) => (current + 1) % count),
-      AUTOPLAY_INTERVAL_MS,
-    );
-    return () => clearInterval(timer);
-  }, [autoplay, count]);
+  const rootRef = useHeroAutoplay<HTMLDivElement>({
+    strip: thumbnailsRef,
+    enabled: autoplay,
+    seconds,
+    active,
+    count,
+    setActive,
+  });
+  useKeepThumbnailInView(thumbnailsRef, active);
 
   return (
-    <div className="flex h-svh flex-col">
+    <div ref={rootRef} className="flex h-svh flex-col">
       {/* Slides are stacked and cross-faded; only the active one is focusable. */}
       <div className="relative w-full flex-grow overflow-hidden">
         {slides.map((slide, index) => {
@@ -96,9 +106,7 @@ export function HeroBanner({ slides, autoplay = false }: HeroBannerProps) {
               {(index === 0 || isActive || warm) && (
                 <Image
                   src={slide.src}
-                  alt={`${slide.publication} — ${slide.credits
-                    .map((credit) => credit.name.trim())
-                    .join(", ")}`}
+                  alt={slideLabel(slide)}
                   fill
                   priority={index === 0}
                   fetchPriority={index === 0 ? "high" : "auto"}
@@ -120,7 +128,7 @@ export function HeroBanner({ slides, autoplay = false }: HeroBannerProps) {
                       {credit.role}
                     </span>
                   ))}
-                  <em className="italic">{slide.publication}</em>
+                  {slide.publication && <em className="italic">{slide.publication}</em>}
                 </p>
               </div>
             </a>
@@ -136,7 +144,7 @@ export function HeroBanner({ slides, autoplay = false }: HeroBannerProps) {
           <button
             key={`${slide.src}-${index}`}
             type="button"
-            aria-label={`Show slide ${index + 1}: ${slide.publication}`}
+            aria-label={`Show slide ${index + 1}: ${slideLabel(slide)}`}
             aria-pressed={index === active}
             onClick={() => setActive(index)}
             className="w-fit shrink-0 grow-0 text-left"

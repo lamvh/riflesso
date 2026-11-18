@@ -20,7 +20,6 @@ import { StructuredData } from "@/components/structured-data";
  * every card at once.
  */
 const DISPLAY = {
-  bannerAutoplay: false,
   /** Design range: 236–460px. */
   sliderHeight: 350,
   hoverZoom: true,
@@ -64,7 +63,11 @@ export default async function HomePage() {
         </Suspense>
         <main>
           {showHero ? (
-            <HeroBanner slides={slides} autoplay={DISPLAY.bannerAutoplay} />
+            <HeroBanner
+              slides={slides}
+              autoplay={settings.heroAutoplay.on}
+              seconds={settings.heroAutoplay.seconds}
+            />
           ) : (
             /* Clears the 60px fixed masthead. */
             <div className="h-[110px]" />

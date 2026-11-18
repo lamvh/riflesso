@@ -1,3 +1,4 @@
+import { withHeroAutoplayDefaults } from "./hero-autoplay";
 import { withSeoDefaults } from "./site-seo";
 import type { SiteContent, SiteSettings } from "./site-content-types";
 
@@ -48,6 +49,8 @@ export function withVisibilityDefaults(content: SiteContent): SiteContent {
       hiddenParts: content.settings.hiddenParts ?? [],
       /* Older drafts and history entries predate SEO settings. */
       seo: withSeoDefaults(content.settings.seo),
+      /* ...and hero autoplay. */
+      heroAutoplay: withHeroAutoplayDefaults(content.settings.heroAutoplay),
       socialLinks: content.settings.socialLinks.map((link) => ({ ...link, hidden: link.hidden ?? false })),
     },
     /* Older drafts and history entries predate the WhatsApp field. */

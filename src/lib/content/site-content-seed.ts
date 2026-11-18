@@ -1,5 +1,6 @@
 import "server-only";
 
+import { DEFAULT_HERO_AUTOPLAY } from "./hero-autoplay";
 import { blankSeo } from "./site-seo";
 
 import { CONTACT_CARDS } from "@/data/contact-offices";
@@ -40,6 +41,7 @@ const seedSettings = (): SiteSettings => ({
   copyright: "Riflesso Studio ©2026",
   hiddenParts: [],
   seo: blankSeo(),
+  heroAutoplay: { ...DEFAULT_HERO_AUTOPLAY },
 });
 
 const seedContacts = (): ContactCardRecord[] =>
