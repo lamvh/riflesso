@@ -244,18 +244,21 @@ function ScreenPreview({
 }) {
   const info = HERO_SCREEN_INFO[screen];
   const ratio = info.width / info.height;
-  /* Growing in proportion to its aspect ratio gives every frame in a row the
-     same height, so the row always fits its column whatever the width. */
+  /* The thumbnail is small enough to draw at its real size (square corners,
+     as in the strip). Screens grow in proportion to their aspect ratio, which
+     gives them the same height, so the row fits its column whatever the width.
+     Every frame keeps its real aspect ratio. */
+  const actualSize = screen === "thumbnail";
   return (
     <button
       type="button"
       aria-pressed={active}
       onClick={onSelect}
       className="flex min-w-0 cursor-pointer flex-col gap-[6px] text-left"
-      style={{ flex: `${ratio} 1 0` }}
+      style={actualSize ? { flex: "none", width: info.width } : { flex: `${ratio} 1 0` }}
     >
       <span
-        className={`relative block overflow-hidden rounded-[6px] bg-well transition-shadow ${
+        className={`relative block overflow-hidden bg-well transition-shadow ${actualSize ? "" : "rounded-[6px]"} ${
           active ? "shadow-[0_0_0_2px_var(--color-ink)]" : "opacity-80 hover:opacity-100"
         }`}
         style={{ aspectRatio: `${info.width} / ${info.height}` }}
@@ -272,7 +275,8 @@ function ScreenPreview({
       <span className="flex flex-col gap-[2px] font-sans text-[12px] leading-[120%]">
         <span className={active ? "font-bold" : "font-medium text-graphite"}>{info.label}</span>
         <span className="text-[11px] text-subtle tabular-nums">
-          {info.width}×{info.height} · {own ? "own crop" : "inherited"}
+          {info.width}×{info.height}
+          {actualSize && " · actual size"} · {own ? "own crop" : "inherited"}
         </span>
       </span>
     </button>
